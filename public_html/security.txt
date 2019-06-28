@@ -1,0 +1,4 @@
+Contact: security@malshare.com
+PGP-key: https://malshare.com/security.key.asc
+Acknowledgements: https://malshare.com/tos.php
+Disclosure: https://malshare.com/tos.php

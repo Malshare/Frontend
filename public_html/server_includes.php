@@ -84,7 +84,7 @@ class ServerObject {
 	public $sample;
 	public $filename;
 	
-	public static $sql;
+	public $sql;
 	
 	public $uri_api_key;
 	public $uri_action;
@@ -107,7 +107,7 @@ class ServerObject {
 	public $upload_data;
 	
 	public $table;
-	
+
 	function __construct() {
 		$this->host_ip = $_SERVER['REMOTE_ADDR'];
 		

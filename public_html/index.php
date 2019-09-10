@@ -5,17 +5,6 @@
 	</head>
 	<body>
         <?php include('nav.php') ?>
-	<script type="text/javascript">
-	    function ShowLoading(e) {
-	        var div = document.createElement('div');
-	        var img = document.createElement('img');
-	        img.src = 'images/ajax-loader.gif';
-	        div.style.cssText = 'position: fixed; top: 5%; left: 40%; z-index: 5000; width: 422px; text-align: center;';
-	        div.appendChild(img);
-	        document.body.appendChild(div);
-	        return true;
-	    }
-	</script>
 
 	<div class="container" style="width:90%">			
       		<div class="hero-unit"> 
@@ -44,9 +33,8 @@
 				include("server_includes.php");
 				$share = new ServerObject();
 				echo $share->get_recent();        
-			
-
-				echo "<center><h4>Total Samples:" . $share->get_total() . "</h4></center>";
+				echo '<div class="container-fluid center text-center">';
+				echo '<h4>Total Samples: ' . $share->get_total() . "</h4></div>";
 
 			?>
 	</div> 

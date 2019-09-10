@@ -1,14 +1,13 @@
 	
 	<meta charset="utf-8">
 	<title>MalShare</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="The MalShare Project is a community driven public malware repository that works to provide free access to malware samples and tooling to the infomation security community.">
+    	<meta name="description" content="The MalShare Project is a community driven public malware repository that works to provide free access to malware samples and tooling to the infomation security community.">
 
+	<link href="./css/malshare.css" rel="stylesheet">
 	<link href="./css/bootstrap.css" rel="stylesheet">
-	<link href="./css/upload_page.css" rel="stylesheet">
 	<link href="./css/sticky-footer-navbar.css" rel="stylesheet">
 	<link href="./css/popup.css" rel="stylesheet">
-	<script type="text/javascript">
+	<script>
 
 		var _gaq = _gaq || [];
 		_gaq.push(['_setAccount', 'UA-49931431-1']);

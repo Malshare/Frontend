@@ -225,8 +225,10 @@ class ServerObject {
 				foreach ($jhits->yara as $yh){
 					$counter += 1;
 					if ($counter > 3 && $extend == 0){
-						$yhits .= '<a id="c_yara_' . $sample_row->md5 . '" class="none" href="#" onclick="document.getElementById(\'yara_' . $sample_row->md5 . '\').className = \'none\'; document.getElementById(\'c_yara_' . $sample_row->md5 . '\').className = \'hidden\';">[+]</a>';
-						$yhits .= '<div id="yara_' . $sample_row->md5 . '" class="hidden">';
+                                                $yhits .= '<a id="c_yara_' . $sample_row->md5 . '" class="none" href="#" onclick="document.getElementById(\'yara_' . $sample_row->md5 . '\').style= \'block\'; document.getElementById(\'c_yara_' . $sample_row->md5 . '\').className = \'hidden\';">[+]</a>';
+                                                $yhits .= '<div id="yara_' . $sample_row->md5 . '" style="display: none;">';
+
+
 						$extend = 1;	 
 					}
 					$yhits .= '<a href="search.php?query='. $yh .'"><span class="label label-info">' . $yh .'</span></a>  ';
@@ -373,8 +375,10 @@ class ServerObject {
 						foreach ($jhits->yara as $yh){
 							$counter += 1;
 							if ($counter > 4 && $extend == 0){
-								$yhits .= '<a id="c_yara_' . $sample_row->md5 . '" class="none" href="#" onclick="document.getElementById(\'yara_' . $sample_row->md5 . '\').className = \'none\'; document.getElementById(\'c_yara_' . $sample_row->md5 . '\').className = \'hidden\';">[+]</a>';
-								$yhits .= '<div id="yara_' . $sample_row->md5 . '" class="hidden">';
+
+                                                $yhits .= '<a id="c_yara_' . $sample_row->md5 . '" class="none" href="#" onclick="document.getElementById(\'yara_' . $sample_row->md5 . '\').style= \'block\'; document.getElementById(\'c_yara_' . $sample_row->md5 . '\').className = \'hidden\';">[+]</a>';
+                                                $yhits .= '<div id="yara_' . $sample_row->md5 . '" style="display: none;">';
+
 								$extend = 1;
 							}
 							$yhits .= '<a href="search.php?query='. $yh .'"><span class="label label-info">' . $yh .'</span></a>  ';

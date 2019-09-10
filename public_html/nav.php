@@ -68,8 +68,4 @@
     </div>
 </div>
 
-<br />
-<div class="alert alert-danger" role="alert">
-	Recovery Mode. Please be aware.  Older samples are currently being restored.
-</div>
 

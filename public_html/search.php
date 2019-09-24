@@ -2,8 +2,12 @@
 <html lang="en">
 	<head>
         <?php include('header.php'); ?>
-	</head>
 
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js">  
+	<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
+
+	</head>
 <body>
 <?php include('nav.php') ?>
 
@@ -22,7 +26,7 @@
 				} else{
 					$showDivFlag=true;
 				} ?>
-<div class="container"  <?php if ($showDivFlag===false){?>style="display:none"<?php } ?>>
+				<div class="container"  <?php if ($showDivFlag===false){?>style="display:none"<?php } ?>>
 
                         	<form method=get action=search.php class="form-signin" id="search_form" onsubmit="ShowLoading()">
                                 	<h2 class="form-signin-heading">Search</h2>
@@ -41,14 +45,14 @@
 					<table class="table table-bordered table-striped">
 					<thead> <tr>  <th><h4>Recent Searches</h4></th>  </tr> </thead>
 					<tbody>
-<?php
-	$share = new ServerObject();
-	$stats = $share->get_recent_searches();
-        foreach ($stats as $skey ){
-                echo '                  <tr><td>' . $skey . ' </td>';
-        }
-					
-?>
+
+					<?php
+						$share = new ServerObject();
+						$stats = $share->get_recent_searches();
+					        foreach ($stats as $skey ){
+				        	        echo '                  <tr><td>' . $skey . ' </td>';
+					        }
+					?>
 					</tbody></table>
 
                         	</form>
@@ -62,6 +66,14 @@ function myFunction() {
     var popup = document.getElementById("myPopup");
     popup.classList.toggle("show");
 }
+$(document).ready( function () {
+	$('#searchres').DataTable({
+	        "paging":   false,
+		"searching" : false
+
+	});
+} );
+
 </script>
 
 

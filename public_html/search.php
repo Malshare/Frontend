@@ -90,6 +90,7 @@ $(document).ready( function () {
 	$('#searchres').DataTable({
 	        "paging":   false,
 		"searching" : false,
+		"bInfo" : false,
     		"language": {
       			"emptyTable": "  "
     		}

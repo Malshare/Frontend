@@ -66,11 +66,33 @@ function myFunction() {
     var popup = document.getElementById("myPopup");
     popup.classList.toggle("show");
 }
+function ShowLoading(e) {
+        setTimeout(function(){
+        window.location.reload(1);
+     }, 20000);
+
+     var div = document.createElement('div');
+     var img = document.createElement('img');
+       
+     div.innerHTML = "<br /> <br /><h1>Searching...</h1><br />";
+
+     img.src = 'images/ajax-loader.gif';
+     div.style.cssText = 'position: fixed; top: 5%; left: 40%; z-index: 5000; width: 422px; text-align: center;';
+     div.appendChild(img);
+     document.body.appendChild(div);
+     return true;
+     // These 2 lines cancel form submission, so only use if needed.
+     //window.event.cancelBubble = true;
+     //e.stopPropagation();
+}
+
 $(document).ready( function () {
 	$('#searchres').DataTable({
 	        "paging":   false,
-		"searching" : false
-
+		"searching" : false,
+    		"language": {
+      			"emptyTable": "  "
+    		}
 	});
 } );
 

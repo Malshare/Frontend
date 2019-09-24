@@ -327,7 +327,7 @@ class ServerObject {
 
 			// Build header / if not API
 			if ($api_query == false ) { 
-				$output =  '<table class="table table-bordered table-striped" style="table-layout: fixed;">
+				$output =  '<table id="searchres" class="table table-bordered table-striped" style="table-layout: fixed;">
 								<thead>  
 										<tr>  
 												<th style="width: 25%">MD5 Hash</th>  

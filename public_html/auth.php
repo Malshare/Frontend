@@ -1,6 +1,6 @@
 <?php
 
-	$c_REFER = isset($_POST['HTTP_REFERER']) ? $_POST['HTTP_REFERER'] : "";
+	$c_REFER = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : "";
 	if($c_REFER != "") {
 		# Handle Login requests
 		$c_login = isset($_POST['api_key']) ? $_POST['api_key'] : "";

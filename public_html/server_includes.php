@@ -72,6 +72,7 @@ class UserObject {
 
 		$this->ready = True;
 	}	
+
 }
 
 class ServerObject {
@@ -152,7 +153,11 @@ class ServerObject {
 		}
 	}
 
-	
+	public function login() {
+		$uuser = new UserObject($this->sql, $this->uri_api_key, True);
+		return $uuser;
+	}
+
 	public function secure($string) { 
 		if(!$this->sql) die("ERROR");
 			$string = strip_tags($string);

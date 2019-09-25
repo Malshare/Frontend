@@ -9,7 +9,7 @@
 	<div class="container">
 		<div class="hero-unit">
 		<center><img src="images/logo_header.png" width="333" height="119" alt="Malshare Logo" ></center>
-		<p>The MalShare Admin Team would like to recognize and extend thanks to the following indivuals for their service in responsibly reporting vulnerabilities:</p>
+		<p>The MalShare Admin Team would like to recognize and extend thanks to the following individuals for their service in responsibly reporting vulnerabilities:</p>
 		<br />
 		<table class="table">
 			<thead>

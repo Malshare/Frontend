@@ -491,6 +491,8 @@ class ServerObject {
 			die("Error Sample not found by hash ($hash)");
 		}
 		$f_row = $full_res->fetch_object();			
+
+		$dt = new DateTime("@$f_row->added");
 		
 		$output =  '<br />
 			<p class="lead">Sample details: ' . $f_row->md5 . '  
@@ -529,9 +531,8 @@ class ServerObject {
 			  </tr>  
 			</thead>  
 			<tbody>		 
-			  <tr>  
-				<td><b>File Type</b>:   ' . $f_row->ftype . '</td> 
-			  </tr>
+			  <tr><td><b>File Type:</b>     ' . $f_row->ftype . '</td> </tr>
+			  <tr><td><b>Added</b>:    ' . $dt->format('Y-m-d H:i:s') . '</td>  </tr>
 			</tbody>  
 		  </table>  
 		';
@@ -870,6 +871,7 @@ class ServerObject {
 		$output['SHA256'] = $f_row->sha256;
 		$output['SSDEEP'] = $f_row->ssdeep;
 		$output['F_TYPE'] = $f_row->ftype;
+		$output['ADDED'] = $f_row->added;
 
 		$full_res = $this->sql->query("SELECT source FROM $table_sources WHERE id = " . $row->hash );
 		if(!$full_res) $this->error_die("Error 139312 (Problem sample sources. Please contact admin@malshare.com)");

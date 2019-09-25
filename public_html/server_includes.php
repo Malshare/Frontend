@@ -1211,9 +1211,10 @@ class ServerObject {
 		return $smp_md5;
 	}	
 
-	public function task_url_download($user_id, $url, $recursive){
+	public function task_url_download($user_id, $durl, $recursive){
 		$table = $this->vars_table_url_download_tasks;
 		
+		$url = $this->sql->real_escape_string($durl)
 		# https://stackoverflow.com/questions/21671179/how-to-generate-a-new-guid
 		$guid = vsprintf('%s%s-%s-4000-8%.3s-%s%s%s0',str_split(dechex( microtime(true) * 1000 ) . bin2hex( random_bytes(8) ),4));
 

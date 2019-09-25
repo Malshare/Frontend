@@ -1220,7 +1220,6 @@ class ServerObject {
 
                 $res = $this->sql->query($sql_query);
                 if(!$res) {
-			echo $this->sql->error;
                 	$this->error_die("Error 149991 (URL Tasking failed. Please report to admin@malshare.com)");
 			return "false";
                 }

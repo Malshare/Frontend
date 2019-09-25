@@ -30,6 +30,7 @@ define(USERS_TABLE, "tbl_users");
 define(UPLOADS_TABLE, "tbl_uploads");
 define(SEARCHES_TABLE, "tbl_searches");
 define(PUBSEARCHES_TABLE, "tbl_public_searches");
+define(URLDLTASKS_TABLE, "tbl_url_download_tasks");
 
 // DB Connection
 define(DB_HOST, getenv('MALSHARE_DB_HOST'));
@@ -49,11 +50,13 @@ class UserObject {
 	
 	function __construct($sql,$submitted_api_key, $web=False) {
 		$this->ready = False;
-		$res = $sql->query("SELECT api_key as api_key,active,approved FROM tbl_users WHERE api_key='$submitted_api_key' LIMIT 1");
+		$res = $sql->query("SELECT id as id, api_key as api_key, active as active, approved as approved, recursive_url_download_allowed FROM tbl_users WHERE api_key='$submitted_api_key' LIMIT 1");
 		$row = $res->fetch_object();
+		$this->id = $row->id;
 		$this->api_key = $row->api_key;
 		$this->active = $row->active;
 		$this->approved = $row->approved;
+		$this->recursiveUrlDownloadAllowed = $row->recursive_url_download_allowed;
 		$res->free_result();
 		
 		if ($web == True) {
@@ -66,7 +69,7 @@ class UserObject {
 			die("Error 14000 (Account not activated)");
 		}
 		if($this->approved==0) {
-						http_response_code(401);
+			http_response_code(401);
 			die("Error 14001 (Account not approved)");
 		}
 
@@ -97,9 +100,9 @@ class ServerObject {
 	public $vars_table_sample_sources;
 	public $vars_table_samples;
 	public $vars_table_users;
-
 	public $vars_table_searches;
 	public $vars_table_uploads;
+	public $vars_table_url_download_tasks;
 
 	public $upload_data;
 	
@@ -146,6 +149,7 @@ class ServerObject {
 		$this->vars_table_searches = SEARCHES_TABLE;
 		$this->vars_table_pub_searches = PUBSEARCHES_TABLE;
 		$this->vars_table_uploads = UPLOADS_TABLE;
+		$this->vars_table_url_download_tasks = URLDLTASKS_TABLE;
 
 		if(!is_dir($this->vars_samples_root)) {
 			http_response_code(503);
@@ -1204,6 +1208,52 @@ class ServerObject {
 
 		return $smp_md5;
 	}	
+
+	public function task_url_download($user_id, $url, $recursive){
+		$table = $this->vars_table_url_download_tasks;
+		# https://stackoverflow.com/questions/21671179/how-to-generate-a-new-guid
+		$guid = vsprintf('%s%s-%s-4000-8%.3s-%s%s%s0',str_split(dechex( microtime(true) * 1000 ) . bin2hex( random_bytes(8) ),4));
+		if ($recursive != 1) $recursive = 0;
+                $sql_query = "INSERT INTO $table (guid, user_id, url, recursive) VALUES ( '$guid', '$user_id', '$url', $recursive )";
+
+                $res = $this->sql->query($sql_query);
+                if(!$res) {
+				echo $this->sql->error;
+                                $this->error_die("Error 149991 (URL Tasking failed. Please report to admin@malshare.com)");
+				return "false";
+                }
+
+		return $guid;
+	}
+
+
+        public function is_valid_guid($guid){
+		if (! preg_match( "/^[A-Fa-f0-9]{8}\-[A-Fa-f0-9]{4}\-4000-8[A-Fa-f0-9]{3}\-[A-Fa-f0-9]{12}$/", $guid)){
+			return false;
+		}
+		return true;
+        }
+
+	public function get_download_status($user_id, $dguid){
+		$table = $this->vars_table_url_download_tasks;
+		
+		$guid = $this->secure($dguid);
+
+		$r_res = $this->sql->query( "SELECT started_at, finished_at from $table WHERE guid = '$guid' and user_id='$user_id'" );
+		if(!$r_res) $this->error_die("Error 149992 (Problem fetching URL Download task status.  Please contact admin@malshare.com)");
+		if($r_res->num_rows==0) next();
+		$t_status = $r_res->fetch_object();
+
+		if (! $t_status) return "non-existent GUID";
+		if ($t_status->finished_at != "1970-01-01 00:00:01" ) return "complete";
+		if ($t_status->started_at  != "1970-01-01 00:00:01" ) return "in progress";
+		return "pending";
+	}
+
+
+
+
+
 }
 
 ?>

@@ -25,8 +25,9 @@
 
         	<h3> Admin Team</h3>
 				<p> <b> Silas Cutler </b>  <i> - Founder / Lead Developer</i> <br /> - <a href="https://twitter.com/silascutler?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @silascutler</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
-				<p> <b> Brandon Levene</b>  <i> </i> <br /> - <a href="https://twitter.com/SeraphimDomain?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @silascutler</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
-				<p> <b> Lars A. Wallenborn </b>  <i> - Developer</i> <br /> - <a href="https://twitter.com/larsborn?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @silascutler</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
+				<p> <b> Brandon Levene</b>  <i> </i> <br /> - <a href="https://twitter.com/SeraphimDomain?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @SeraphimDomain</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
+				<p> <b> Lars A. Wallenborn </b>  <i> - Developer</i> <br /> - <a href="https://twitter.com/larsborn?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @larsborn</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
+				<p> <b> Alexandru Constantin </b>  <i> - Client Developer</i> <br /> - <a href="https://twitter.com/AlexBK1996?twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @AlexBK1996</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
         		</div>
 	<div class="row">
 		<div class="span5">

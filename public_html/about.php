@@ -13,6 +13,7 @@
 		<p>Not all files in our system are malicious and our data feeds are considered as is. We offer free public API keys.  Standard keys allow 1000 API calls per day (including downloading samples, details lookup and search).  If you require more, contact <a href="mailto:admin@MalShare.com">admin@MalShare.com</a> for further assistance. </p>
 
 		<p>Feature requests, bug reports and any other issues can be reported <a href="https://github.com/Malshare/MalShare/issues">here</a></p>
+		<p>A list of those who have helped secure MalShare through security reports can be found:  <a href="thanks.php">here</a></p>
 		<br /><center>
 		<a href="https://github.com/malshare"><img src="images/github.png" height="20" width="20">  GitHub  </a>|<a href="https://twitter.com/mal_share"><img src="images/twitter.png" height="20" width="20">  Twitter</a> 
         <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
@@ -25,8 +26,9 @@
 
         	<h3> Admin Team</h3>
 				<p> <b> Silas Cutler </b>  <i> - Founder / Lead Developer</i> <br /> - <a href="https://twitter.com/silascutler?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @silascutler</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
-				<p> <b> Brandon Levene</b>  <i> </i> <br /> - <a href="https://twitter.com/SeraphimDomain?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @silascutler</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
-				<p> <b> Lars A. Wallenborn </b>  <i> - Developer</i> <br /> - <a href="https://twitter.com/larsborn?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @silascutler</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
+				<p> <b> Brandon Levene</b>  <i> </i> <br /> - <a href="https://twitter.com/SeraphimDomain?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @SeraphimDomain</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
+				<p> <b> Lars A. Wallenborn </b>  <i> - Developer</i> <br /> - <a href="https://twitter.com/larsborn?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @larsborn</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
+				<p> <b> Alexandru Constantin </b>  <i> - Client Developer</i> <br /> - <a href="https://twitter.com/AlexBK1996?twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @AlexBK1996</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
         		</div>
 	<div class="row">
 		<div class="span5">

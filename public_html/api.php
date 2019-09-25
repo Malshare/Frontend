@@ -128,8 +128,12 @@ if ($share->uri_action == 'download_url') {
         http_response_code(400);
         die(json_encode(array('error' => 'invalid value in field "url"')));
     }
+    
     $url = $_POST['url'];
-    $recursive = (isset($_POST['recursive']) and $_POST['recursive']) ? true : false;
+    $recursive = 0;
+    if (isset($_POST['recursive'])) {
+	    if ( strtolower($_POST['recursive']) == "true" or $_POST['recursive'] == 1) $recursive = 1;
+    }
     if ($recursive && !$user->recursiveUrlDownloadAllowed) {
         http_response_code(403);
         die(json_encode(array('error' => 'not allowed to perform recursive URL downloads')));
@@ -142,6 +146,7 @@ if ($share->uri_action == 'download_url') {
 
 if ($share->uri_action == 'download_url_check') {
     header('Content-Type: application/json');
+
     if (!isset($_SERVER['REQUEST_METHOD']) or ($_SERVER['REQUEST_METHOD'] !== 'GET')) {
         http_response_code(400);
         die(json_encode(array('error' => 'invalid method, only GET allowed on this endpoint')));

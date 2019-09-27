@@ -368,6 +368,9 @@ class ServerObject {
 
 				$sample_row = $r_res->fetch_object();
 				$totalHits += 1;
+				if (strlen($sample_row->source) < 1){
+					$sample_row->source = "User Submission";
+				}
 
 				// if not an API query, build HTML
 				if ($api_query == false ) {

@@ -31,6 +31,7 @@ define(UPLOADS_TABLE, "tbl_uploads");
 define(SEARCHES_TABLE, "tbl_searches");
 define(PUBSEARCHES_TABLE, "tbl_public_searches");
 define(URLDLTASKS_TABLE, "tbl_url_download_tasks");
+define(AVFEED_TABLE, "tbl_av_partners");
 
 // DB Connection
 define(DB_HOST, getenv('MALSHARE_DB_HOST'));
@@ -103,6 +104,7 @@ class ServerObject {
 	public $vars_table_searches;
 	public $vars_table_uploads;
 	public $vars_table_url_download_tasks;
+	public $vars_table_av_partners;
 
 	public $upload_data;
 	
@@ -150,6 +152,7 @@ class ServerObject {
 		$this->vars_table_pub_searches = PUBSEARCHES_TABLE;
 		$this->vars_table_uploads = UPLOADS_TABLE;
 		$this->vars_table_url_download_tasks = URLDLTASKS_TABLE;
+		$this->vars_table_av_feeds = AVFEED_TABLE;
 
 		if(!is_dir($this->vars_samples_root)) {
 			http_response_code(503);
@@ -195,6 +198,7 @@ class ServerObject {
 	
 		$table = $this->vars_table_samples;
 		$table_sources = $this->vars_table_sources;
+		$table_av_feeds = $this->vars_table_av_feeds;
 
 		$res = $this->sql->query("SELECT id from $table WHERE ( ( pending != 1 or pending is NULL ) AND ftype != 'html' ) ORDER by added DESC limit 10");
 		
@@ -214,7 +218,10 @@ class ServerObject {
 		
 		while($s_row = $res->fetch_object()) {	
 			$limit++;
-			$r_res = $this->sql->query("SELECT $table.md5 as md5, $table.added as added, $table.ftype as ftype, $table.yara as yara, $table_sources.source as source FROM $table LEFT JOIN $table_sources ON $table.id = $table_sources.id WHERE $table.id=" . $s_row->id );
+			$tQuery = "SELECT $table.md5 as md5, $table.added as added, $table.ftype as ftype, $table.yara as yara, CONCAT( IF( $table_sources.source IS NULL, '', $table_sources.source), IF( $table_av_feeds.display_name IS NULL, '', $table_av_feeds.display_name) ) as source FROM $table LEFT JOIN $table_sources ON $table.id = $table_sources.id LEFT JOIN $table_av_feeds ON $table_sources.av_partner_submission = $table_av_feeds.id WHERE $table.id=" . $s_row->id;
+
+			$r_res = $this->sql->query($tQuery);
+
 			
 			if(!$r_res) $this->error_die("Error 13512 (Problem getting recent sample details.  Please contact admin@malshare.com)");
 			if($r_res->num_rows==0) next();

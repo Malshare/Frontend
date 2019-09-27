@@ -465,8 +465,9 @@ class ServerObject {
 		
 		$table = $this->vars_table_samples;
 		$root_path = $this->vars_samples_root;
-
 		$table_sources = $this->vars_table_sources;
+		$table_av_feeds = $this->vars_table_av_feeds;
+
 
 		$lenght = strlen($hash);
 			
@@ -618,7 +619,7 @@ class ServerObject {
 			';
 		}
 		
-		$full_res = $this->sql->query("SELECT source FROM $table_sources WHERE id = " . $row->hash );
+		$full_res = $this->sql->query("SELECT CONCAT( IF( $table_sources.source IS NULL, '', $table_sources.source), IF( $table_av_feeds.display_name IS NULL, '', $table_av_feeds.display_name)) as source from $table_sources LEFT JOIN $table_av_feeds ON $table_sources.av_partner_submission = $table_av_feeds.id WHERE $table_sources.id = " . $row->hash );
 		if(!$full_res) $this->error_die("Error 23735 (Problem finding sources for sample.  Please contact admin@malshare.com)");
 		if(!$full_res->num_rows==0){
 			$output .=  '

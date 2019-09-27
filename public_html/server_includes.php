@@ -288,6 +288,8 @@ class ServerObject {
 				$table_sources = $this->vars_table_sources;
 				$table_searches = $this->vars_table_searches;
 				$table_pub_searches = $this->vars_table_pub_searches; 
+				$table_sample_partners = $this->vars_table_sample_partners;
+
 
 				$searchValue = $this->secure($this->uri_query);
 				$searchPrivate = 0; 
@@ -359,7 +361,7 @@ class ServerObject {
 			// Fetch data
 			$totalHits = 0;
 			while($s_row = $res->fetch_object()) {
-				$r_res = $this->sql->query("SELECT $table.id as id, $table.md5 as md5, $table.sha1 as sha1, $table.sha256 as sha256, $table.added as added, $table.ftype as ftype, $table.yara as yara, $table_sources.source as source, $table.parent_id FROM $table LEFT JOIN $table_sources ON $table.id = $table_sources.id WHERE $table.id=" . $s_row->id );
+				$r_res = $this->sql->query("SELECT $table.id as id, $table.md5 as md5, $table.sha1 as sha1, $table.sha256 as sha256, $table.added as added, $table.ftype as ftype, $table.yara as yara, CONCAT( IF( $table_sources.source IS NULL, '', $table_sources.source), IF( ($table_sources.source IS NOT NULL AND $table_sample_partners.display_name IS NOT NULL), ' <br />', ''), IF( $table_sample_partners.display_name IS NULL, '', $table_sample_partners.display_name)) as source, $table.parent_id FROM $table LEFT JOIN $table_sources ON $table.id = $table_sources.id LEFT JOIN $table_sample_partners ON $table_sources.sample_partner_submission = $table_sample_partners.id WHERE $table.id=" . $s_row->id );
 
 				if(!$r_res) $this->error_die("Error 13842 (Problem fetching search results.  Please contact admin@malshare.com)");
 				if($r_res->num_rows==0) next();

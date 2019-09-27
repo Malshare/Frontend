@@ -31,7 +31,7 @@ define(UPLOADS_TABLE, "tbl_uploads");
 define(SEARCHES_TABLE, "tbl_searches");
 define(PUBSEARCHES_TABLE, "tbl_public_searches");
 define(URLDLTASKS_TABLE, "tbl_url_download_tasks");
-define(AVFEED_TABLE, "tbl_av_partners");
+define(SAMPLE_PARTNER_TABLE, "tbl_sample_partners");
 
 // DB Connection
 define(DB_HOST, getenv('MALSHARE_DB_HOST'));
@@ -104,7 +104,7 @@ class ServerObject {
 	public $vars_table_searches;
 	public $vars_table_uploads;
 	public $vars_table_url_download_tasks;
-	public $vars_table_av_partners;
+	public $vars_table_sample_partners;
 
 	public $upload_data;
 	
@@ -152,7 +152,7 @@ class ServerObject {
 		$this->vars_table_pub_searches = PUBSEARCHES_TABLE;
 		$this->vars_table_uploads = UPLOADS_TABLE;
 		$this->vars_table_url_download_tasks = URLDLTASKS_TABLE;
-		$this->vars_table_av_feeds = AVFEED_TABLE;
+		$this->vars_table_sample_partners = SAMPLE_PARTNER_TABLE;
 
 		if(!is_dir($this->vars_samples_root)) {
 			http_response_code(503);
@@ -198,7 +198,7 @@ class ServerObject {
 	
 		$table = $this->vars_table_samples;
 		$table_sources = $this->vars_table_sources;
-		$table_av_feeds = $this->vars_table_av_feeds;
+		$table_sample_partners = $this->vars_table_sample_partners;;
 
 		$res = $this->sql->query("SELECT id from $table WHERE ( ( pending != 1 or pending is NULL ) AND ftype != 'html' ) ORDER by added DESC limit 10");
 		
@@ -218,7 +218,7 @@ class ServerObject {
 		
 		while($s_row = $res->fetch_object()) {	
 			$limit++;
-			$tQuery = "SELECT $table.md5 as md5, $table.added as added, $table.ftype as ftype, $table.yara as yara, CONCAT( IF( $table_sources.source IS NULL, '', $table_sources.source), IF( $table_av_feeds.display_name IS NULL, '', $table_av_feeds.display_name) ) as source FROM $table LEFT JOIN $table_sources ON $table.id = $table_sources.id LEFT JOIN $table_av_feeds ON $table_sources.av_partner_submission = $table_av_feeds.id WHERE $table.id=" . $s_row->id;
+			$tQuery = "SELECT $table.md5 as md5, $table.added as added, $table.ftype as ftype, $table.yara as yara, CONCAT( IF( $table_sources.source IS NULL, '', $table_sources.source), IF( ($table_sources.source IS NOT NULL AND $table_sample_partners.display_name IS NOT NULL), ' | ', ''), IF( $table_sample_partners.display_name IS NULL, '', $table_sample_partners.display_name) ) as source FROM $table LEFT JOIN $table_sources ON $table.id = $table_sources.id LEFT JOIN $table_sample_partners ON $table_sources.sample_partner_submission = $table_sample_partners.id WHERE $table.id=" . $s_row->id;
 
 			$r_res = $this->sql->query($tQuery);
 
@@ -255,9 +255,8 @@ class ServerObject {
 					<td>' . $sample_row->ftype . '</td> 
 					<td>' .  date("Y-m-d H:i:s", $sample_row->added) . ' UTC</td>';
 
-			if (strlen($sample_row->source) > 45 ) $output .= '<td>' . substr($sample_row->source, 0, 45) . '...</td> ';
-			else if (empty($sample_row->source) )	$output .= '<td>User Submission</td> ';
-			else $output .= '<td class="word-wrap: break-word">' . $sample_row->source . '</td> ';
+			if (empty($sample_row->source) )	$output .= '<td>User Submission</td> ';
+			else $output .= '<td class="word-wrap: wrap-word">' . $sample_row->source . '</td> ';
 			
 			$output .= '<td>' . $yhits . '</td></tr>'; 			
 			
@@ -466,7 +465,7 @@ class ServerObject {
 		$table = $this->vars_table_samples;
 		$root_path = $this->vars_samples_root;
 		$table_sources = $this->vars_table_sources;
-		$table_av_feeds = $this->vars_table_av_feeds;
+		$table_sample_partners = $this->vars_table_sample_partners;
 
 
 		$lenght = strlen($hash);
@@ -619,7 +618,7 @@ class ServerObject {
 			';
 		}
 		
-		$full_res = $this->sql->query("SELECT CONCAT( IF( $table_sources.source IS NULL, '', $table_sources.source), IF( $table_av_feeds.display_name IS NULL, '', $table_av_feeds.display_name)) as source from $table_sources LEFT JOIN $table_av_feeds ON $table_sources.av_partner_submission = $table_av_feeds.id WHERE $table_sources.id = " . $row->hash );
+		$full_res = $this->sql->query("SELECT CONCAT( IF( $table_sources.source IS NULL, '', $table_sources.source), IF( ($table_sources.source IS NOT NULL AND $table_sample_partners.display_name IS NOT NULL), ' <br />', ''), IF( $table_sample_partners.display_name IS NULL, '', $table_sample_partners.display_name)) as source from $table_sources LEFT JOIN $table_sample_partners ON $table_sources.sample_partner_submission = $table_sample_partners.id WHERE $table_sources.id = " . $row->hash );
 		if(!$full_res) $this->error_die("Error 23735 (Problem finding sources for sample.  Please contact admin@malshare.com)");
 		if(!$full_res->num_rows==0){
 			$output .=  '

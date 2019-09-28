@@ -23,13 +23,15 @@
                 <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
         </form>
         </center>
-
+		
+	<div class="row">
+		<div class="span5">
         	<h3> Admin Team</h3>
 				<p> <b> Silas Cutler </b>  <i> - Founder / Lead Developer</i> <br /> - <a href="https://twitter.com/silascutler?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @silascutler</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
 				<p> <b> Brandon Levene</b>  <i> </i> <br /> - <a href="https://twitter.com/SeraphimDomain?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @SeraphimDomain</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
 				<p> <b> Lars A. Wallenborn </b>  <i> - Developer</i> <br /> - <a href="https://twitter.com/larsborn?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @larsborn</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
 				<p> <b> Alexandru Constantin </b>  <i> - Client Developer</i> <br /> - <a href="https://twitter.com/AlexBK1996?twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @AlexBK1996</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
-        		</div>
+		</div>
 	<div class="row">
 		<div class="span5">
 			<h3> Yara Feeds:</h3>
@@ -41,19 +43,24 @@
 				<a href="https://github.com/bwall/bamfdetect">BAMFDetect</a> <br />
 			</h4>
 		</div>
-                <div class="span7">
-			<center><h3>Partners </h3> </center>
+        </div>
+                <div> 
+			<center><h3>Partners </h3>
+			<a href="https://www.zemana.com/"><img src="images/zemana_logo.png" width="182" height="140" alt="Zemana"></a>
+			<br />
 			<img src="images/ET-PP-Logo.png" width="214" height="72" alt="Emerging Threats / Proofpoint">
 			<img src="images/12-1362_Crowd_Strike_Logo_Red_D0_01.gif" height="134" width="209" alt="CrowdStrike">
 			<img src="images/2uB3xrjd.jpg" height="100" width="100"  alt="QuadraNet" >
 			<img src="images/TEHTRIS.png" height="100" width="206"  alt="Tehtris" >
 			<img src="images/TPSC.png" height="100" width="100"  alt="The PC Security Channel" >
 			<img src="images/farsight-logo.svg" height="200" width="200"  alt="Farsight Security" >
-	
+			</center>
 		</div>
-
 	</div>
-			
+	</div>
+	</div>
+
+<br />	
 	
 <?php
 include_once('footer.php');

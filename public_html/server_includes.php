@@ -51,8 +51,11 @@ class UserObject {
 	
 	function __construct($sql,$submitted_api_key, $web=False) {
 		$this->ready = False;
+		$this->sql=$sql;
+
 		$res = $sql->query("SELECT id as id, api_key as api_key, active as active, approved as approved, recursive_url_download_allowed FROM tbl_users WHERE api_key='$submitted_api_key' LIMIT 1");
 		$row = $res->fetch_object();
+
 		$this->id = $row->id;
 		$this->api_key = $row->api_key;
 		$this->active = $row->active;
@@ -76,6 +79,82 @@ class UserObject {
 
 		$this->ready = True;
 	}	
+
+        public function secure($string) {
+                if(!$this->sql) die("ERROR");
+                        $string = strip_tags($string);
+                if(get_magic_quotes_gpc()) {
+                        $string = stripslashes($string);
+                }
+
+                $string = $this->sql->real_escape_string($string);
+                return $string;
+        }
+
+
+	public function do_upgrade($upgrade_code) {
+		$guid = $this->secure(strtolower($_REQUEST["code"]));
+
+                $res = $this->sql->query("SELECT id, action, rlimit FROM tbl_upgrade_codes WHERE guid = '" . $guid . "' LIMIT 1");
+		if(!$res) return array( false, "Error 29000 (Problem checking upgrade_code.  Please contact admin@malshare.com)");
+
+		$row = $res->fetch_object();
+		if($res->num_rows==0) return array(false, "Invalid Code");
+
+		$code_id = $row->id;
+		$code_action = $row->action;		
+		$code_rlimit = $row->rlimit;
+
+		# Check if code used
+		if ($code_rlimit <= 0) {
+			return array(false, "Code has already been used the maximum number of times");
+		}
+
+                $hist_res = $this->sql->query("SELECT user_id, code_id FROM tbl_upgrade_codes_history WHERE user_id = " . $this->id . " and code_id = " . $code_id);
+                if(!$hist_res) return array( false, "Error 29001 (Problem checking upgrade_code.  Please contact admin@malshare.com)");
+		if ( $hist_res->num_rows > 0 ) return array(false, "The Code has already been used on this account");
+		
+		$hist_query = "INSERT INTO tbl_upgrade_codes_history (user_id, code_id) VALUES( " . $this->id . ", " . $code_id .")";
+		$res = $this->sql->query($hist_query);
+		$this->sql->commit();
+
+
+                $dec_query = "UPDATE tbl_upgrade_codes set rlimit = rlimit - 1 WHERE id = " . $code_id;
+                $res = $this->sql->query($dec_query);
+                $this->sql->commit();
+
+
+		$message = "Unknown Error: 29009";
+
+		switch($code_action) {
+			case "url_download_recursive":
+                                $action_query = "UPDATE tbl_users set recursive_url_download_allowed = 1 WHERE id = " . $this->id;
+                                $res = $this->sql->query($action_query);
+                                $this->sql->commit();
+				$message = "Recursive URL downloading enabled for account";
+
+				break;
+			case "api_limit_10000":
+                                $action_query = "UPDATE tbl_users set query_limit = query_limit + 10000, query_base = query_base + 10000  WHERE id = " . $this->id;
+                                $res = $this->sql->query($action_query);
+                                $this->sql->commit();
+				$message = "Daily API Query limit increased by 10000";
+
+				break;
+			case "api_limit_unlim":
+                                $action_query = "UPDATE tbl_users set query_limit = 100000000, query_base = 100000000  WHERE id = " . $this->id;
+                                $res = $this->sql->query($action_query);
+                                $this->sql->commit();
+				$message = "API Key set to allow unlimited downloading";
+
+				break;
+			break;
+		}
+
+		return array( true, $message);
+
+
+	}
 
 }
 

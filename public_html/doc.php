@@ -118,7 +118,7 @@
 			  <tr>
 			    <td class="hash_font">POST</td>
 			    <td class="hash_font">/api.php?api_key=[API_KEY]&amp;action=upload </td>
-			    <td>Upload using FormData field "upload"</td>
+			    <td>Upload using FormData field "upload".  Uploading files temporarily increases a users quota.</td>
 			    <td></td>
 			  </tr>
 			<a name="getlimit"></a> 

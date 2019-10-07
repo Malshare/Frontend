@@ -1062,7 +1062,7 @@ class ServerObject {
 				die("Error: Over Request Limit.  Please contact admin@malshare.com if you need this increased");		
 			}
 		}
-		else{
+		else {
 			$res = $this->sql->query("UPDATE $table SET query_limit = query_limit - 1 WHERE api_key= '$api_key' ");
 			if(!$res) $this->error_die("Error 432104 (Please report to admin@malshare.com)");
 			
@@ -1070,6 +1070,14 @@ class ServerObject {
 			if(!$res) $this->error_die("Error 432105 (Please report to admin@malshare.com)");
 		}
 	}
+	
+        public function increment_query_limit() {
+                $table = $this->vars_table_users;
+                $api_key = $this->uri_api_key;
+
+                $res = $this->sql->query("UPDATE $table SET query_limit = query_limit + 1 WHERE api_key= '$api_key' ");
+                if(!$res) $this->error_die("Error 432104 (Please report to admin@malshare.com)");
+        }
 
 	public function update_sample_count($hash) {		
 		$table = $this->vars_table_samples;

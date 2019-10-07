@@ -104,6 +104,7 @@ if ($share->uri_action=="upload"){
 	foreach ($_FILES as $upload){
 		$sub_result = $share->upload_sample($upload);
 		if ( $sub_result != false ){
+			$share->increment_query_limit();
 			echo "Success - $sub_result";
 		} else {
 			http_response_code(500);

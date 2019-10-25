@@ -10,7 +10,7 @@
 		<div class="hero-unit">
 		<center><img src="images/logo_header.png" width="333" height="119" alt="Malshare Logo" ></center>
 		The MalShare Project is a collaborative effort to create a community driven public malware repository that works to build additional tools to benefit the security community at large.   <br /><br />
-		<p>Not all files in our system are malicious and our data feeds are considered as is. We offer free public API keys.  Standard keys allow 1000 API calls per day (including downloading samples, details lookup and search).  If you require more, contact <a href="mailto:admin@MalShare.com">admin@MalShare.com</a> for further assistance. </p>
+		<p>Not all files in our system are malicious and our data feeds are considered as is. We offer free public API keys.  Standard keys allow 2000 API calls per day (including downloading samples, details lookup and search).  If you require more, contact <a href="mailto:admin@MalShare.com">admin@MalShare.com</a> for further assistance. </p>
 
 		<p>Feature requests, bug reports and any other issues can be reported <a href="https://github.com/Malshare/MalShare/issues">here</a></p>
 		<p>A list of those who have helped secure MalShare through security reports can be found:  <a href="thanks.php">here</a></p>

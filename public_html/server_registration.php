@@ -110,7 +110,7 @@ Email   : ' . $this->email . '
 API Key : ' . $this->api_key . ' 
 
 
-Your free API key will allow you to pull 1000 samples per day. If you require more or have additional feature requests, please contact Admin@MalShare.com.
+Your free API key will allow you to pull 2000 samples per day. If you require more or have additional feature requests, please contact Admin@MalShare.com.
 
 If you would like to show your support for the MalShare Project, please consider donating via paypal. 
 

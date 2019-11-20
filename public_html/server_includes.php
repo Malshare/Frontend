@@ -647,7 +647,7 @@ class ServerObject {
 				</table>  
 			';		
 		}	
-		$output .=  '
+/*		$output .=  '
 				<table class="table">  
 					<thead>  
 						<tr>  
@@ -666,7 +666,9 @@ class ServerObject {
 		$str = shell_exec("/usr/bin/strings -n 6 -a $spath");
 		$output .= htmlspecialchars( $str );
 		$output .= "</pre></td></tr></tbody></table>";
-			
+ */
+
+
 		if ($f_row->pending == 1) $output .= "<script>ShowLoading();</script>";
 
 		return $output;

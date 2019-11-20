@@ -1,12 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-	<meta charset="utf-8">
-	<title>MalShare</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="The MalShare Project is a community driven public malware repository that works to provide free access to malware samples and tooling to the infomation security community.">
+        <?php include('header.php'); ?>
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
-	
 	
 	<link href="./css/bootstrap.css" rel="stylesheet">
 	<style type="text/css">
@@ -43,24 +40,10 @@
 			margin-bottom: 15px;
 			padding: 7px 9px;
 		}
-		
 	
 	</style>
 	<link href="./css/sticky-footer-navbar.css" rel="stylesheet">
 
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-49931431-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
 	</head>
 
 	<body>
@@ -69,7 +52,6 @@
 
 
 <script type="text/javascript">
-       // Source: https://stackoverflow.com/questions/39920900/disabling-submit-button-while-processing-on-server-without-jquery
     function ShowLoading(e) {
 	setTimeout(function(){
 	   window.location.reload(1);
@@ -93,17 +75,53 @@
 		<div class="container">			
 			<div class="jumbotron">
 <?php
-	if($_GET["hash"]!="" && $_GET["action"]=="detail") {
-		include("server_includes.php");
-		$share = new ServerObject();
-		echo $share->get_details();        
+        include("server_includes.php");
+	require_once "recaptchalib.php";
+
+
+	// Captcha Check skip for logged in users:
+	$share = new ServerObject();
+	$getDetails = false;
+
+        if (array_key_exists('mapi_key', $_COOKIE) && $_COOKIE['mapi_key'] != "" ){
+		$uuser = $share->login();
+		if ( $uuser->ready == true ) {
+			$getDetails = true;
+		}
 	}
-	else{
-		echo '<br /> <center><p class="lead">Please enter request with a hash</p></center>';
-	
-		die();
-		
-		
+
+	 if (strlen($_POST["g-recaptcha-response"]) > 5) {
+		$secret = getenv('MALSHARE_RECAPTCHA_SECRET');
+		$reCaptcha = new ReCaptcha($secret);
+
+		$response = $reCaptcha->verifyResponse(
+			"malshare.com", //$_SERVER["REMOTE_ADDR"],
+			$_POST["g-recaptcha-response"]
+		);
+		if  ($response != null && $response->success) {
+			$getDetails= true;
+		}
+
+	} 
+
+	if ( $getDetails == true ) {
+		if($_GET["hash"]!="" && $_GET["action"]=="detail") {
+			echo $share->get_details();        
+		}
+		else{
+			echo '<br /> <center><p class="lead">Please enter request with a hash</p></center>';	
+			die();
+		}
+	} else {
+                echo '
+                <form method=post action=sample.php?' .  $_SERVER['QUERY_STRING'] .' class="form-signin">
+                        <h2 class="form-signin-heading">Captcha Check</h2>
+                        <center>
+                                <div class="g-recaptcha" data-sitekey="6LfippkUAAAAAG9CeuGbV6Yev1FoCMAQzVyPLfE7"></div>
+                                <br />
+                                <button class="btn btn-small btn-primary" type="submit">Submit</button>
+                        </center>
+                </form>';
 	}
 
 ?>

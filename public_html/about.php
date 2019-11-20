@@ -13,6 +13,7 @@
 		<p>Not all files in our system are malicious and our data feeds are considered as is. We offer free public API keys.  Standard keys allow 2000 API calls per day (including downloading samples, details lookup and search).  If you require more, contact <a href="mailto:admin@MalShare.com">admin@MalShare.com</a> for further assistance. </p>
 
 		<p>Feature requests, bug reports and any other issues can be reported <a href="https://github.com/Malshare/MalShare/issues">here</a></p>
+                <p>Large updates and general information can be found on our <a href="https://malshare.blogspot.com/">blog</a></p>
 		<p>A list of those who have helped secure MalShare through security reports can be found:  <a href="thanks.php">here</a></p>
 		<br /><center>
 		<a href="https://github.com/malshare"><img src="images/github.png" height="20" width="20">  GitHub  </a>|<a href="https://twitter.com/mal_share"><img src="images/twitter.png" height="20" width="20">  Twitter</a> 

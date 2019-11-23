@@ -20,29 +20,29 @@ error_reporting(E_ALL & ~E_NOTICE);
 /* GLOBAL CONFIG VARS */
 
 // Paths
-define(SAMPLES_ROOT, getenv('MALSHARE_SAMPLES_ROOT'));
-define(UPLOAD_SAMPLES_ROOT, getenv('UPLOAD_MALSHARE_SAMPLES_ROOT'));
+define("SAMPLES_ROOT", getenv('MALSHARE_SAMPLES_ROOT'));
+define("UPLOAD_SAMPLES_ROOT", getenv('UPLOAD_MALSHARE_SAMPLES_ROOT'));
 
 // Tables
-define(SAMPLES_TABLE,"tbl_samples");
-define(SAMPLE_SOURCES_TABLE,"tbl_sample_sources");
-define(USERS_TABLE, "tbl_users");
-define(UPLOADS_TABLE, "tbl_uploads");
-define(SEARCHES_TABLE, "tbl_searches");
-define(PUBSEARCHES_TABLE, "tbl_public_searches");
-define(URLDLTASKS_TABLE, "tbl_url_download_tasks");
-define(SAMPLE_PARTNER_TABLE, "tbl_sample_partners");
+define("SAMPLES_TABLE", "tbl_samples");
+define("SAMPLE_SOURCES_TABLE", "tbl_sample_sources");
+define("USERS_TABLE", "tbl_users");
+define("UPLOADS_TABLE", "tbl_uploads");
+define("SEARCHES_TABLE", "tbl_searches");
+define("PUBSEARCHES_TABLE", "tbl_public_searches");
+define("URLDLTASKS_TABLE", "tbl_url_download_tasks");
+define("SAMPLE_PARTNER_TABLE", "tbl_sample_partners");
 
 // DB Connection
-define(DB_HOST, getenv('MALSHARE_DB_HOST'));
-define(DB_USER, getenv('MALSHARE_DB_USER'));
-define(DB_PASS, getenv('MALSHARE_DB_PASS'));
-define(DB_DATABASE, getenv('MALSHARE_DB_DATABASE'));
+define("DB_HOST", getenv('MALSHARE_DB_HOST'));
+define("DB_USER", getenv('MALSHARE_DB_USER'));
+define("DB_PASS", getenv('MALSHARE_DB_PASS'));
+define("DB_DATABASE", getenv('MALSHARE_DB_DATABASE'));
 
 // Supported Hashing
-define(HASH_SUPPORTED_MD5,"true");	
-define(HASH_SUPPORTED_SHA1,"true");	
-define(HASH_SUPPORTED_SHA256,"true");	
+define("HASH_SUPPORTED_MD5", "true");
+define("HASH_SUPPORTED_SHA1", "true");
+define("HASH_SUPPORTED_SHA256", "true");
 
 class UserObject {
 	public $api_key;

@@ -464,7 +464,6 @@ class ServerObject {
 
 	public function get_details() {				
 		$r_hash = $this->uri_hash;
-		
 		$hash = preg_replace("/[^a-zA-Z0-9]+/", "", $r_hash);
 		
 		$table = $this->vars_table_samples;
@@ -472,8 +471,6 @@ class ServerObject {
 		$table_sources = $this->vars_table_sources;
 		$table_sample_partners = $this->vars_table_sample_partners;
 
-
-		$lenght = strlen($hash);
 			
 		if (strlen($hash) == 32){
 			$res = $this->sql->query("SELECT id as hash FROM $table WHERE md5 = lower('$hash')");
@@ -488,11 +485,11 @@ class ServerObject {
 			http_response_code(404);
 			die("Invalid Hash.");
 		}
-		if(!$res) die("Error 13417 (Problem findings sample details.  Please contact admin@malshare.com)");
-		if($res->num_rows==0) {
-			http_response_code(404);
-			die("Sample not found with hash ($hash)");
-		}
+        if (!$res) die("Error 13417 (Problem findings sample details.  Please contact admin@malshare.com)");
+        if ($res->num_rows == 0) {
+            http_response_code(404);
+            die("Sample not found with hash ($hash)");
+        }
 		
 		$row = $res->fetch_object();	
 		
@@ -673,9 +670,10 @@ class ServerObject {
 
 		return $output;
 		
-	}	
+	}
 
-	public function get_details_json() {
+	public function get_details_json()
+	{
 		header('Content-Type: application/json');
 		$output = array();
 
@@ -685,32 +683,27 @@ class ServerObject {
 		$table = $this->vars_table_samples;
 		$table_sources = $this->vars_table_sources;
 
-		$lenght = strlen($hash);
-
-		if (strlen($hash) == 32){
-				$res = $this->sql->query("SELECT id as hash FROM $table WHERE md5 = lower('$hash')");
-		}
-		else if (strlen($hash) == 40){
-				$res = $this->sql->query("SELECT id as hash FROM $table WHERE sha1 = lower('$hash')");
-		}
-		else if (strlen($hash) == 64){
-				$res = $this->sql->query("SELECT id as hash FROM $table WHERE sha256 = lower('$hash')");
-		}   
-		else{   
+		if (strlen($hash) == 32) {
+			$res = $this->sql->query("SELECT id as hash FROM $table WHERE md5 = lower('$hash')");
+		} else if (strlen($hash) == 40) {
+			$res = $this->sql->query("SELECT id as hash FROM $table WHERE sha1 = lower('$hash')");
+		} else if (strlen($hash) == 64) {
+			$res = $this->sql->query("SELECT id as hash FROM $table WHERE sha256 = lower('$hash')");
+		} else {
 			http_response_code(400);
 			$output['ERROR'] = array();
 			$output['ERROR']["CODE"] = 400;
 			$output['ERROR']["MESSAGE"] = "Invalid Hash";
 			return json_encode($output, JSON_UNESCAPED_SLASHES);
 		}
-		if(!$res){
+		if (! $res) {
 			http_response_code(500);
 			$output['ERROR'] = array();
 			$output['ERROR']["CODE"] = 724433;
 			$output['ERROR']["MESSAGE"] = "Problem finding sample details for json details.  Please contact admin@malshare.com";
 			return json_encode($output, JSON_UNESCAPED_SLASHES);
 		}
-		if($res->num_rows==0) {
+		if ($res->num_rows == 0) {
 			http_response_code(404);
 			$output['ERROR'] = array();
 			$output['ERROR']["CODE"] = 404;
@@ -719,40 +712,40 @@ class ServerObject {
 		}
 		$row = $res->fetch_object();
 
-		$full_res = $this->sql->query("SELECT md5, sha1, sha256, ssdeep, added, ftype FROM $table WHERE id = " . $row->hash );
+		$full_res = $this->sql->query("SELECT md5, sha1, sha256, ssdeep, added, ftype FROM $table WHERE id = " . $row->hash);
 
-		if(!$full_res){
+		if (! $full_res) {
 			http_response_code(500);
 			$output['ERROR'] = array();
 			$output['ERROR']["CODE"] = 724341;
 			$output['ERROR']["MESSAGE"] = "problem getting details for hash (json).  Please contact admin@malshare.com";
 			return json_encode($output, JSON_UNESCAPED_SLASHES);
-		} 
-		if($full_res->num_rows==0) {
+		}
+		if ($full_res->num_rows == 0) {
 			http_response_code(500);
 			$output['ERROR'] = array();
 			$output['ERROR']["CODE"] = 500;
 			$output['ERROR']["MESSAGE"] = "Sample details not found";
-			return json_encode($output, JSON_UNESCAPED_SLASHES);		
+			return json_encode($output, JSON_UNESCAPED_SLASHES);
 		}
 
 		$f_row = $full_res->fetch_object();
-		$output['MD5'] =$f_row->md5;
+		$output['MD5'] = $f_row->md5;
 		$output['SHA1'] = $f_row->sha1;
 		$output['SHA256'] = $f_row->sha256;
 		$output['SSDEEP'] = $f_row->ssdeep;
 		$output['F_TYPE'] = $f_row->ftype;
 
-		$full_res = $this->sql->query("SELECT source FROM $table_sources WHERE id = " . $row->hash );
-		if(!$full_res){
+		$full_res = $this->sql->query("SELECT source FROM $table_sources WHERE id = " . $row->hash);
+		if (! $full_res) {
 			http_response_code(500);
 			$output['ERROR'] = array();
 			$output['ERROR']["CODE"] = 724323;
 			$output['ERROR']["MESSAGE"] = "Problem getting sources for hash.  Please contact admin@malshare.com";
-			return json_encode($output, JSON_UNESCAPED_SLASHES);	
+			return json_encode($output, JSON_UNESCAPED_SLASHES);
 		}
 		$t_source = array();
-		while($s_row = $full_res->fetch_object()) {
+		while ($s_row = $full_res->fetch_object()) {
 			array_push($t_source, $s_row->source);
 		}
 
@@ -1072,14 +1065,15 @@ class ServerObject {
 			if(!$res) $this->error_die("Error 432105 (Please report to admin@malshare.com)");
 		}
 	}
-	
-        public function increment_query_limit() {
-                $table = $this->vars_table_users;
-                $api_key = $this->uri_api_key;
 
-                $res = $this->sql->query("UPDATE $table SET query_limit = query_limit + 1 WHERE api_key= '$api_key' ");
-                if(!$res) $this->error_die("Error 432104 (Please report to admin@malshare.com)");
-        }
+    public function increment_query_limit()
+    {
+        $table = $this->vars_table_users;
+        $api_key = $this->uri_api_key;
+
+        $res = $this->sql->query("UPDATE $table SET query_limit = query_limit + 1 WHERE api_key= '$api_key' ");
+        if (!$res) $this->error_die("Error 432104 (Please report to admin@malshare.com)");
+    }
 
 	public function update_sample_count($hash) {		
 		$table = $this->vars_table_samples;
@@ -1252,13 +1246,13 @@ class ServerObject {
 		return $guid;
 	}
 
-
-        public function is_valid_guid($guid){
-		if (! preg_match( "/^[A-Fa-f0-9]{8}\-[A-Fa-f0-9]{4}\-4000-8[A-Fa-f0-9]{3}\-[A-Fa-f0-9]{12}$/", $guid)){
-			return false;
-		}
-		return true;
+    public function is_valid_guid($guid)
+    {
+        if (!preg_match("/^[A-Fa-f0-9]{8}\-[A-Fa-f0-9]{4}\-4000-8[A-Fa-f0-9]{3}\-[A-Fa-f0-9]{12}$/", $guid)) {
+            return false;
         }
+        return true;
+    }
 
 	public function get_download_status($user_id, $dguid){
 		$table = $this->vars_table_url_download_tasks;

@@ -68,12 +68,12 @@ if($share->uri_action=="getfile") {
 	@unlink($contents);
 	die();
 }
+
 if($share->uri_action=="details") {
-	$share->update_query_limit();
-	$hash = $share->uri_hash;
-	$sample = $share->get_details_json($hash);
-	echo $sample;
-	die();
+    $share->update_query_limit();
+    $sample = $share->get_details_json();
+    echo $sample;
+    die();
 }
 
 if($share->uri_action=="type") {

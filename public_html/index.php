@@ -10,7 +10,7 @@
       		<div class="hero-unit"> 
       			<div class="row">
         			<div class="span12">
-                        <p>A free Malware repository providing researchers access to samples, malicous feeds, and Yara results.</p>
+                        <p>A free Malware repository providing researchers access to samples, malicious feeds, and Yara results.</p>
         			</div>
      			</div>
      		</div>

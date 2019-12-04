@@ -97,7 +97,8 @@
 						<li><a href="./daily/">Daily Digest</a></li>
                                                 <li><a href="doc.php">Documentation</a></li>
                                                 <li><a href="http://malshare.blogspot.com" target="_blank">Blog</a></li>
-						<li><a href="about.php">About</a></li>						
+						<li><a href="stats.php">Stats</a></li>
+						<li><a href="about.php">About</a></li>
 					</ul>
 				</div>
 				</div>

@@ -93,6 +93,12 @@
 			    <td>GET stored file details</td>
 			    <td>JSON</td>
 			  </tr>
+			  <tr>
+			    <td class="hash_font">POST</td>
+			    <td class="hash_font">/api.php?api_key=[API_KEY]&amp;action=hashlookup</td>
+			    <td>Supply an array of hex-encoded hashes in a POST field named <span class="hash_font">hashes</span>.</td>
+			    <td>JSON</td>
+			  </tr>
 				<a name="list"></a>
 			  <tr>
 			    <td class="hash_font">GET</td>

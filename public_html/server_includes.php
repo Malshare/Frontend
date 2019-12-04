@@ -20,29 +20,29 @@ error_reporting(E_ALL & ~E_NOTICE);
 /* GLOBAL CONFIG VARS */
 
 // Paths
-define(SAMPLES_ROOT, getenv('MALSHARE_SAMPLES_ROOT'));
-define(UPLOAD_SAMPLES_ROOT, getenv('UPLOAD_MALSHARE_SAMPLES_ROOT'));
+define("SAMPLES_ROOT", getenv('MALSHARE_SAMPLES_ROOT'));
+define("UPLOAD_SAMPLES_ROOT", getenv('UPLOAD_MALSHARE_SAMPLES_ROOT'));
 
 // Tables
-define(SAMPLES_TABLE,"tbl_samples");
-define(SAMPLE_SOURCES_TABLE,"tbl_sample_sources");
-define(USERS_TABLE, "tbl_users");
-define(UPLOADS_TABLE, "tbl_uploads");
-define(SEARCHES_TABLE, "tbl_searches");
-define(PUBSEARCHES_TABLE, "tbl_public_searches");
-define(URLDLTASKS_TABLE, "tbl_url_download_tasks");
-define(SAMPLE_PARTNER_TABLE, "tbl_sample_partners");
+define("SAMPLES_TABLE", "tbl_samples");
+define("SAMPLE_SOURCES_TABLE", "tbl_sample_sources");
+define("USERS_TABLE", "tbl_users");
+define("UPLOADS_TABLE", "tbl_uploads");
+define("SEARCHES_TABLE", "tbl_searches");
+define("PUBSEARCHES_TABLE", "tbl_public_searches");
+define("URLDLTASKS_TABLE", "tbl_url_download_tasks");
+define("SAMPLE_PARTNER_TABLE", "tbl_sample_partners");
 
 // DB Connection
-define(DB_HOST, getenv('MALSHARE_DB_HOST'));
-define(DB_USER, getenv('MALSHARE_DB_USER'));
-define(DB_PASS, getenv('MALSHARE_DB_PASS'));
-define(DB_DATABASE, getenv('MALSHARE_DB_DATABASE'));
+define("DB_HOST", getenv('MALSHARE_DB_HOST'));
+define("DB_USER", getenv('MALSHARE_DB_USER'));
+define("DB_PASS", getenv('MALSHARE_DB_PASS'));
+define("DB_DATABASE", getenv('MALSHARE_DB_DATABASE'));
 
 // Supported Hashing
-define(HASH_SUPPORTED_MD5,"true");	
-define(HASH_SUPPORTED_SHA1,"true");	
-define(HASH_SUPPORTED_SHA256,"true");	
+define("HASH_SUPPORTED_MD5", "true");
+define("HASH_SUPPORTED_SHA1", "true");
+define("HASH_SUPPORTED_SHA256", "true");
 
 class UserObject {
 	public $api_key;
@@ -464,7 +464,6 @@ class ServerObject {
 
 	public function get_details() {				
 		$r_hash = $this->uri_hash;
-		
 		$hash = preg_replace("/[^a-zA-Z0-9]+/", "", $r_hash);
 		
 		$table = $this->vars_table_samples;
@@ -472,8 +471,6 @@ class ServerObject {
 		$table_sources = $this->vars_table_sources;
 		$table_sample_partners = $this->vars_table_sample_partners;
 
-
-		$lenght = strlen($hash);
 			
 		if (strlen($hash) == 32){
 			$res = $this->sql->query("SELECT id as hash FROM $table WHERE md5 = lower('$hash')");
@@ -488,11 +485,11 @@ class ServerObject {
 			http_response_code(404);
 			die("Invalid Hash.");
 		}
-		if(!$res) die("Error 13417 (Problem findings sample details.  Please contact admin@malshare.com)");
-		if($res->num_rows==0) {
-			http_response_code(404);
-			die("Sample not found with hash ($hash)");
-		}
+        if (!$res) die("Error 13417 (Problem findings sample details.  Please contact admin@malshare.com)");
+        if ($res->num_rows == 0) {
+            http_response_code(404);
+            die("Sample not found with hash ($hash)");
+        }
 		
 		$row = $res->fetch_object();	
 		
@@ -673,9 +670,10 @@ class ServerObject {
 
 		return $output;
 		
-	}	
+	}
 
-	public function get_details_json() {
+	public function get_details_json()
+	{
 		header('Content-Type: application/json');
 		$output = array();
 
@@ -685,32 +683,27 @@ class ServerObject {
 		$table = $this->vars_table_samples;
 		$table_sources = $this->vars_table_sources;
 
-		$lenght = strlen($hash);
-
-		if (strlen($hash) == 32){
-				$res = $this->sql->query("SELECT id as hash FROM $table WHERE md5 = lower('$hash')");
-		}
-		else if (strlen($hash) == 40){
-				$res = $this->sql->query("SELECT id as hash FROM $table WHERE sha1 = lower('$hash')");
-		}
-		else if (strlen($hash) == 64){
-				$res = $this->sql->query("SELECT id as hash FROM $table WHERE sha256 = lower('$hash')");
-		}   
-		else{   
+		if (strlen($hash) == 32) {
+			$res = $this->sql->query("SELECT id as hash FROM $table WHERE md5 = lower('$hash')");
+		} else if (strlen($hash) == 40) {
+			$res = $this->sql->query("SELECT id as hash FROM $table WHERE sha1 = lower('$hash')");
+		} else if (strlen($hash) == 64) {
+			$res = $this->sql->query("SELECT id as hash FROM $table WHERE sha256 = lower('$hash')");
+		} else {
 			http_response_code(400);
 			$output['ERROR'] = array();
 			$output['ERROR']["CODE"] = 400;
 			$output['ERROR']["MESSAGE"] = "Invalid Hash";
 			return json_encode($output, JSON_UNESCAPED_SLASHES);
 		}
-		if(!$res){
+		if (! $res) {
 			http_response_code(500);
 			$output['ERROR'] = array();
 			$output['ERROR']["CODE"] = 724433;
 			$output['ERROR']["MESSAGE"] = "Problem finding sample details for json details.  Please contact admin@malshare.com";
 			return json_encode($output, JSON_UNESCAPED_SLASHES);
 		}
-		if($res->num_rows==0) {
+		if ($res->num_rows == 0) {
 			http_response_code(404);
 			$output['ERROR'] = array();
 			$output['ERROR']["CODE"] = 404;
@@ -719,40 +712,40 @@ class ServerObject {
 		}
 		$row = $res->fetch_object();
 
-		$full_res = $this->sql->query("SELECT md5, sha1, sha256, ssdeep, added, ftype FROM $table WHERE id = " . $row->hash );
+		$full_res = $this->sql->query("SELECT md5, sha1, sha256, ssdeep, added, ftype FROM $table WHERE id = " . $row->hash);
 
-		if(!$full_res){
+		if (! $full_res) {
 			http_response_code(500);
 			$output['ERROR'] = array();
 			$output['ERROR']["CODE"] = 724341;
 			$output['ERROR']["MESSAGE"] = "problem getting details for hash (json).  Please contact admin@malshare.com";
 			return json_encode($output, JSON_UNESCAPED_SLASHES);
-		} 
-		if($full_res->num_rows==0) {
+		}
+		if ($full_res->num_rows == 0) {
 			http_response_code(500);
 			$output['ERROR'] = array();
 			$output['ERROR']["CODE"] = 500;
 			$output['ERROR']["MESSAGE"] = "Sample details not found";
-			return json_encode($output, JSON_UNESCAPED_SLASHES);		
+			return json_encode($output, JSON_UNESCAPED_SLASHES);
 		}
 
 		$f_row = $full_res->fetch_object();
-		$output['MD5'] =$f_row->md5;
+		$output['MD5'] = $f_row->md5;
 		$output['SHA1'] = $f_row->sha1;
 		$output['SHA256'] = $f_row->sha256;
 		$output['SSDEEP'] = $f_row->ssdeep;
 		$output['F_TYPE'] = $f_row->ftype;
 
-		$full_res = $this->sql->query("SELECT source FROM $table_sources WHERE id = " . $row->hash );
-		if(!$full_res){
+		$full_res = $this->sql->query("SELECT source FROM $table_sources WHERE id = " . $row->hash);
+		if (! $full_res) {
 			http_response_code(500);
 			$output['ERROR'] = array();
 			$output['ERROR']["CODE"] = 724323;
 			$output['ERROR']["MESSAGE"] = "Problem getting sources for hash.  Please contact admin@malshare.com";
-			return json_encode($output, JSON_UNESCAPED_SLASHES);	
+			return json_encode($output, JSON_UNESCAPED_SLASHES);
 		}
 		$t_source = array();
-		while($s_row = $full_res->fetch_object()) {
+		while ($s_row = $full_res->fetch_object()) {
 			array_push($t_source, $s_row->source);
 		}
 
@@ -761,10 +754,59 @@ class ServerObject {
 		return json_encode($output, JSON_UNESCAPED_SLASHES);
 	}
 
+	public function get_hashes(array $hashes)
+	{
+		$sha256s = [];
+		$sha1s = [];
+		$md5s = [];
+		foreach ($hashes as &$hash) {
+			$hash = trim(strtolower($hash));
+			if (preg_match('/^[a-f0-9]{32}$/', $hash)) {
+				$md5s[] = $hash;
+			} else if (preg_match('/^[a-f0-9]{40}$/', $hash)) {
+				$sha1s[] = $hash;
+			} else if (preg_match('/^[a-f0-9]{64}$/', $hash)) {
+				$sha256s[] = $hash;
+			}
+		}
+		$where = [];
+		if ($md5s) {
+			$where[] = '(md5 IN ("' . implode('", "', $md5s) . '"))';
+		}
+		if ($sha1s) {
+			$where[] = '(sha1 IN ("' . implode('", "', $sha1s) . '"))';
+		}
+		if ($sha256s) {
+			$where[] = '(sha256 IN ("' . implode('", "', $sha256s) . '"))';
+		}
+		if (! $where) {
+			return [];
+		}
+		$sql = 'SELECT sha256, md5, sha1 FROM ' . $this->vars_table_samples .
+			' WHERE (' . implode(' OR ', $where) . ')';
+		print($sql);
+		if (! ($stmt = $this->sql->prepare($sql))) {
+			return [];
+		}
+		$stmt->execute();
+		$stmt->bind_result($sha256, $md5, $sha1);
+		$ret = [];
+		while ($stmt->fetch()) {
+			$ret[] = [
+				'sha256' => $sha256,
+				'md5' => $md5,
+				'sha1' => $sha1,
+			];
+		}
 
-	public function get_sample($hash) {
-		if($hash=="") $this->error_die("Empty hash specified");
-	
+
+		return [];
+	}
+
+	public function get_sample($hash)
+	{
+		if ($hash == "") $this->error_die("Empty hash specified");
+
 		$table = $this->vars_table_samples;
 		$root_path = $this->vars_samples_root;
 		$lenght = strlen($hash);
@@ -1072,14 +1114,15 @@ class ServerObject {
 			if(!$res) $this->error_die("Error 432105 (Please report to admin@malshare.com)");
 		}
 	}
-	
-        public function increment_query_limit() {
-                $table = $this->vars_table_users;
-                $api_key = $this->uri_api_key;
 
-                $res = $this->sql->query("UPDATE $table SET query_limit = query_limit + 1 WHERE api_key= '$api_key' ");
-                if(!$res) $this->error_die("Error 432104 (Please report to admin@malshare.com)");
-        }
+    public function increment_query_limit()
+    {
+        $table = $this->vars_table_users;
+        $api_key = $this->uri_api_key;
+
+        $res = $this->sql->query("UPDATE $table SET query_limit = query_limit + 1 WHERE api_key= '$api_key' ");
+        if (!$res) $this->error_die("Error 432104 (Please report to admin@malshare.com)");
+    }
 
 	public function update_sample_count($hash) {		
 		$table = $this->vars_table_samples;
@@ -1252,13 +1295,13 @@ class ServerObject {
 		return $guid;
 	}
 
-
-        public function is_valid_guid($guid){
-		if (! preg_match( "/^[A-Fa-f0-9]{8}\-[A-Fa-f0-9]{4}\-4000-8[A-Fa-f0-9]{3}\-[A-Fa-f0-9]{12}$/", $guid)){
-			return false;
-		}
-		return true;
+    public function is_valid_guid($guid)
+    {
+        if (!preg_match("/^[A-Fa-f0-9]{8}\-[A-Fa-f0-9]{4}\-4000-8[A-Fa-f0-9]{3}\-[A-Fa-f0-9]{12}$/", $guid)) {
+            return false;
         }
+        return true;
+    }
 
 	public function get_download_status($user_id, $dguid){
 		$table = $this->vars_table_url_download_tasks;

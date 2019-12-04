@@ -754,10 +754,59 @@ class ServerObject {
 		return json_encode($output, JSON_UNESCAPED_SLASHES);
 	}
 
+	public function get_hashes(array $hashes)
+	{
+		$sha256s = [];
+		$sha1s = [];
+		$md5s = [];
+		foreach ($hashes as &$hash) {
+			$hash = trim(strtolower($hash));
+			if (preg_match('/^[a-f0-9]{32}$/', $hash)) {
+				$md5s[] = $hash;
+			} else if (preg_match('/^[a-f0-9]{40}$/', $hash)) {
+				$sha1s[] = $hash;
+			} else if (preg_match('/^[a-f0-9]{64}$/', $hash)) {
+				$sha256s[] = $hash;
+			}
+		}
+		$where = [];
+		if ($md5s) {
+			$where[] = '(md5 IN ("' . implode('", "', $md5s) . '"))';
+		}
+		if ($sha1s) {
+			$where[] = '(sha1 IN ("' . implode('", "', $sha1s) . '"))';
+		}
+		if ($sha256s) {
+			$where[] = '(sha256 IN ("' . implode('", "', $sha256s) . '"))';
+		}
+		if (! $where) {
+			return [];
+		}
+		$sql = 'SELECT sha256, md5, sha1 FROM ' . $this->vars_table_samples .
+			' WHERE (' . implode(' OR ', $where) . ')';
+		print($sql);
+		if (! ($stmt = $this->sql->prepare($sql))) {
+			return [];
+		}
+		$stmt->execute();
+		$stmt->bind_result($sha256, $md5, $sha1);
+		$ret = [];
+		while ($stmt->fetch()) {
+			$ret[] = [
+				'sha256' => $sha256,
+				'md5' => $md5,
+				'sha1' => $sha1,
+			];
+		}
 
-	public function get_sample($hash) {
-		if($hash=="") $this->error_die("Empty hash specified");
-	
+
+		return [];
+	}
+
+	public function get_sample($hash)
+	{
+		if ($hash == "") $this->error_die("Empty hash specified");
+
 		$table = $this->vars_table_samples;
 		$root_path = $this->vars_samples_root;
 		$lenght = strlen($hash);

@@ -76,6 +76,12 @@ if($share->uri_action=="details") {
     die();
 }
 
+if ($share->uri_action == 'hashlookup') {
+    $share->update_query_limit();
+    echo(json_encode($share->get_hashes(explode("\n", file_get_contents('php://input')))));
+    die();
+}
+
 if($share->uri_action=="type") {
 	$sample = $share->search_type_day();
 	echo $sample;
@@ -129,7 +135,7 @@ if ($share->uri_action == 'download_url') {
         http_response_code(400);
         die(json_encode(array('error' => 'invalid value in field "url"')));
     }
-    
+
     $url = $_POST['url'];
     $recursive = 0;
     if (isset($_POST['recursive'])) {

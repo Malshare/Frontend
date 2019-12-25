@@ -784,7 +784,6 @@ class ServerObject {
 		}
 		$sql = 'SELECT sha256, md5, sha1 FROM ' . $this->vars_table_samples .
 			' WHERE (' . implode(' OR ', $where) . ')';
-		print($sql);
 		if (! ($stmt = $this->sql->prepare($sql))) {
 			return [];
 		}
@@ -798,7 +797,6 @@ class ServerObject {
 				'sha1' => $sha1,
 			];
 		}
-
 
 		return [];
 	}
@@ -1274,55 +1272,60 @@ class ServerObject {
 		}
 
 		return $smp_md5;
-	}	
-
-	public function task_url_download($user_id, $durl, $recursive){
-		$table = $this->vars_table_url_download_tasks;
-		
-		$url = $this->sql->real_escape_string($durl);
-		# https://stackoverflow.com/questions/21671179/how-to-generate-a-new-guid
-		$guid = vsprintf('%s%s-%s-4000-8%.3s-%s%s%s0',str_split(dechex( microtime(true) * 1000 ) . bin2hex( random_bytes(8) ),4));
-
-		if ($recursive != 1) $recursive = 0;
-                $sql_query = "INSERT INTO $table (guid, user_id, url, recursive) VALUES ( '$guid', '$user_id', '$url', $recursive )";
-
-                $res = $this->sql->query($sql_query);
-                if(!$res) {
-                	$this->error_die("Error 149991 (URL Tasking failed. Please report to admin@malshare.com)");
-			return "false";
-                }
-
-		return $guid;
 	}
 
-    public function is_valid_guid($guid)
+    public function task_url_download($user_id, $durl, $recursive)
     {
-        if (!preg_match("/^[A-Fa-f0-9]{8}\-[A-Fa-f0-9]{4}\-4000-8[A-Fa-f0-9]{3}\-[A-Fa-f0-9]{12}$/", $guid)) {
-            return false;
+        $table = $this->vars_table_url_download_tasks;
+
+        $url = $this->sql->real_escape_string($durl);
+        # https://stackoverflow.com/questions/21671179/how-to-generate-a-new-guid
+        $guid = vsprintf('%s%s-%s-4000-8%.3s-%s%s%s0', str_split(dechex(microtime(true) * 1000) . bin2hex(random_bytes(8)), 4));
+
+        if ($recursive != 1) $recursive = 0;
+        $sql_query = "INSERT INTO $table (guid, user_id, url, recursive) VALUES ( '$guid', '$user_id', '$url', $recursive )";
+
+        $res = $this->sql->query($sql_query);
+        if (! $res) {
+            $this->error_die("Error 149991 (URL Tasking failed. Please report to admin@malshare.com)");
+            return "false";
         }
-        return true;
+
+        return $guid;
     }
 
-	public function get_download_status($user_id, $dguid){
-		$table = $this->vars_table_url_download_tasks;
-		
-		$guid = $this->secure($dguid);
-
-		$r_res = $this->sql->query( "SELECT started_at, finished_at from $table WHERE guid = '$guid' and user_id='$user_id'" );
-		if(!$r_res) $this->error_die("Error 149992 (Problem fetching URL Download task status.  Please contact admin@malshare.com)");
-		if($r_res->num_rows==0) next();
-		$t_status = $r_res->fetch_object();
-
-		if (! $t_status) return "non-existent GUID";
-		if ($t_status->finished_at != "1970-01-01 00:00:01" ) return "complete";
-		if ($t_status->started_at  != "1970-01-01 00:00:01" ) return "in progress";
-		return "pending";
+	public function is_valid_guid($guid)
+	{
+		if (! preg_match("/^[A-Fa-f0-9]{8}\-[A-Fa-f0-9]{4}\-4000-8[A-Fa-f0-9]{3}\-[A-Fa-f0-9]{12}$/", $guid)) {
+			return false;
+		}
+		return true;
 	}
 
+    public function get_download_status($userId, $guid)
+    {
+        $table = $this->vars_table_url_download_tasks;
+        $sql = 'SELECT started_at, finished_at FROM ' . $table . ' WHERE (guid = ?) AND (user_id = ?)';
+        if (! ($stmt = $this->sql->prepare($sql))) {
+            $this->error_die("Error 149992 (Problem fetching URL Download task status.  Please contact admin@malshare.com)");
+        }
+        $stmt->bind_param('si', $guid, $userId);
+        $stmt->execute();
+        $stmt->bind_result($startedAt, $finishedAt);
+        if (! $stmt->fetch()) {
+            return 'missing';
+        }
+        if ($this->empty_date_str($startedAt)) {
+            return 'pending';
+        } elseif ($this->empty_date_str($finishedAt)) {
+            return 'processing';
+        } else {
+            return 'finished';
+        }
+    }
 
-
-
-
+    private function empty_date_str($str)
+    {
+        return ! $str || ($str === '1970-01-01 01:00:01') || ($str === '1970-01-01 00:00:01');
+    }
 }
-
-?>

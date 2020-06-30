@@ -1083,18 +1083,14 @@ class ServerObject {
 		$table = $this->vars_table_users;
 		$api_key = $this->uri_api_key;
 	
-		$res = $this->sql->query("SELECT query_limit FROM $table WHERE api_key= '$api_key' ");
+		$res = $this->sql->query("SELECT query_limit, last_query FROM $table WHERE api_key= '$api_key' ");
 		if(!$res) $this->error_die("Error 432101 (Please report to admin@malshare.com)");
 		$row = $res->fetch_object();
 	
 		if ($row->query_limit <= 0 ){
-			$res = $this->sql->query("SELECT last_query FROM $table WHERE api_key= '$api_key' ");
-			if(!$res) $this->error_die("Error 432102 (Please report to admin@malshare.com)");	
 
-			$row = $res->fetch_object();
-			
 			if ( ( $row->last_query + 86400) < time()  ){		
-				$res = $this->sql->query("UPDATE $table SET query_limit = query_base  WHERE api_key= '$api_key' ");
+				$res = $this->sql->query("UPDATE $table SET query_limit = query_base - 1  WHERE api_key= '$api_key' ");
 				if(!$res) $this->error_die("Error 432103 (Please report to admin@malshare.com)");
 			
 			}
@@ -1105,11 +1101,9 @@ class ServerObject {
 			}
 		}
 		else {
-			$res = $this->sql->query("UPDATE $table SET query_limit = query_limit - 1 WHERE api_key= '$api_key' ");
+			$res = $this->sql->query("UPDATE $table SET query_limit = query_limit - 1, last_query = UNIX_TIMESTAMP() WHERE api_key= '$api_key' ");
 			if(!$res) $this->error_die("Error 432104 (Please report to admin@malshare.com)");
 			
-			$res = $this->sql->query("UPDATE $table SET last_query = UNIX_TIMESTAMP()  WHERE api_key= '$api_key' ");
-			if(!$res) $this->error_die("Error 432105 (Please report to admin@malshare.com)");
 		}
 	}
 

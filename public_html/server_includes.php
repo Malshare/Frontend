@@ -798,7 +798,7 @@ class ServerObject {
 			];
 		}
 
-		return [];
+		return $ret;
 	}
 
 	public function get_sample($hash)

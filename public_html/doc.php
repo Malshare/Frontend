@@ -39,7 +39,7 @@
 			  <tr>
 			    <td>Java</td>
 			    <td><a href="https://twitter.com/LibraAnalysis">@LibraAnalysis</a></td>
-			    <td><a href="https://github.com/ThisIsLibra/MalShareApi>Github.com/ThisIsLibra/MalShareApi</a></td>
+			    <td><a href="https://github.com/ThisIsLibra/MalShareApi">Github.com/ThisIsLibra/MalShareApi</a></td>
 			  </tr>
 				
 

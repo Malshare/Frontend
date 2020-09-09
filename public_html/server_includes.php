@@ -356,7 +356,7 @@ class ServerObject {
 			}
 			else {
 				header('Content-Type: application/json');
-				$output = "";
+				$output = array();
 			}
 			// Fetch data
 			$totalHits = 0;
@@ -447,7 +447,8 @@ class ServerObject {
 						}
 					}
 
-					$output .= json_encode($t, JSON_UNESCAPED_SLASHES); 
+					#$output .= json_encode($t, JSON_UNESCAPED_SLASHES); 
+					array_push($output, $t);
 				}
 			}
 
@@ -457,9 +458,13 @@ class ServerObject {
 				$this->sql->commit();
 			}
 
-			if ($api_query == false ) $output .=  '</tbody></table>  ';
-
-			return $output;
+			if ($api_query == false ) {
+				$output .=  '</tbody></table>  ';
+				return $output;
+			}
+			else{
+				return json_encode($output, JSON_UNESCAPED_SLASHES);
+			}
 		}
 
 	public function get_details() {				

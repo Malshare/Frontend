@@ -48,6 +48,8 @@
                 <div> 
 			<center><h3>Partners </h3>
 			<a href="https://www.zemana.com/"><img src="images/zemana_logo.png" width="182" height="140" alt="Zemana"></a>
+            <a href="https://www.virussamples.com/"><img src="images/malware_virus_samples_logo2.png" width="182" height="120" alt="VirusSamples"></a>
+
 			<br />
 			<img src="images/ET-PP-Logo.png" width="214" height="72" alt="Emerging Threats / Proofpoint">
 			<img src="images/12-1362_Crowd_Strike_Logo_Red_D0_01.gif" height="134" width="209" alt="CrowdStrike">

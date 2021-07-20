@@ -270,7 +270,7 @@ class ServerObject {
 						if($r_res->num_rows==0) next();
 
 						$sample_row = $r_res->fetch_object();
-						$output .=  '<a href="sample.php?action=detail&hash=' . $sample_row->md5 . '">' . $sample_row->md5 . ' | '. $sample_row->sha1 . ' | ' . $sample_row->sha256 . '</a><br />';
+						$output .=  '<a href="sample.php?action=detail&hash=' . $sample_row->sha256 . '">' . $sample_row->md5 . ' | '. $sample_row->sha1 . ' | ' . $sample_row->sha256 . '</a><br />';
 				}
 				return $output;
 		}
@@ -331,7 +331,7 @@ class ServerObject {
 
 			// Build header / if not API
 			if ($api_query == false ) { 
-				$output =  '<table id="searchres" class="table table-bordered table-striped" style="table-layout: fixed;"><thead>  <tr>  <th style="width: 20%">MD5 Hash</th>  <th style="width: 5%">File type</th>  <th style="width: 10%">Added</th>  <th style="width: 20%">Source</th>  <th style="width: 45%">Yara Hits</th> </tr>  </thead> <tbody>';
+				$output =  '<table id="searchres" class="table table-bordered table-striped" style="table-layout: fixed;"><thead>  <tr>  <th style="width: 20%">SHA256 Hash</th>  <th style="width: 5%">File type</th>  <th style="width: 10%">Added</th>  <th style="width: 20%">Source</th>  <th style="width: 45%">Yara Hits</th> </tr>  </thead> <tbody>';
 			}
 			else {
 				header('Content-Type: application/json');
@@ -354,7 +354,7 @@ class ServerObject {
 				// if not an API query, build HTML
 				if ($api_query == false ) {
 					$output .=  '<tr>  
-					<td class="hash_font"><a href="sample.php?action=detail&hash=' . $sample_row->md5 . '">' . $sample_row->md5 . '</a></td> 
+					<td class="hash_font"><a href="sample.php?action=detail&hash=' . $sample_row->sha256 . '">' . $sample_row->sha256 . '</a></td> 
 					<td>' . $sample_row->ftype . '</td> 
 					<td>' .  date("Y-m-d H:i:s", $sample_row->added) . '</td>';
 
@@ -371,8 +371,8 @@ class ServerObject {
 							$counter += 1;
 							if ($counter > 4 && $extend == 0){
 
-                                                $yhits .= '<a id="c_yara_' . $sample_row->md5 . '" class="none" href="#" onclick="document.getElementById(\'yara_' . $sample_row->md5 . '\').style= \'block\'; document.getElementById(\'c_yara_' . $sample_row->md5 . '\').className = \'hidden\';">[+]</a>';
-                                                $yhits .= '<div id="yara_' . $sample_row->md5 . '" style="display: none;">';
+                                                $yhits .= '<a id="c_yara_' . $sample_row->sha256 . '" class="none" href="#" onclick="document.getElementById(\'yara_' . $sample_row->sha256 . '\').style= \'block\'; document.getElementById(\'c_yara_' . $sample_row->sha256 . '\').className = \'hidden\';">[+]</a>';
+                                                $yhits .= '<div id="yara_' . $sample_row->sha256 . '" style="display: none;">';
 
 								$extend = 1;
 							}
@@ -489,7 +489,7 @@ class ServerObject {
 		
 		$output =  '<br />
 			<button type"submit"> 
-			<a href="sampleshare.php?action=getfile&hash=' . $f_row->md5 . '">Download</a></button>
+			<a href="sampleshare.php?action=getfile&hash=' . $f_row->sha256 . '">Download</a></button>
 			</p>
 
 			<table class="table">  
@@ -569,11 +569,11 @@ class ServerObject {
 			}
 
 			foreach ($parent_ids as $pid){
-				$full_res = $this->sql->query("SELECT md5 FROM $table WHERE id = " . $pid );
+				$full_res = $this->sql->query("SELECT sha256 FROM $table WHERE id = " . $pid );
 				if(!$full_res) $this->error_die("Error 23732 (Problem finding parent details for hash.  Please contact admin@malshare.com)");
 				if(!$full_res->num_rows==0){
 					while($s_row = $full_res->fetch_object()) {
-							$output .=  '<tr> <td><a href="sample.php?action=detail&hash=' . $s_row->md5 . '">' . $s_row->md5 . '</a></td> </tr>';
+							$output .=  '<tr> <td><a href="sample.php?action=detail&hash=' . $s_row->sha256 . '">' . $s_row->sha256 . '</a></td> </tr>';
 					}
 					$output .=  '   
 									</tbody>  
@@ -582,7 +582,7 @@ class ServerObject {
 				}
 			}
 		}
-		$full_res = $this->sql->query("SELECT md5 FROM $table WHERE parent_id = " . $row->hash );
+		$full_res = $this->sql->query("SELECT sha256 FROM $table WHERE parent_id = " . $row->hash );
 		if(!$full_res) $this->error_die("Error 23734 (Problem finding child samples.  Please contact admin@malshare.com)");
 		if(!$full_res->num_rows==0){
 			$output .=  '
@@ -595,7 +595,7 @@ class ServerObject {
 							<tbody>
 			';
 			while($s_row = $full_res->fetch_object()) {
-				$output .=  '<tr> <td><a href="sample.php?action=detail&hash=' . $s_row->md5 . '">' . $s_row->md5 . '</a></td> </tr>';
+				$output .=  '<tr> <td><a href="sample.php?action=detail&hash=' . $s_row->sha256 . '">' . $s_row->sha256 . '</a></td> </tr>';
 			}
 			$output .=  '   
 							</tbody>  
@@ -627,27 +627,6 @@ class ServerObject {
 				</table>  
 			';		
 		}	
-/*		$output .=  '
-				<table class="table">  
-					<thead>  
-						<tr>  
-							<th>Strings</th>  
-						</tr>  
-						</thead>  
-						<tbody>
-						<tr><td><pre>
-		';
-
-		$part1 = substr($f_row->md5,0,3);
-		$part2 = substr($f_row->md5,3,3);
-   		$part3 = substr($f_row->md5,6,3);
-		$spath = $root_path."/$part1/$part2/$part3/$f_row->md5";
-
-		$str = shell_exec("/usr/bin/strings -n 6 -a $spath");
-		$output .= htmlspecialchars( $str );
-		$output .= "</pre></td></tr></tbody></table>";
- */
-
 
 		if ($f_row->pending == 1) $output .= "<script>ShowLoading();</script>";
 
@@ -932,7 +911,7 @@ class ServerObject {
 		$table = $this->vars_table_samples;
 		$root_path = $this->vars_samples_root;
 
-		$res = $this->sql->query("SELECT md5 as md5 FROM $table WHERE ( added > ( UNIX_TIMESTAMP() - 86400) ) ");
+		$res = $this->sql->query("SELECT sha256 as sha256 FROM $table WHERE ( added > ( UNIX_TIMESTAMP() - 86400) ) ");
 		if(!$res){
 			http_response_code(500);
 			$output['ERROR'] = array();
@@ -942,7 +921,7 @@ class ServerObject {
 		}
 
 		while($row = $res->fetch_object()) {
-			array_push($output, $this->sample_details_raw($row->md5));
+			array_push($output, $this->sample_details_raw($row->sha256));
 		}
 		
 		return json_encode($output);
@@ -1101,20 +1080,20 @@ class ServerObject {
 
 	public function update_sample_count($hash) {		
 		$table = $this->vars_table_samples;
-		$res = $this->sql->query("UPDATE $table SET counter = counter + 1 WHERE md5 = '$hash' ");
+		$res = $this->sql->query("UPDATE $table SET counter = counter + 1 WHERE sha256 = '$hash' ");
 		if(!$res) $this->error_die("Error 432201 (Please report to admin@malshare.com)");		
 	}		
 	
 	public function mark_processing($hash) {		
 		$table = $this->vars_table_samples;
-		$res = $this->sql->query("UPDATE $table SET processed = 1 WHERE md5 = '$hash' ");
+		$res = $this->sql->query("UPDATE $table SET processed = 1 WHERE sha256 = '$hash' ");
 		if(!$res) $this->error_die("Error 630001 (Please report to admin@malshare.com)");		
 	}	
 	
 	public function get_next_unprocessed() {
 		$table = $this->vars_table_samples;
 		
-		$res = $this->sql->query("SELECT md5 as hash FROM $table where processed = 0 order by added limit 1;");
+		$res = $this->sql->query("SELECT sha256 as hash FROM $table where processed = 0 order by added limit 1;");
 		if(!$res) $this->error_die("Error 630002 (Please report to admin@malshare.com)");
 		if($res->num_rows==0) $this->error_die("Error 63003 No samples waiting processing.");
 		
@@ -1207,29 +1186,29 @@ class ServerObject {
 
 		$orig_name = $this->secure( $up_sample['name'] );
 
-		$src_sql_query = "INSERT INTO $table_uploads (name, md5, source, ts ) VALUES ( '$orig_name', '$smp_md5', '$source_ip', UNIX_TIMESTAMP() )";
+		$src_sql_query = "INSERT INTO $table_uploads (name, sha256, source, ts ) VALUES ( '$orig_name', '$smp_sha256', '$source_ip', UNIX_TIMESTAMP() )";
 		$res = $this->sql->query($src_sql_query);
 		$this->sql->commit();
 
-                $part1 = substr($smp_md5,0,3);
-                $part2 = substr($smp_md5,3,3);
-                $part3 = substr($smp_md5,6,3);
+                $part1 = substr($smp_sha256,0,3);
+                $part2 = substr($smp_sha256,3,3);
+                $part3 = substr($smp_sha256,6,3);
 
-                $new_path = $root_path . "/$part1/$part2/$part3/$smp_md5";
+                $new_path = $root_path . "/$part1/$part2/$part3/$smp_sha256";
                 $dir_path = $root_path . "/$part1/$part2/$part3/";
 
-		$res = $this->sql->query("SELECT md5 as hash FROM $table where md5 = '$smp_md5' limit 1;");
+		$res = $this->sql->query("SELECT sha256 as hash FROM $table where sha256 = '$smp_sha256' limit 1;");
 		if(!$res) $this->error_die("Error 139910 (Problem saving sample. Please report to admin@malshare.com)" );
 		if($res->num_rows>0) {
-			if (! is_file($root_path . "/$part1/$part2/$part3/$smp_md5") ) {
+			if (! is_file($root_path . "/$part1/$part2/$part3/$smp_sha256") ) {
 		                if (is_dir($dir_path) != true) mkdir($dir_path, 0777, true);
 
 				move_uploaded_file($upload_path, $new_path);
 	                        unlink($upload_path);
-				return " - " . $smp_md5;
+				return " - " . $smp_sha256;
 			}
 			unlink($upload_path);
-			return $smp_md5;
+			return $smp_sha256;
 		}
 
 		if (is_dir($dir_path) != true) mkdir($dir_path, 0777, true);
@@ -1241,14 +1220,14 @@ class ServerObject {
 
 		}
 
-		$sql_query = "INSERT INTO $table (md5, sha1, sha256, added, counter, pending,ftype) VALUES ( '$smp_md5', '$smp_sha1', '$smp_sha256', UNIX_TIMESTAMP(), 0, 1, '-')";
+		$sql_query = "INSERT INTO $table (md5, sha1, sha256, added, counter, pending,ftype) VALUES ( '$smp_sha256', '$smp_sha1', '$smp_sha256', UNIX_TIMESTAMP(), 0, 1, '-')";
 		$res = $this->sql->query($sql_query);
 		if(!$res) {
 				unlink($upload_path);
 				$this->error_die("Error 139999 (Upload failed. Please report to admin@malshare.com)");
 		}
 
-		return $smp_md5;
+		return $smp_sha256;
 	}
 
     public function task_url_download($user_id, $durl, $recursive)

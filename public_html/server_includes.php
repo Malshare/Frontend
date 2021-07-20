@@ -199,11 +199,18 @@ class ServerObject {
 		
 		if(!$res) $this->error_die("Error 13513 (Unable to get recent samples. Please contact admin@malshare.com)");
 
-		$output =  '<table class="table table-bordered table-striped" style="table-layout: fixed;"><thead>  <tr>  <th style="width: 20%">MD5 Hash</th>  <th style="width: 5%">File type</th>  <th style="width: 10%">Added</th>  <th style="width: 20%">Source</th>  <th style="width: 45%">Yara Hits</th></tr>  </thead>  <tbody>';	
+		$output =  '<table class="table table-bordered table-striped" style="table-layout: fixed;">
+		<thead>  <tr>  
+		<th style="width: 17%;">SHA256 Hash</th>  
+		<th style="width: 5%">File type</th>  
+		<th style="width: 13%">Added</th>  
+		<th style="width: 25%">Source</th>  
+		<th style="width: 40%">Yara Hits</th>
+		</tr>  </thead>  <tbody>';	
 		
 		while($s_row = $res->fetch_object()) {	
 			$limit++;
-			$tQuery = "SELECT $table.md5 as md5, $table.added as added, $table.ftype as ftype, $table.yara as yara, CONCAT( IF( $table_sources.source IS NULL, '', $table_sources.source), IF( ($table_sources.source IS NOT NULL AND $table_sample_partners.display_name IS NOT NULL), ' | ', ''), IF( $table_sample_partners.display_name IS NULL, '', $table_sample_partners.display_name) ) as source FROM $table LEFT JOIN $table_sources ON $table.id = $table_sources.id LEFT JOIN $table_sample_partners ON $table_sources.sample_partner_submission = $table_sample_partners.id WHERE $table.id=" . $s_row->id;
+			$tQuery = "SELECT $table.sha256 as sha256, $table.added as added, $table.ftype as ftype, $table.yara as yara, CONCAT( IF( $table_sources.source IS NULL, '', $table_sources.source), IF( ($table_sources.source IS NOT NULL AND $table_sample_partners.display_name IS NOT NULL), ' | ', ''), IF( $table_sample_partners.display_name IS NULL, '', $table_sample_partners.display_name) ) as source FROM $table LEFT JOIN $table_sources ON $table.id = $table_sources.id LEFT JOIN $table_sample_partners ON $table_sources.sample_partner_submission = $table_sample_partners.id WHERE $table.id=" . $s_row->id;
 
 			$r_res = $this->sql->query($tQuery);
 
@@ -222,8 +229,8 @@ class ServerObject {
 				foreach ($jhits->yara as $yh){
 					$counter += 1;
 					if ($counter > 3 && $extend == 0){
-                                                $yhits .= '<a id="c_yara_' . $sample_row->md5 . '" class="none" href="#" onclick="document.getElementById(\'yara_' . $sample_row->md5 . '\').style= \'block\'; document.getElementById(\'c_yara_' . $sample_row->md5 . '\').className = \'hidden\';">[+]</a>';
-                                                $yhits .= '<div id="yara_' . $sample_row->md5 . '" style="display: none;">';
+                                                $yhits .= '<a id="c_yara_' . $sample_row->sha256 . '" class="none" href="#" onclick="document.getElementById(\'yara_' . $sample_row->sha256 . '\').style= \'block\'; document.getElementById(\'c_yara_' . $sample_row->sha256 . '\').className = \'hidden\';">[+]</a>';
+                                                $yhits .= '<div id="yara_' . $sample_row->sha256 . '" style="display: none;">';
 
 
 						$extend = 1;	 
@@ -236,7 +243,7 @@ class ServerObject {
 				}
 			}
 			$output .=  '<tr>  
-					<td class="hash_font"><a href="sample.php?action=detail&hash=' . $sample_row->md5 . '">' . $sample_row->md5 . '</a></td> 
+					<td class="hash_font"><div style = "word-wrap: break-word"><a href="sample.php?action=detail&hash=' . $sample_row->sha256 . '">' . $sample_row->sha256 . '</a></div></td> 
 					<td>' . $sample_row->ftype . '</td> 
 					<td>' .  date("Y-m-d H:i:s", $sample_row->added) . ' UTC</td>';
 
@@ -481,8 +488,7 @@ class ServerObject {
 		$dt = new DateTime("@$f_row->added");
 		
 		$output =  '<br />
-			<p class="lead">Sample details: ' . $f_row->md5 . '  
-			-- <button type"submit"> 
+			<button type"submit"> 
 			<a href="sampleshare.php?action=getfile&hash=' . $f_row->md5 . '">Download</a></button>
 			</p>
 

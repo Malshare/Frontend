@@ -116,6 +116,7 @@ class ServerObject {
 		$this->sql = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_DATABASE);	
 		if(mysqli_connect_errno()) {
 			http_response_code(503);
+//			printf("Connect failed: %s\n", mysqli_connect_error());
 			die("Error 13000 (System Unavailable. Please report to admin@malshare.com)");
 		}		
 	

@@ -1,0 +1,41 @@
+version: '3'
+services:
+  mysql:
+    image: mysql:5.7.35
+    container_name: malshare_db
+    volumes:
+      - ../malshare_db.sql:/docker-entrypoint-initdb.d/dump.sql
+    environment:
+      - MYSQL_ROOT_PASSWORD=this_is_not_the_prod_password
+      - MYSQL_DATABASE=malshare_db
+    ports:
+      - "3306:3306"
+
+  webserver:
+    image: php:7.2-apache
+    links:
+      - "mysql"
+    container_name: malshare_web
+    volumes:
+      - ./testing/samples:/mw/repository/binaries/
+      - ./testing/uploads:/mw/uploads/
+      - ../public_html:/var/www/html/
+    environment:
+      MALSHARE_SAMPLES_ROOT: "/mw/repository/binaries/"
+      MALSHARE_UPLOAD_SAMPLES_ROOT: "/mw/uploads/"
+      MALSHARE_DB_HOST: "malshare_db"
+      MALSHARE_DB_USER: "root"
+      MALSHARE_DB_PASS: "this_is_not_the_prod_password"
+      MALSHARE_DB_DATABASE: malshare_db
+
+      MALSHARE_RECAPTCHA_SECRET: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      MALSHARE_MAILGUN_USERNAME: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      MALSHARE_MAILGUN_PASSWORD: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      MALSHARE_MAILGUN_FROM: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      MALSHARE_MAILGUN_SMTP: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      MALSHARE_MAILGUN_PORT: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+
+    command: "/bin/sh -c 'docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql && exec apache2-foreground'"
+
+    ports:
+      - "80:80"

@@ -32,10 +32,7 @@
 			<?php
 				include("server_includes.php");
 				$share = new ServerObject();
-				echo $share->get_recent();        
-				echo '<div class="container-fluid center text-center">';
-				echo '<h4>Total Samples: ' . $share->get_total() . "</h4></div>";
-
+				echo $share->get_recent();
 			?>
 	</div> 
 

@@ -8,12 +8,6 @@
 /* Modified by Silas Cutler for Malshare.com  */
 /*											  */
 /* ****************************************** */
-/* Version 1.1 (2018-06-21)			  		  */
-/*	* Started proper change log here		  */
-/*	* Cleaned up errors						  */
-/*											  */
-/*											  */
-/* ****************************************** */
 
 error_reporting(E_ALL & ~E_NOTICE);
 
@@ -205,17 +199,7 @@ class ServerObject {
 		
 		if(!$res) $this->error_die("Error 13513 (Unable to get recent samples. Please contact admin@malshare.com)");
 
-		$output =  '<table class="table table-bordered table-striped" style="table-layout: fixed;">
-				<thead>  
-					<tr>  
-						<th style="width: 25%">MD5 Hash</th>  
-						<th style="width: 10%">File type</th>  
-						<th style="width: 10%">Added</th>  
-						<th style="width: 30%">Source</th>  
-						<th style="width: 25%">Yara Hits</th>
-					</tr>  
-				</thead>  
-				<tbody>';	
+		$output =  '<table class="table table-bordered table-striped" style="table-layout: fixed;"><thead>  <tr>  <th style="width: 20%">MD5 Hash</th>  <th style="width: 5%">File type</th>  <th style="width: 10%">Added</th>  <th style="width: 20%">Source</th>  <th style="width: 45%">Yara Hits</th></tr>  </thead>  <tbody>';	
 		
 		while($s_row = $res->fetch_object()) {	
 			$limit++;
@@ -340,20 +324,7 @@ class ServerObject {
 
 			// Build header / if not API
 			if ($api_query == false ) { 
-				$output =  '<table id="searchres" class="table table-bordered table-striped" style="table-layout: fixed;">
-								<thead>  
-										<tr>  
-												<th style="width: 25%">MD5 Hash</th>  
-												<th style="width: 10%">File type</th>  
-												<th style="width: 10%">Added</th>  
-												<th style="width: 30%">Source</th>  
-												<th style="width: 25%">Yara Hits</th>
-
-	
-											</tr>  
-									</thead>  
-									<tbody>
-				';
+				$output =  '<table id="searchres" class="table table-bordered table-striped" style="table-layout: fixed;"><thead>  <tr>  <th style="width: 20%">MD5 Hash</th>  <th style="width: 5%">File type</th>  <th style="width: 10%">Added</th>  <th style="width: 20%">Source</th>  <th style="width: 45%">Yara Hits</th> </tr>  </thead> <tbody>';
 			}
 			else {
 				header('Content-Type: application/json');

@@ -15,7 +15,7 @@ error_reporting(E_ALL & ~E_NOTICE);
 
 // Paths
 define("SAMPLES_ROOT", getenv('MALSHARE_SAMPLES_ROOT'));
-define("UPLOAD_SAMPLES_ROOT", getenv('UPLOAD_MALSHARE_SAMPLES_ROOT'));
+define("UPLOAD_SAMPLES_ROOT", getenv('MALSHARE_UPLOAD_SAMPLES_ROOT'));
 
 // Tables
 define("SAMPLES_TABLE", "tbl_samples");
@@ -1188,7 +1188,7 @@ class ServerObject {
 	}
 
 	public function upload_sample($up_sample) {
-		$root_path = $this->vars_samples_root;
+		$root_path = $this->vars_dirty_root;
 		$upload_path = $up_sample['tmp_name'];	
 		$table = $this->vars_table_samples;
 		$table_uploads = $this->vars_table_uploads;

@@ -11,7 +11,6 @@ if( (array_key_exists( 'fsample', $_FILES ) && ($_FILES['fsample'])) ){
 		$h_server = new ServerObject();
 		$sub_result = $h_server->upload_sample($_FILES['fsample']);
 		if ( $sub_result == false ){
-//			echo var_dump($_REQUEST);
 			if( $_REQUEST['mode'] == "cli"){
 				die("Probem with Upload");
 			}
@@ -54,7 +53,9 @@ if( (array_key_exists( 'fsample', $_FILES ) && ($_FILES['fsample'])) ){
 
 	<div class="container">
 		<div class="jumbotron">
-			<br /> <br />
+			<div class="alert alert-warning" role="alert">
+				Sample processing is currently disabled.  Samples can still be uploaded, however, results will be delayed.
+			</div>
 			<?php
 				if ($SUCCESS == false){
 					if (strlen($RESULTS) > 1){

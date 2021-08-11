@@ -331,7 +331,14 @@ class ServerObject {
 
 			// Build header / if not API
 			if ($api_query == false ) { 
-				$output =  '<table id="searchres" class="table table-bordered table-striped" style="table-layout: fixed;"><thead>  <tr>  <th style="width: 20%">SHA256 Hash</th>  <th style="width: 5%">File type</th>  <th style="width: 10%">Added</th>  <th style="width: 20%">Source</th>  <th style="width: 45%">Yara Hits</th> </tr>  </thead> <tbody>';
+        $output =  '<table class="table table-bordered table-striped" style="table-layout: fixed;">
+        <thead>  <tr>  
+        <th style="width: 17%;">SHA256 Hash</th>  
+        <th style="width: 5%">File type</th>  
+        <th style="width: 13%">Added</th>  
+        <th style="width: 25%">Source</th>  
+        <th style="width: 40%">Yara Hits</th>
+        </tr>  </thead>  <tbody>'; 
 			}
 			else {
 				header('Content-Type: application/json');
@@ -772,13 +779,13 @@ class ServerObject {
 		$lenght = strlen($hash);
 	
 		if (strlen($hash) == 32){
-			$res = $this->sql->query("SELECT md5 as hash FROM $table WHERE md5 = lower('$hash')");
+			$res = $this->sql->query("SELECT sha256 as hash FROM $table WHERE md5 = lower('$hash')");
 		}
 		else if (strlen($hash) == 40){
-			$res = $this->sql->query("SELECT md5 as hash FROM $table WHERE sha1 = lower('$hash')");
+			$res = $this->sql->query("SELECT sha256 as hash FROM $table WHERE sha1 = lower('$hash')");
 		}
 		else if (strlen($hash) == 64){
-			$res = $this->sql->query("SELECT md5 as hash FROM $table WHERE sha256 = lower('$hash')");
+			$res = $this->sql->query("SELECT sha256 as hash FROM $table WHERE sha256 = lower('$hash')");
 		}
 		else{
 			http_response_code(404);

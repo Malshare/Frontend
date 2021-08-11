@@ -49,7 +49,6 @@ if($share->uri_action=="getfile") {
 	$hash = $share->uri_hash;
 	$sample = $share->get_sample($hash);
 	$share->update_query_limit();
-	$share->update_sample_count($hash);
 	$contents = file_get_contents($sample);
 	$share->send_headers($share->filename);
 	echo $contents;		

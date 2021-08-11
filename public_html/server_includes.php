@@ -15,7 +15,7 @@ error_reporting(E_ALL & ~E_NOTICE);
 
 // Paths
 define("SAMPLES_ROOT", getenv('MALSHARE_SAMPLES_ROOT'));
-define("UPLOAD_SAMPLES_ROOT", getenv('UPLOAD_MALSHARE_SAMPLES_ROOT'));
+define("UPLOAD_SAMPLES_ROOT", getenv('MALSHARE_UPLOAD_SAMPLES_ROOT'));
 
 // Tables
 define("SAMPLES_TABLE", "tbl_samples");
@@ -1082,124 +1082,125 @@ class ServerObject {
         if (!$res) $this->error_die("Error 432104 (Please report to admin@malshare.com)");
     }
 
-    public function update_sample_count($hash) {        
-        $table = $this->vars_table_samples;
-        $res = $this->sql->query("UPDATE $table SET counter = counter + 1 WHERE sha256 = '$hash' ");
-        if(!$res) $this->error_die("Error 432201 (Please report to admin@malshare.com)");        
-    }        
-    
-    public function mark_processing($hash) {        
-        $table = $this->vars_table_samples;
-        $res = $this->sql->query("UPDATE $table SET processed = 1 WHERE sha256 = '$hash' ");
-        if(!$res) $this->error_die("Error 630001 (Please report to admin@malshare.com)");        
-    }    
-    
-    public function get_next_unprocessed() {
-        $table = $this->vars_table_samples;
-        
-        $res = $this->sql->query("SELECT sha256 as hash FROM $table where processed = 0 order by added limit 1;");
-        if(!$res) $this->error_die("Error 630002 (Please report to admin@malshare.com)");
-        if($res->num_rows==0) $this->error_die("Error 63003 No samples waiting processing.");
-        
-        $row = $res->fetch_object();
-        
-        return $row->hash;
-    }        
 
-    public function stats_get_types() {
-        $results = array();
+	public function update_sample_count($hash) {		
+		$table = $this->vars_table_samples;
+		$res = $this->sql->query("UPDATE $table SET counter = counter + 1 WHERE md5 = '$hash' ");
+		if(!$res) $this->error_die("Error 432201 (Please report to admin@malshare.com)");		
+	}		
+	
+	public function mark_processing($hash) {		
+		$table = $this->vars_table_samples;
+		$res = $this->sql->query("UPDATE $table SET processed = 1 WHERE md5 = '$hash' ");
+		if(!$res) $this->error_die("Error 630001 (Please report to admin@malshare.com)");		
+	}	
+	
+	public function get_next_unprocessed() {
+		$table = $this->vars_table_samples;
+		
+		$res = $this->sql->query("SELECT md5 as hash FROM $table where processed = 0 order by added limit 1;");
+		if(!$res) $this->error_die("Error 630002 (Please report to admin@malshare.com)");
+		if($res->num_rows==0) $this->error_die("Error 63003 No samples waiting processing.");
+		
+		$row = $res->fetch_object();
+		
+		return $row->hash;
+	}		
 
-        $table = $this->vars_table_samples;
+	public function stats_get_types() {
+		$results = array();
 
-        $res = $this->sql->query("SELECT ftype as ftype, count(id) as fcount from $table WHERE added > (unix_timestamp() - 86400) AND ftype != '-' GROUP BY ftype limit 8");
-        if(!$res) return "Error 132522 (Unable to list file types.  Please report to admin@malshare.com)";
-        if($res->num_rows==0) return "Error 132523 (Unable to list file types.  Please report to admin@malshare.com)";
+		$table = $this->vars_table_samples;
 
-        while($row = $res->fetch_object()) {
-            $results[$row->ftype] = $row->fcount;
-        }
+		$res = $this->sql->query("SELECT ftype as ftype, count(id) as fcount from $table WHERE added > (unix_timestamp() - 86400) AND ftype != '-' GROUP BY ftype limit 8");
+		if(!$res) return "Error 132522 (Unable to list file types.  Please report to admin@malshare.com)";
+		if($res->num_rows==0) return "Error 132523 (Unable to list file types.  Please report to admin@malshare.com)";
 
-        return $results;
-    }
+		while($row = $res->fetch_object()) {
+			$results[$row->ftype] = $row->fcount;
+		}
 
-    public function stats_get_top_rules() {
-        $results = array();
+		return $results;
+	}
 
-        $table = $this->vars_table_samples;
+	public function stats_get_top_rules() {
+		$results = array();
 
-        $res = $this->sql->query("select yara->'$.yara' as rules from $table WHERE added > (unix_timestamp() - 86400) ");
-        if(!$res) return "Error 132621 (Unable to list file types.  Please report to admin@malshare.com)";
-        if($res->num_rows==0) return "Error 132622 (Unable to list file types.  Please report to admin@malshare.com)";
+		$table = $this->vars_table_samples;
 
-        while($row = $res->fetch_object()) {
-            $rules = json_decode($row->rules);
-            foreach($rules as $yhit){
-        //                if ( strpos($yhit, '/contentis'
-            array_push( $results, $yhit);
-            }
-        }
+		$res = $this->sql->query("select yara->'$.yara' as rules from $table WHERE added > (unix_timestamp() - 86400) ");
+		if(!$res) return "Error 132621 (Unable to list file types.  Please report to admin@malshare.com)";
+		if($res->num_rows==0) return "Error 132622 (Unable to list file types.  Please report to admin@malshare.com)";
 
-        $totals = array_count_values($results);
-        arsort( $totals );
-        $totals = array_slice( $totals, 0, 10 );
+		while($row = $res->fetch_object()) {
+			$rules = json_decode($row->rules);
+			foreach($rules as $yhit){
+		//				if ( strpos($yhit, '/contentis'
+			array_push( $results, $yhit);
+			}
+		}
 
-        return $totals;
-    }
+		$totals = array_count_values($results);
+		arsort( $totals );
+		$totals = array_slice( $totals, 0, 10 );
 
-    public function get_recent_searches() {
-        $results = array();
+		return $totals;
+	}
 
-        $table = $this->vars_table_pub_searches;
+	public function get_recent_searches() {
+		$results = array();
 
-        $res = $this->sql->query("SELECT query from $table  ORDER BY ts DESC limit 10");
-        if(!$res) return $results;
-        if($res->num_rows==0) return $results;
+		$table = $this->vars_table_pub_searches;
 
-        while($row = $res->fetch_object()) {
-            array_push( $results, $row->query);
-        }
-        return $results;
-    }
+		$res = $this->sql->query("SELECT query from $table  ORDER BY ts DESC limit 10");
+		if(!$res) return $results;
+		if($res->num_rows==0) return $results;
 
-    public function get_samples_count_date() {
-        $results = array();
+		while($row = $res->fetch_object()) {
+			array_push( $results, $row->query);
+		}
+		return $results;
+	}
 
-        $table = $this->vars_table_samples;
+	public function get_samples_count_date() {
+		$results = array();
 
-        $res = $this->sql->query("SELECT FROM_UNIXTIME(added, \"%Y-%m-%d\") AS date, COUNT(*) AS sampleCount FROM $table WHERE ( added > ( unix_timestamp(now()) - 604800  ) )  GROUP BY FROM_UNIXTIME(added, \"%Y-%m-%d\") ORDER BY sampleCount DESC;");
-        if(!$res) return $results;
-        if($res->num_rows==0) return $results;
+		$table = $this->vars_table_samples;
 
-        while($row = $res->fetch_object()) {
-            array_push( $results,  array( $row->date, $row->sampleCount));
-        }
-        return $results;
-    }
+		$res = $this->sql->query("SELECT FROM_UNIXTIME(added, \"%Y-%m-%d\") AS date, COUNT(*) AS sampleCount FROM $table WHERE ( added > ( unix_timestamp(now()) - 604800  ) )  GROUP BY FROM_UNIXTIME(added, \"%Y-%m-%d\") ORDER BY sampleCount DESC;");
+		if(!$res) return $results;
+		if($res->num_rows==0) return $results;
 
-    public function upload_sample($up_sample) {
-        $root_path = $this->vars_samples_root;
-        $upload_path = $up_sample['tmp_name'];    
-        $table = $this->vars_table_samples;
-        $table_uploads = $this->vars_table_uploads;
+		while($row = $res->fetch_object()) {
+			array_push( $results,  array( $row->date, $row->sampleCount));
+		}
+		return $results;
+	}
 
-        $smp_md5 = $this->secure(strtolower(hash_file("md5", "$upload_path")));
-        $smp_sha1 = $this->secure(strtolower(hash_file("sha1", "$upload_path")));
-        $smp_sha256 = $this->secure(strtolower(hash_file("sha256", "$upload_path")));
+	public function upload_sample($up_sample) {
+		$root_path = $this->vars_dirty_root;
+		$upload_path = $up_sample['tmp_name'];	
+		$table = $this->vars_table_samples;
+		$table_uploads = $this->vars_table_uploads;
 
-        $source_ip = $this->secure($_SERVER['REMOTE_ADDR']);
+		$smp_md5 = $this->secure(strtolower(hash_file("md5", "$upload_path")));
+		$smp_sha1 = $this->secure(strtolower(hash_file("sha1", "$upload_path")));
+		$smp_sha256 = $this->secure(strtolower(hash_file("sha256", "$upload_path")));
 
-        $orig_name = $this->secure( $up_sample['name'] );
+		$source_ip = $this->secure($_SERVER['REMOTE_ADDR']);
 
-        $src_sql_query = "INSERT INTO $table_uploads (name, sha256, source, ts ) VALUES ( '$orig_name', '$smp_sha256', '$source_ip', UNIX_TIMESTAMP() )";
-        $res = $this->sql->query($src_sql_query);
-        $this->sql->commit();
+		$orig_name = $this->secure( $up_sample['name'] );
 
-                $part1 = substr($smp_sha256,0,3);
-                $part2 = substr($smp_sha256,3,3);
-                $part3 = substr($smp_sha256,6,3);
+		$src_sql_query = "INSERT INTO $table_uploads (name, md5, source, ts ) VALUES ( '$orig_name', '$smp_md5', '$source_ip', UNIX_TIMESTAMP() )";
+		$res = $this->sql->query($src_sql_query);
+		$this->sql->commit();
 
-                $new_path = $root_path . "/$part1/$part2/$part3/$smp_sha256";
-                $dir_path = $root_path . "/$part1/$part2/$part3/";
+    $part1 = substr($smp_sha256,0,3);
+    $part2 = substr($smp_sha256,3,3);
+    $part3 = substr($smp_sha256,6,3);
+
+    $new_path = $root_path . "/$part1/$part2/$part3/$smp_sha256";
+    $dir_path = $root_path . "/$part1/$part2/$part3/";
 
         $res = $this->sql->query("SELECT sha256 as hash FROM $table where sha256 = '$smp_sha256' limit 1;");
         if(!$res) $this->error_die("Error 139910 (Problem saving sample. Please report to admin@malshare.com)" );

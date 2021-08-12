@@ -1178,7 +1178,7 @@ class ServerObject {
 	}
 
 	public function upload_sample($up_sample) {
-		$root_path = $this->vars_dirty_root;
+		$root_path = $this->vars_samples_root;
 		$upload_path = $up_sample['tmp_name'];	
 		$table = $this->vars_table_samples;
 		$table_uploads = $this->vars_table_uploads;
@@ -1195,21 +1195,25 @@ class ServerObject {
 		$res = $this->sql->query($src_sql_query);
 		$this->sql->commit();
 
-    $part1 = substr($smp_sha256,0,3);
-    $part2 = substr($smp_sha256,3,3);
-    $part3 = substr($smp_sha256,6,3);
+        $part1 = substr($smp_sha256,0,3);
+        $part2 = substr($smp_sha256,3,3);
+        $part3 = substr($smp_sha256,6,3);
 
-    $new_path = $root_path . "/$part1/$part2/$part3/$smp_sha256";
-    $dir_path = $root_path . "/$part1/$part2/$part3/";
+        $new_path = $root_path . "/$part1/$part2/$part3/$smp_sha256";
+        $dir_path = $root_path . "/$part1/$part2/$part3/";
 
         $res = $this->sql->query("SELECT sha256 as hash FROM $table where sha256 = '$smp_sha256' limit 1;");
         if(!$res) $this->error_die("Error 139910 (Problem saving sample. Please report to admin@malshare.com)" );
         if($res->num_rows>0) {
             if (! is_file($root_path . "/$part1/$part2/$part3/$smp_sha256") ) {
-                        if (is_dir($dir_path) != true) mkdir($dir_path, 0777, true);
+                if (is_dir($dir_path) != true) mkdir($dir_path, 0777, true);
 
                 move_uploaded_file($upload_path, $new_path);
-                            unlink($upload_path);
+                
+                if (file_exists($upload_path) == true){
+                    unlink($upload_path);
+                }
+
                 return " - " . $smp_sha256;
             }
             unlink($upload_path);
@@ -1217,7 +1221,7 @@ class ServerObject {
         }
 
         if (is_dir($dir_path) != true) mkdir($dir_path, 0777, true);
-        move_uploaded_file($upload_path, $new_path);
+            move_uploaded_file($upload_path, $new_path);
         
         if (file_exists($new_path) != true){
             unlink($upload_path); 

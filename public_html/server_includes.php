@@ -462,7 +462,6 @@ class ServerObject
         $hash = preg_replace("/[^a-zA-Z0-9]+/", "", $r_hash);
 
         $table = $this->vars_table_samples;
-        $root_path = $this->vars_samples_root;
         $table_sources = $this->vars_table_sources;
         $table_sample_partners = $this->vars_table_sample_partners;
 
@@ -776,7 +775,6 @@ class ServerObject
 
         $table = $this->vars_table_samples;
         $root_path = $this->vars_samples_root;
-        $lenght = strlen($hash);
 
         if (strlen($hash) == 32) {
             $res = $this->sql->query("SELECT sha256 as hash FROM $table WHERE md5 = lower('$hash')");
@@ -827,7 +825,6 @@ class ServerObject
         $output = array();
 
         $table = $this->vars_table_samples;
-        $root_path = $this->vars_samples_root;
 
         $res = $this->sql->query("SELECT md5 as md5, sha1 as sha1, sha256 as sha256 FROM $table WHERE ( added > ( UNIX_TIMESTAMP() - 86400) ) ");
         if (! $res) {
@@ -848,7 +845,6 @@ class ServerObject
     public function get_list_raw()
     {
         $table = $this->vars_table_samples;
-        $root_path = $this->vars_samples_root;
 
         $res = $this->sql->query("SELECT md5 as md5, sha1 as sha1, sha256 as sha256 FROM $table WHERE ( added > ( UNIX_TIMESTAMP() - 86400) ) ");
         if (! $res) $this->error_die("Error 131311 (Please report to admin@malshare.com)");
@@ -918,7 +914,6 @@ class ServerObject
 
         $output = array();
         $table = $this->vars_table_samples;
-        $root_path = $this->vars_samples_root;
 
         $res = $this->sql->query("SELECT sha256 as sha256 FROM $table WHERE ( added > ( UNIX_TIMESTAMP() - 86400) ) ");
         if (! $res) {
@@ -943,7 +938,6 @@ class ServerObject
         $results = array();
 
         $table = $this->vars_table_samples;
-        $root_path = $this->vars_samples_root;
 
         $r_type = $this->uri_type;
 

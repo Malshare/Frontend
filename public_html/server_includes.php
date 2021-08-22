@@ -769,13 +769,19 @@ class ServerObject
         return $ret;
     }
 
+    private function sample_path($hash)
+    {
+        $part1 = substr($hash, 0, 3);
+        $part2 = substr($hash, 3, 3);
+        $part3 = substr($hash, 6, 3);
+        return $this->vars_samples_root . "/$part1/$part2/$part3/$hash";
+    }
+
     public function get_sample($hash)
     {
         if ($hash == "") $this->error_die("Empty hash specified");
 
         $table = $this->vars_table_samples;
-        $root_path = $this->vars_samples_root;
-
         switch (strlen($hash)) {
             case 32:
                 $searchFieldName = 'md5';
@@ -790,7 +796,7 @@ class ServerObject
                 http_response_code(404);
                 die("Invalid Hash...");
         }
-        $res = $this->sql->query("SELECT sha256 AS hash, md5 AS path_hash FROM $table WHERE " . $searchFieldName . " = lower('$hash')");
+        $res = $this->sql->query("SELECT sha256 AS hash, md5 AS md5 FROM $table WHERE " . $searchFieldName . " = lower('$hash')");
 
         if (! $res) die("Error 13940 (Problem finding sample.  Please contact admin@malshare.com)");
         if ($res->num_rows == 0) {
@@ -798,19 +804,17 @@ class ServerObject
             die("Sample not found by hash ($hash)");
         }
         $row = $res->fetch_object();
-        if ($row->hash == "") {
+        if ($row->hash == "" || $row->md5 == "") {
             http_response_code(404);
             die("Sample not found by hash ($hash)");
         }
-        $part1 = substr($row->hash, 0, 3);
-        $part2 = substr($row->hash, 3, 3);
-        $part3 = substr($row->hash, 6, 3);
-
-        $this->sample = $root_path . "/$part1/$part2/$part3/$row->hash";
-
+        $this->sample = $this->sample_path($row->hash);
         if (! file_exists($this->sample)) {
-            http_response_code(404);
-            die("Error 12412 (Sample Missing.  Please alert admin@malshare.com): " . $this->sample);
+            $this->sample = $this->sample_path($row->md5);
+            if (! file_exists($this->sample)) {
+                http_response_code(404);
+                die("Error 12412 (Sample Missing.  Please alert admin@malshare.com): " . $this->sample);
+            }
         }
 
         return $this->sample;

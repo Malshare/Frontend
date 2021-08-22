@@ -1245,8 +1245,10 @@ class ServerObject
 
         $sql_query = "INSERT INTO $table (md5, sha1, sha256, added, counter, pending,ftype) VALUES ( '$smp_sha256', '$smp_sha1', '$smp_sha256', UNIX_TIMESTAMP(), 0, 1, '-')";
         $res = $this->sql->query($sql_query);
-        if ( !$res) {
-            unlink($upload_path);
+        if (! $res) {
+            if (file_exists($upload_path)) {
+                unlink($upload_path);
+            }
             $this->error_die("Error 139999 (Upload failed. Please report to admin@malshare.com)");
         }
 

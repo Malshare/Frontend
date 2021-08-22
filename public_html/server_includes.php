@@ -776,16 +776,21 @@ class ServerObject
         $table = $this->vars_table_samples;
         $root_path = $this->vars_samples_root;
 
-        if (strlen($hash) == 32) {
-            $res = $this->sql->query("SELECT sha256 as hash FROM $table WHERE md5 = lower('$hash')");
-        } else if (strlen($hash) == 40) {
-            $res = $this->sql->query("SELECT sha256 as hash FROM $table WHERE sha1 = lower('$hash')");
-        } else if (strlen($hash) == 64) {
-            $res = $this->sql->query("SELECT sha256 as hash FROM $table WHERE sha256 = lower('$hash')");
-        } else {
-            http_response_code(404);
-            $this->error_die("Invalid Hash...");
+        switch (strlen($hash)) {
+            case 32:
+                $searchFieldName = 'md5';
+                break;
+            case 40:
+                $searchFieldName = 'sha1';
+                break;
+            case 64:
+                $searchFieldName = 'sha256';
+                break;
+            default:
+                http_response_code(404);
+                die("Invalid Hash...");
         }
+        $res = $this->sql->query("SELECT sha256 AS hash, md5 AS path_hash FROM $table WHERE " . $searchFieldName . " = lower('$hash')");
 
         if (! $res) die("Error 13940 (Problem finding sample.  Please contact admin@malshare.com)");
         if ($res->num_rows == 0) {
@@ -795,17 +800,17 @@ class ServerObject
         $row = $res->fetch_object();
         if ($row->hash == "") {
             http_response_code(404);
-            die("Sample not found by hash ($hash).");
+            die("Sample not found by hash ($hash)");
         }
-        $part1 = substr($row->hash, 0, 3);
-        $part2 = substr($row->hash, 3, 3);
-        $part3 = substr($row->hash, 6, 3);
+        $part1 = substr($row->path_hash, 0, 3);
+        $part2 = substr($row->path_hash, 3, 3);
+        $part3 = substr($row->path_hash, 6, 3);
 
-        $this->sample = $root_path . "/$part1/$part2/$part3/$row->hash";
+        $this->sample = $root_path . "/$part1/$part2/$part3/$row->path_hash";
 
         if (! file_exists($this->sample)) {
             http_response_code(404);
-            die("Error 12412 (Sample Missing.  Please alert admin@malshare.com)");
+            die("Error 12412 (Sample Missing.  Please alert admin@malshare.com): " . $this->sample);
         }
 
         return $this->sample;

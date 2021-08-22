@@ -325,10 +325,12 @@ class ServerObject
             $rhash = trim(explode(":", $searchValue)[1]);
             $res = $this->sql->query("SELECT distinct(id) from $table_sources where source like '%$rhash%' LIMIT 1");
         } else {
-            $res = $this->sql->query("(SELECT id FROM tbl_sample_sources WHERE source like '%$searchValue%' LIMIT 1000)
-                       UNION
-                     (SELECT id from tbl_samples WHERE JSON_SEARCH( lower(yara->'$.yara'), 'all', lower('$searchValue')) IS NOT NULL LIMIT 1000)");
-
+            $searchValueLower = strtolower($searchValue);
+            $res = $this->sql->query("
+                (SELECT id FROM tbl_sample_sources WHERE source LIKE '$searchValueLower%' LIMIT 100)
+                UNION
+                (SELECT id from tbl_samples WHERE JSON_SEARCH( lower(yara->'$.yara'), 'all', '$searchValueLower') IS NOT NULL LIMIT 100)
+            ");
         }
 
         if (! $res) $this->error_die("Error 13843 (System error while searching.  Please contact admin@malshare.com)");

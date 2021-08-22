@@ -802,11 +802,11 @@ class ServerObject
             http_response_code(404);
             die("Sample not found by hash ($hash)");
         }
-        $part1 = substr($row->path_hash, 0, 3);
-        $part2 = substr($row->path_hash, 3, 3);
-        $part3 = substr($row->path_hash, 6, 3);
+        $part1 = substr($row->hash, 0, 3);
+        $part2 = substr($row->hash, 3, 3);
+        $part3 = substr($row->hash, 6, 3);
 
-        $this->sample = $root_path . "/$part1/$part2/$part3/$row->path_hash";
+        $this->sample = $root_path . "/$part1/$part2/$part3/$row->hash";
 
         if (! file_exists($this->sample)) {
             http_response_code(404);

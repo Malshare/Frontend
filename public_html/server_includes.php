@@ -1243,7 +1243,7 @@ class ServerObject
             $this->error_die("Error 139991 (Problem saving sample. Please report to admin@malshare.com)");
         }
 
-        $sql_query = "INSERT INTO $table (md5, sha1, sha256, added, counter, pending,ftype) VALUES ( '$smp_sha256', '$smp_sha1', '$smp_sha256', UNIX_TIMESTAMP(), 0, 1, '-')";
+        $sql_query = "INSERT INTO $table (md5, sha1, sha256, added, counter, pending,ftype) VALUES ( '$smp_md5', '$smp_sha1', '$smp_sha256', UNIX_TIMESTAMP(), 0, 1, '-')";
         $res = $this->sql->query($sql_query);
         if (! $res) {
             if (file_exists($upload_path)) {

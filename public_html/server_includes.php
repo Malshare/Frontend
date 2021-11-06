@@ -305,9 +305,8 @@ class ServerObject
         if (strlen($searchValue) < 3) $this->error_die("Query must by longer then 3 characters");
 
         $src_sql_query = "INSERT INTO $table_searches (query, source, ts, private ) VALUES ( '$searchValue', '$source_ip', UNIX_TIMESTAMP(), '$searchPrivate' )";
-        $res = $this->sql->query($src_sql_query);
+        $this->sql->query($src_sql_query);
         $this->sql->commit();
-
 
         if (strlen($searchValue) == 32) $res = $this->sql->query("SELECT distinct(id) FROM $table WHERE md5 = lower('$searchValue') LIMIT 1");
         else if (substr($searchValue, 0, 4) == "md5:") {

@@ -334,7 +334,6 @@ class ServerObject
 
         if (! $res) $this->error_die("Error 13843 (System error while searching.  Please contact admin@malshare.com)");
 
-
         // Build header / if not API
         if ($api_query == false) {
             $output = '<table class="table table-bordered table-striped" style="table-layout: fixed;">

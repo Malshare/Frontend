@@ -288,7 +288,7 @@ class ServerObject
 
     private function getRuleIdByName($ruleName)
     {
-        if (! ($stmt = $this->sql->prepare('SELECT id FROM tbl_yara WHERE (rule_name = ?)'))) {
+        if (! ($stmt = $this->sql->prepare('SELECT id FROM tbl_yara WHERE (lower(rule_name) = lower(?))'))) {
             return null;
         }
         $stmt->bind_param('s', $ruleName);

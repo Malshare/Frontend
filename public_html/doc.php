@@ -41,8 +41,11 @@
 			    <td><a href="https://twitter.com/Libranalysis">@Libranalysis</a></td>
 			    <td><a href="https://github.com/ThisIsLibra/MalShareApi">Github.com/ThisIsLibra/MalShareApi</a></td>
 			  </tr>
-				
-
+			  <tr>
+			    <td>Python</td>
+			    <td><a href="https://twitter.com/0xDroogy">@0xDroogy</a></td>
+			    <td><a href="https://github.com/Droogy/Malget">https://github.com/Droogy/Malget</a></td>
+			  </tr>				
 			</table>
 
 

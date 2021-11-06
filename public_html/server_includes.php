@@ -286,6 +286,18 @@ class ServerObject
         return $output;
     }
 
+    private function getRuleIdByName($ruleName)
+    {
+        if (! ($stmt = $this->sql->prepare('SELECT id FROM tbl_yara WHERE (rule_name = ?)'))) {
+            return null;
+        }
+        $stmt->bind_param('s', $ruleName);
+        $stmt->execute();
+        $stmt->bind_result($yaraRuleId);
+        $stmt->fetch();
+        return $yaraRuleId;
+    }
+
     public function sample_search($api_query = false)
     {
         $table = $this->vars_table_samples;
@@ -324,12 +336,19 @@ class ServerObject
             $rhash = trim(explode(":", $searchValue)[1]);
             $res = $this->sql->query("SELECT distinct(id) from $table_sources where source like '%$rhash%' LIMIT 1");
         } else {
-            $searchValueLower = strtolower($searchValue);
-            $res = $this->sql->query("
-                (SELECT id FROM tbl_sample_sources WHERE source LIKE '$searchValueLower%' LIMIT 100)
-                UNION
-                (SELECT id from tbl_samples WHERE JSON_SEARCH( lower(yara->'$.yara'), 'all', '$searchValueLower') IS NOT NULL LIMIT 100)
-            ");
+            if (substr($searchValue, 0, 4) == "yrp/") { // startswith
+                $yaraId = $this->getRuleIdByName(substr($_REQUEST["query"], 4));
+                if (! $yaraId) {
+                    return '<p>YARA rule with this name could not be found</p>';
+                }
+                $sql = 'SELECT s.id FROM tbl_samples s LEFT JOIN tbl_matches m ON (s.id = m.sample_id) WHERE (m.yara_id = ' . $yaraId . ') ORDER BY s.added DESC LIMIT 100';
+                $res = $this->sql->query($sql);
+            } else {
+                $searchValueLower = strtolower($searchValue);
+                $res = $this->sql->query(
+                    "SELECT id FROM tbl_sample_sources WHERE source LIKE '$searchValueLower%' LIMIT 100"
+                );
+            }
         }
 
         if (! $res) $this->error_die("Error 13843 (System error while searching.  Please contact admin@malshare.com)");

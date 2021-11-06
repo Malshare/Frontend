@@ -3,7 +3,7 @@ $SUCCESS = false;
 $RESULTS = "";
 if( (array_key_exists( 'fsample', $_FILES ) && ($_FILES['fsample'])) ){
 	if ($_FILES["fsample"]["size"] > 26214400) {
-		$RESULTS = "File too Large: <i> 10Mb Max</i>";
+		$RESULTS = "File too Large: <i> 25MB Max</i>";
 	}
 	else{
 		include("server_includes.php");

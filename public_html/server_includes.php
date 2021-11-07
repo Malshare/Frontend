@@ -220,7 +220,18 @@ class ServerObject
 
         while ($s_row = $res->fetch_object()) {
             $limit++;
-            $tQuery = "SELECT $table.sha256 as sha256, $table.added as added, $table.ftype as ftype, $table.yara as yara, CONCAT( IF( $table_sources.source IS NULL, '', $table_sources.source), IF( ($table_sources.source IS NOT NULL AND $table_sample_partners.display_name IS NOT NULL), ' | ', ''), IF( $table_sample_partners.display_name IS NULL, '', $table_sample_partners.display_name) ) as source FROM $table LEFT JOIN $table_sources ON $table.id = $table_sources.id LEFT JOIN $table_sample_partners ON $table_sources.sample_partner_submission = $table_sample_partners.id WHERE $table.id=" . $s_row->id;
+            $tQuery = "
+                SELECT 
+                       $table.sha256 AS sha256, 
+                       $table.added AS added, 
+                       $table.ftype AS ftype, 
+                       $table.yara AS yara, 
+                       $table_sources.source AS source,
+                       $table_sample_partners.display_name AS source_display_name
+                FROM $table 
+                    LEFT JOIN $table_sources ON $table.id = $table_sources.id 
+                    LEFT JOIN $table_sample_partners ON $table_sources.sample_partner_submission = $table_sample_partners.id 
+                WHERE $table.id=" . $s_row->id;
 
             $r_res = $this->sql->query($tQuery);
 
@@ -256,9 +267,20 @@ class ServerObject
                     <td>' . $sample_row->ftype . '</td> 
                     <td>' . date("Y-m-d H:i:s", $sample_row->added) . ' UTC</td>';
 
-            if (empty($sample_row->source)) $output .= '<td>User Submission</td> ';
-            else $output .= '<td class="word-wrap: wrap-word">' . $sample_row->source . '</td> ';
-
+            if ($sample_row->source) {
+                if ($sample_row->source_display_name) {
+                    $source = "$sample_row->source | $sample_row->source_display_name";
+                } else {
+                    $source = "$sample_row->source";
+                }
+            } else {
+                if ($sample_row->source_display_name) {
+                    $source = "$sample_row->source_display_name";
+                } else {
+                    $source = "User Submission";
+                }
+            }
+            $output .= '<td class="word-wrap: wrap-word">' . $source . '</td> ';
             $output .= '<td>' . $yhits . '</td></tr>';
 
         }

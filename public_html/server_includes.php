@@ -267,25 +267,29 @@ class ServerObject
                     <td>' . $sample_row->ftype . '</td> 
                     <td>' . date("Y-m-d H:i:s", $sample_row->added) . ' UTC</td>';
 
-            if ($sample_row->source) {
-                if ($sample_row->source_display_name) {
-                    $source = "$sample_row->source | $sample_row->source_display_name";
-                } else {
-                    $source = "$sample_row->source";
-                }
-            } else {
-                if ($sample_row->source_display_name) {
-                    $source = "$sample_row->source_display_name";
-                } else {
-                    $source = "User Submission";
-                }
-            }
-            $output .= '<td class="word-wrap: wrap-word">' . $source . '</td> ';
+            $output .= '<td class="word-wrap: wrap-word">' . $this->sourceForDisplay($sample_row) . '</td> ';
             $output .= '<td>' . $yhits . '</td></tr>';
 
         }
         $output .= '</tbody></table>';
         return $output;
+    }
+
+    public function sourceForDisplay($row, $separator = ' | ')
+    {
+        if ($row->source) {
+            if ($row->source_display_name) {
+                return $row->source . $separator . $row->source_display_name;
+            } else {
+                return $row->source;
+            }
+        } else {
+            if ($row->source_display_name) {
+                return $row->source_display_name;
+            } else {
+                return 'User Submission';
+            }
+        }
     }
 
     public function get_sitemap()
@@ -392,16 +396,29 @@ class ServerObject
         // Fetch data
         $totalHits = 0;
         while ($s_row = $res->fetch_object()) {
-            $r_res = $this->sql->query("SELECT $table.id as id, $table.md5 as md5, $table.sha1 as sha1, $table.sha256 as sha256, $table.added as added, $table.ftype as ftype, $table.yara as yara, CONCAT( IF( $table_sources.source IS NULL, '', $table_sources.source), IF( ($table_sources.source IS NOT NULL AND $table_sample_partners.display_name IS NOT NULL), ' <br />', ''), IF( $table_sample_partners.display_name IS NULL, '', $table_sample_partners.display_name)) as source, $table.parent_id FROM $table LEFT JOIN $table_sources ON $table.id = $table_sources.id LEFT JOIN $table_sample_partners ON $table_sources.sample_partner_submission = $table_sample_partners.id WHERE $table.id=" . $s_row->id);
+            $r_res = $this->sql->query("
+                SELECT 
+                       $table.id AS id, 
+                       $table.md5 AS md5, 
+                       $table.sha1 AS sha1, 
+                       $table.sha256 AS sha256, 
+                       $table.added AS added, 
+                       $table.ftype AS ftype, 
+                       $table.yara AS yara, 
+                       $table_sources.source AS source,
+                       $table_sample_partners.display_name AS display_name_source,
+                       $table.parent_id 
+                FROM $table 
+                    LEFT JOIN $table_sources ON $table.id = $table_sources.id
+                    LEFT JOIN $table_sample_partners ON $table_sources.sample_partner_submission = $table_sample_partners.id 
+                WHERE $table.id=" . $s_row->id);
 
             if (! $r_res) $this->error_die("Error 13842 (Problem fetching search results.  Please contact admin@malshare.com)");
             if ($r_res->num_rows == 0) next();
 
             $sample_row = $r_res->fetch_object();
             $totalHits += 1;
-            if (strlen($sample_row->source) < 1) {
-                $sample_row->source = "User Submission";
-            }
+            $source = $this->sourceForDisplay($sample_row, '<br/>');
 
             // if not an API query, build HTML
             if ($api_query == false) {
@@ -410,8 +427,8 @@ class ServerObject
                     <td>' . $sample_row->ftype . '</td> 
                     <td>' . date("Y-m-d H:i:s", $sample_row->added) . '</td>';
 
-                if (strlen($sample_row->source) > 45) $output .= '<td>' . substr($sample_row->source, 0, 45) . '...</td> ';
-                else $output .= '<td>' . $sample_row->source . '</td> ';
+                if (strlen($source) > 45) $output .= '<td>' . substr($source, 0, 45) . '...</td> ';
+                else $output .= '<td>' . $source . '</td> ';
 
                 $yhits = "";
                 $jhits = json_decode($sample_row->yara);
@@ -445,7 +462,7 @@ class ServerObject
                     'sha256' => $sample_row->sha256,
                     'type' => $sample_row->ftype,
                     'added' => intval($sample_row->added),
-                    'source' => $sample_row->source,
+                    'source' => $source,
                     'yarahits' => json_decode($sample_row->yara),
                     'parentfiles' => array(),
                     'subfiles' => array());
@@ -648,7 +665,14 @@ class ServerObject
             ';
         }
 
-        $full_res = $this->sql->query("SELECT CONCAT( IF( $table_sources.source IS NULL, '', $table_sources.source), IF( ($table_sources.source IS NOT NULL AND $table_sample_partners.display_name IS NOT NULL), ' <br />', ''), IF( $table_sample_partners.display_name IS NULL, '', $table_sample_partners.display_name)) as source from $table_sources LEFT JOIN $table_sample_partners ON $table_sources.sample_partner_submission = $table_sample_partners.id WHERE $table_sources.id = " . $row->hash);
+        $full_res = $this->sql->query("
+            SELECT 
+                $table_sources.source AS source,
+                $table_sample_partners.display_name AS source_display_name
+            FROM $table_sources
+            LEFT JOIN $table_sample_partners ON $table_sources.sample_partner_submission = $table_sample_partners.id 
+            WHERE $table_sources.id = " . $row->hash
+        );
         if (! $full_res) $this->error_die("Error 23735 (Problem finding sources for sample.  Please contact admin@malshare.com)");
         if (! $full_res->num_rows == 0) {
             $output .= '
@@ -663,7 +687,7 @@ class ServerObject
             while ($s_row = $full_res->fetch_object()) {
                 $output .= '
                     <tr>  
-                        <td>' . $s_row->source . '</td> 
+                        <td>' . $this->sourceForDisplay($s_row) . '</td> 
                     </tr>
                 ';
             }

@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.7.27, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.36, for Linux (x86_64)
 --
 -- Host: localhost    Database: malshare_db
 -- ------------------------------------------------------
--- Server version	5.7.27-0ubuntu0.16.04.1
+-- Server version 5.7.36-0ubuntu0.18.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -16,6 +16,25 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `tbl_matches`
+--
+
+DROP TABLE IF EXISTS `tbl_matches`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tbl_matches` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `yara_id` int(11) NOT NULL,
+  `sample_id` int(10) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `yara_id_sample_id_unique_index` (`yara_id`,`sample_id`),
+  KEY `yara_id_idx` (`yara_id`),
+  KEY `sample_id_idx` (`sample_id`),
+  CONSTRAINT `yara_id_FK` FOREIGN KEY (`yara_id`) REFERENCES `tbl_yara` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=9846721 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `tbl_public_searches`
 --
 
@@ -24,7 +43,8 @@ DROP TABLE IF EXISTS `tbl_public_searches`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tbl_public_searches` (
   `query` text,
-  `ts` int(20) DEFAULT NULL
+  `ts` int(20) DEFAULT NULL,
+  KEY `tbl_public_searches_ts_idx` (`ts`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -56,6 +76,8 @@ CREATE TABLE `tbl_sample_sources` (
   `source` text,
   `added` int(20) DEFAULT NULL,
   `sample_partner_submission` int(11) DEFAULT NULL,
+  `primary_id` int(11) NOT NULL,
+  PRIMARY KEY (`primary_id`),
   KEY `id` (`id`),
   KEY `sample_source` (`source`(128)),
   KEY `idx_tbl_sample_sourced_added` (`added`),
@@ -89,12 +111,12 @@ CREATE TABLE `tbl_samples` (
   `filenames` text,
   `parent_id` int(10) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `md5` (`md5`),
   KEY `added` (`added`),
   KEY `sample_id` (`md5`,`sha1`,`sha256`),
-  KEY `idx_tbl_samples_parent_id` (`pending`),
-  KEY `idx_tbl_samples_pending` (`pending`)
-) ENGINE=InnoDB AUTO_INCREMENT=5314031 DEFAULT CHARSET=ascii;
+  KEY `idx_tbl_samples_pending` (`pending`),
+  KEY `idx_tbl_samples_parent_id` (`parent_id`) USING BTREE,
+  KEY `idx_tbl_samples_ftype` (`ftype`)
+) ENGINE=InnoDB AUTO_INCREMENT=6216829 DEFAULT CHARSET=ascii;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -108,7 +130,8 @@ CREATE TABLE `tbl_searches` (
   `query` text,
   `source` varchar(30) DEFAULT NULL,
   `ts` int(20) DEFAULT NULL,
-  `private` int(1) DEFAULT NULL
+  `private` int(1) DEFAULT NULL,
+  KEY `searches_ts_idx` (`ts`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -179,8 +202,9 @@ CREATE TABLE `tbl_url_download_tasks` (
   `finished_at` timestamp NOT NULL DEFAULT '1970-01-01 00:00:01',
   PRIMARY KEY (`id`),
   KEY `tbl_url_download_task_ibfk_1` (`user_id`),
+  KEY `tbl_url_download_task_started_at` (`started_at`),
   CONSTRAINT `tbl_url_download_task_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `tbl_users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5369 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=6164 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -206,17 +230,22 @@ CREATE TABLE `tbl_users` (
   PRIMARY KEY (`id`,`email`),
   UNIQUE KEY `api_key` (`api_key`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=20005 DEFAULT CHARSET=ascii COLLATE=ascii_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=30288 DEFAULT CHARSET=ascii COLLATE=ascii_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+--
+-- Table structure for table `tbl_yara`
+--
+
+DROP TABLE IF EXISTS `tbl_yara`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tbl_yara` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `rule_name` varchar(255) COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `rule_name_UNIQUE` (`rule_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=5646 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 
 INSERT INTO `tbl_users`(`name`, `email`, `api_key`, `approved`, `active`, `r_ip_address`) VALUES ('testuser', 'testuser@localhost.local', 'f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2', 1, 1, '127.0.0.1');
@@ -242,3 +271,18 @@ LOCK TABLES `tbl_searches` WRITE;
 INSERT INTO `tbl_searches` VALUES ('test2','8.8.8.8',1506803436,1),('uploader','8.8.8.8',1506803442,1);
 /*!40000 ALTER TABLE `tbl_searches` ENABLE KEYS */;
 UNLOCK TABLES;
+
+
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2022-01-03 21:12:26
+

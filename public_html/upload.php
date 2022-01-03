@@ -53,9 +53,6 @@ if( (array_key_exists( 'fsample', $_FILES ) && ($_FILES['fsample'])) ){
 
 	<div class="container">
 		<div class="jumbotron">
-			<div class="alert alert-warning" role="alert">
-				Sample processing is currently disabled.  Samples can still be uploaded, however, results will be delayed.
-			</div>
 			<?php
 				if ($SUCCESS == false){
 					if (strlen($RESULTS) > 1){

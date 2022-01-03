@@ -181,6 +181,11 @@ class ServerObject
         http_response_code(500);
         die($string);
     }
+    public function redirect($loc)
+    {
+        http_response_code(302);        
+        header('Location: ' . $loc);        
+    }
 
     public function error_die_with_code($code, $string)
     {
@@ -332,7 +337,6 @@ class ServerObject
         $table_pub_searches = $this->vars_table_pub_searches;
         $table_sample_partners = $this->vars_table_sample_partners;
 
-
         $searchValue = $this->secure($this->uri_query);
         $searchPrivate = 0;
         $source_ip = $this->secure($_SERVER['REMOTE_ADDR']);
@@ -346,19 +350,12 @@ class ServerObject
         $this->sql->query($src_sql_query);
         $this->sql->commit();
 
-        if (strlen($searchValue) == 32) $res = $this->sql->query("SELECT distinct(id) FROM $table WHERE md5 = lower('$searchValue') LIMIT 1");
-        else if (substr($searchValue, 0, 4) == "md5:") {
-            $rhash = trim(explode(":", $searchValue)[1]);
-            $res = $this->sql->query("SELECT distinct(id) FROM $table WHERE md5 = lower('$rhash')");
-        } else if (strlen($searchValue) == 40) $res = $this->sql->query("SELECT distinct(id) FROM $table WHERE sha1 = lower('$searchValue') LIMIT 1");
-        else if (substr($searchValue, 0, 5) == "sha1:") {
-            $rhash = trim(explode(":", $searchValue)[1]);
-            $res = $this->sql->query("SELECT distinct(id) FROM $table WHERE sha1 = lower('$rhash')");
-        } else if (strlen($searchValue) == 64) $res = $this->sql->query("SELECT distinct(id) FROM $table WHERE sha256 = lower('$searchValue') LIMIT 1");
-        else if (substr($searchValue, 0, 7) == "sha256:") {
-            $rhash = trim(explode(":", $searchValue)[1]);
-            $res = $this->sql->query("SELECT distinct(id) FROM $table WHERE sha256 = lower('$rhash') LIMIT 1");
-        } else if (substr($searchValue, 0, 7) == "source:") {
+        # If search by hash, just take users to the sample details page
+        if (strlen($searchValue) == 32) return $this->redirect("sample.php?action=detail&hash=". $searchValue);
+        else if (strlen($searchValue) == 40) return $this->redirect("sample.php?action=detail&hash=". $searchValue);        
+        else if (strlen($searchValue) == 64) return $this->redirect("sample.php?action=detail&hash=". $searchValue);
+        
+        else if (substr($searchValue, 0, 7) == "source:") {
             $rhash = trim(explode(":", $searchValue)[1]);
             $res = $this->sql->query("SELECT distinct(id) from $table_sources where source like '%$rhash%' LIMIT 1");
         } else {

@@ -1,12 +1,12 @@
 <?php
 
 /* ****************************************** */
-/* Norman SampleShare Server Framework          */
-/* Version 1.30                                  */
+/* Norman SampleShare Server Framework        */
+/* Version 1.30                               */
 /* Created by Trygve Brox - Norman ASA - 2010 */
 /* ****************************************** */
 /* Modified by Silas Cutler for Malshare.com  */
-/*                                              */
+/*                                            */
 /* ****************************************** */
 
 error_reporting(E_ALL & ~E_NOTICE);

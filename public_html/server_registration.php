@@ -41,14 +41,14 @@ class ServerObject {
 			die("ERROR! => 2809.  Please report to admin@malshare.com\n");
 		}		
 	
-		$this->email = filter_var(strip_tags($this->secure($_REQUEST["email"])),FILTER_SANITIZE_EMAIL);
+		$this->email = preg_replace("/\s+/", "", filter_var(strip_tags($this->secure($_REQUEST["email"])),FILTER_SANITIZE_EMAIL));
 		$this->name = filter_var(strip_tags($this->secure($_REQUEST["name"])),FILTER_SANITIZE_STRING);
 		$this->api_key = $this->generate_api_key();
 		$this->valid = true;
-		if(! preg_match("/^[A-Za-z0-9\.\-\_\+]*@[A-Za-z0-9\.\-\_]+$/",$_REQUEST["email"])){
+		if(! preg_match("/^[A-Za-z0-9\.\-\_\+]*@[A-Za-z0-9\.\-\_]+$/", $this->email)){
 			echo ('
 			<center>
-				Invalid Email Supplied 
+				Invalid Email Supplied : ' . $this->email .'
 			</center>	
 			');
 			$this->valid = false;

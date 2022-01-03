@@ -876,7 +876,7 @@ class ServerObject
             $this->sample = $this->sample_path($row->md5);
             if (! file_exists($this->sample)) {
                 http_response_code(404);
-                die("Error 12412 (Sample Missing.  Please alert admin@malshare.com): " . $this->sample);
+                die("Error 12412 (Sample Missing.  Please alert admin@malshare.com): " . $this->sample_path($row->hash));
             }
         }
 

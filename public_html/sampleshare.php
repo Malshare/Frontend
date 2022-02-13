@@ -16,7 +16,8 @@ include("server_includes.php");
 $share = new ServerObject();
 if($share->uri_action=="") die();
 
-$user = new UserObject($share->sql,$share->uri_api_key);
+$user = new UserObject($share->sql, $share->uri_api_key);
+print("-----------\n");
 
 if($share->uri_action=="getlist" ) {		
 	$contents = $share->get_list();
@@ -68,7 +69,6 @@ if($share->uri_action=="type") {
         echo $sample;
         die();
 }
-
 
 ?>
 

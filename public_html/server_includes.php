@@ -27,6 +27,10 @@ define("PUBSEARCHES_TABLE", "tbl_public_searches");
 define("URLDLTASKS_TABLE", "tbl_url_download_tasks");
 define("SAMPLE_PARTNER_TABLE", "tbl_sample_partners");
 
+// External API Connections
+define("VT_CONTEXT_KEY", getenv("VT_CONTEXT_KEY"));
+define("VT_CONTEXT_URL", getenv("VT_CONTEXT_URL"));
+
 // DB Connection
 define("DB_HOST", getenv('MALSHARE_DB_HOST'));
 define("DB_USER", getenv('MALSHARE_DB_USER'));
@@ -103,6 +107,9 @@ class ServerObject
     public $vars_table_url_download_tasks;
     public $vars_table_sample_partners;
 
+    public $vt_context_key;
+    public $vt_context_url;
+
     public $upload_data;
 
     public $table;
@@ -152,6 +159,9 @@ class ServerObject
         $this->vars_table_url_download_tasks = URLDLTASKS_TABLE;
         $this->vars_table_sample_partners = SAMPLE_PARTNER_TABLE;
 
+        $this->vt_context_key = VT_CONTEXT_KEY;
+        $this->vt_context_url = VT_CONTEXT_URL;
+
         if (! is_dir($this->vars_samples_root)) {
             http_response_code(503);
             die("Error 12000 (System Unavailable. Please report to admin@malshare.com)");
@@ -192,6 +202,44 @@ class ServerObject
         http_response_code($code);
         die($string);
     }
+
+    public function load_context($hash)
+    {
+        $r_hash = $this->secure($hash);
+        $hash = preg_replace("/[^a-zA-Z0-9]+/", "", $r_hash);
+
+        $vt_key = $this->vt_context_key;
+
+        $options = array(
+            'http' => array(
+                'header'  => "x-apikey: ". $vt_key . "\r\n",
+                'method'  => 'GET',
+            )
+        );
+
+        $url = $this->vt_context_url.$hash;
+        $context  = stream_context_create($options);
+        $result = @file_get_contents($url, false, $context);
+        if ($result === FALSE) {
+            return false;
+        }
+        $vt_widget = json_decode($result);
+        $widget = '  <iframe src="'. $vt_widget->{'data'}->{'url'}. '"
+          width="100%" height="500" allowfullscreen sandbox>
+    <p>
+      <a href="/en-US/docs/Glossary">
+         VT Context:
+      </a>
+    </p>
+  </iframe>';
+
+        return $widget;
+
+
+
+    }
+
+
 
     public function get_total()
     {
@@ -694,6 +742,25 @@ class ServerObject
             ';
         }
 
+// VT Context:
+        $vt_context .= $this->load_context($hash);
+        if ($vt_context != false){
+            $output .= '<table class="table">  
+                                            <thead>  
+                                                    <tr>  
+                                                            <th>VT Context</th>  
+                                                    </tr>  
+                                            </thead>  
+                                            <tbody>
+                        <tr><td>
+            ';
+            
+            $output .= $vt_context;
+            $output .= " </td></tr>
+            </tbody>
+            </table>"; 
+
+        }
         if ($f_row->pending == 1) $output .= "<script>ShowLoading();</script>";
 
         return $output;

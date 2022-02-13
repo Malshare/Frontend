@@ -35,6 +35,9 @@ services:
       MALSHARE_MAILGUN_SMTP: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
       MALSHARE_MAILGUN_PORT: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 
+      VT_CONTEXT_KEY: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      VT_CONTEXT_URL: "https://www.virustotal.com/api/v3/widget/url?mode=standalone&query="
+
     command: "/bin/sh -c 'docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql && exec apache2-foreground'"
 
     ports:

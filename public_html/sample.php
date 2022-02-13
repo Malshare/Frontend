@@ -111,7 +111,7 @@
 
     if ( $getDetails == true ) {
         if($_GET["hash"]!="" && $_GET["action"]=="detail") {
-            echo $share->get_details();        
+            echo $share->get_details();
         }
         else{
             echo '<br /> <center><p class="lead">Please enter request with a hash</p></center>';    

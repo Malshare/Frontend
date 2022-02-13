@@ -76,8 +76,6 @@ CREATE TABLE `tbl_sample_sources` (
   `source` text,
   `added` int(20) DEFAULT NULL,
   `sample_partner_submission` int(11) DEFAULT NULL,
-  `primary_id` int(11) NOT NULL,
-  PRIMARY KEY (`primary_id`),
   KEY `id` (`id`),
   KEY `sample_source` (`source`(128)),
   KEY `idx_tbl_sample_sourced_added` (`added`),

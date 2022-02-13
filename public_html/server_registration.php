@@ -60,13 +60,10 @@ class ServerObject {
 			$this->valid = false;
 			return false;
 		}
-		echo($email_domain);
-		echo(in_array($email_domain, $reject_email_providers));
 		if (in_array($email_domain, $reject_email_providers)){
-			echo("_________");
 			echo ('
 			<center>
-				Temporary Email Providers not permitted : ' . $this->email .'
+				<b>Temporary Email Providers not permitted : ' . $this->email .'</b>
 			</center>	
 			');
 			$this->valid = false;

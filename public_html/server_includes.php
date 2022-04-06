@@ -398,11 +398,13 @@ class ServerObject
         $this->sql->query($src_sql_query);
         $this->sql->commit();
 
-        # If search by hash, just take users to the sample details page
-        if (strlen($searchValue) == 32) return $this->redirect("sample.php?action=detail&hash=". $searchValue);
-        else if (strlen($searchValue) == 40) return $this->redirect("sample.php?action=detail&hash=". $searchValue);        
-        else if (strlen($searchValue) == 64) return $this->redirect("sample.php?action=detail&hash=". $searchValue);
-        
+        if ($api_query == false) {
+            # If search by hash, just take users to the sample details page
+            if (strlen($searchValue) == 32) return $this->redirect("sample.php?action=detail&hash=". $searchValue);
+            else if (strlen($searchValue) == 40) return $this->redirect("sample.php?action=detail&hash=". $searchValue);        
+            else if (strlen($searchValue) == 64) return $this->redirect("sample.php?action=detail&hash=". $searchValue);
+        }
+
         else if (substr($searchValue, 0, 7) == "source:") {
             $rhash = trim(explode(":", $searchValue)[1]);
             $res = $this->sql->query("SELECT distinct(id) from $table_sources where source like '%$rhash%' LIMIT 1");

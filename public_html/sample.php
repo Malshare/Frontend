@@ -3,6 +3,7 @@
     <head>
         <?php include('header.php'); ?>
         <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+        <script src="./js/vt-augment.min.js" async defer></script>
 
     
     <link href="./css/bootstrap.css" rel="stylesheet">

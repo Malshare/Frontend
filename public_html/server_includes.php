@@ -224,8 +224,8 @@ class ServerObject
             return false;
         }
         $vt_widget = json_decode($result);
-        $widget = '  <iframe src="'. $vt_widget->{'data'}->{'url'}. '"
-          width="100%" height="500" allowfullscreen sandbox>
+        $widget = '  <iframe sandbox="allow-same-origin allow-scripts allow-popups allow-forms" src="'. $vt_widget->{'data'}->{'url'}. '"
+          width="100%" height="500" allowfullscreen>
     <p>
       <a href="/en-US/docs/Glossary">
          VT Context:

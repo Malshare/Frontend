@@ -40,7 +40,7 @@ if( (array_key_exists( 'fsample', $_FILES ) && ($_FILES['fsample'])) ){
 
 	<script>
 		function validate(){
-			var size=10000000;
+			var size=26214400;
 			var file_size=document.getElementById('fsample').files[0].size;
 			if(file_size>=size){
 				alert('File too large');

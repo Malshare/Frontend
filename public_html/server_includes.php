@@ -36,6 +36,8 @@ define("DB_HOST", getenv('MALSHARE_DB_HOST'));
 define("DB_USER", getenv('MALSHARE_DB_USER'));
 define("DB_PASS", getenv('MALSHARE_DB_PASS'));
 define("DB_DATABASE", getenv('MALSHARE_DB_DATABASE'));
+define("DB_CA_PATH", getenv('MALSHARE_DB_CERT'));
+define("DB_PORT", getenv('MALSHARE_DB_PORT'));
 
 // Supported Hashing
 define("HASH_SUPPORTED_MD5", "true");
@@ -118,7 +120,17 @@ class ServerObject
     {
         $this->host_ip = $_SERVER['REMOTE_ADDR'];
 
-        $this->sql = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_DATABASE);
+        if (defined('DB_CA_PATH')){
+            $this->sql = mysqli_init();
+            $this->sql->options(MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, true);
+            $this->sql->ssl_set(NULL, NULL, DB_CA_PATH, NULL, NULL);
+            $this->sql->real_connect(DB_HOST, DB_USER, DB_PASS, DB_DATABASE, DB_PORT);          
+        }
+        else{
+            $this->sql = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_DATABASE);   
+        }
+
+
         if (mysqli_connect_errno()) {
             http_response_code(503);
 //            printf("Connect failed: %s\n", mysqli_connect_error());

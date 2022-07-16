@@ -20,7 +20,7 @@
 <li <?php if (stripos($_SERVER['REQUEST_URI'],'search.php') !== false) {echo 'class="active"';} ?>>
     <a href="search.php">Search</a></li>
 <li <?php if (stripos($_SERVER['REQUEST_URI'],'pull.php') !== false) {echo 'class="active"';} ?>>
-    <a href="pull.php">Pull Sample</a></li>
+    <a href="pull.php">Download</a></li>
 
 <?php
 	// If user has stored API key in cookies

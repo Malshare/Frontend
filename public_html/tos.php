@@ -92,7 +92,7 @@
 					<ul class="nav">
 						<li><a href="index.php">Home</a></li>
                                                 <li><a href="search.php">Search</a></li>
-						<li><a href="pull.php">Pull Sample</a></li>
+						<li><a href="pull.php">Download</a></li>
 						<li><a href="register.php">Request API Key</a></li>
 						<li><a href="./daily/">Daily Digest</a></li>
                                                 <li><a href="doc.php">Documentation</a></li>

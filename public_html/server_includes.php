@@ -1401,16 +1401,18 @@ class ServerObject
         return $smp_sha256;
     }
 
-    public function task_url_download($user_id, $durl, $recursive)
+    public function task_url_download($user_id, $durl, $drecursive)
     {
         $table = $this->vars_table_url_download_tasks;
 
-        $url = $this->sql->real_escape_string($durl);
+        $recursive = $this->secure($drecursive);
+        $url = $this->secure($durl);
+        
         # https://stackoverflow.com/questions/21671179/how-to-generate-a-new-guid
         $guid = vsprintf('%s%s-%s-4000-8%.3s-%s%s%s0', str_split(dechex(microtime(true) * 1000) . bin2hex(random_bytes(8)), 4));
 
         if ($recursive != 1) $recursive = 0;
-        $sql_query = "INSERT INTO $table (guid, user_id, url, recursive) VALUES ( '$guid', '$user_id', '$url', $recursive )";
+        $sql_query = "INSERT INTO $table (guid, user_id, url, fetchall) VALUES ( '$guid', '$user_id', '$url', $recursive )";
 
         $res = $this->sql->query($sql_query);
         if (! $res) {

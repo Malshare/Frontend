@@ -65,36 +65,30 @@
 			    <td>List hashes from the past 24 hours</td>
 			    <td>JSON</td>
 			  </tr>
-				<a name="getlistraw"></a>
 			  <tr>
 			    <td class="hash_font">GET</td>
 			    <td class="hash_font">/api.php?api_key=[API_KEY]&amp;action=getlistraw</td>
 			    <td>List hashes from the past 24 hours </td>
 			    <td>Raw Text List</td>
 			  </tr>
-				<a name="getlistraw"></a>
 			  <tr>
 			    <td class="hash_font">GET</td>
 			    <td class="hash_font">/api.php?api_key=[API_KEY]&amp;action=getsources</td>
 			    <td>List of sample sources from the past 24 hours</td>
 			    <td>JSON</td>
 			  </tr>
-				<a name="getsourcesraw"></a>				
 			  <tr>
 			    <td class="hash_font">GET</td>
 			    <td class="hash_font">/api.php?api_key=[API_KEY]&amp;action=getsourcesraw</td>
 			    <td>List of sample sources from the past 24 hours</td>
 			    <td>Raw Text List</td>
 			  </tr>
-				<a name="getfile"></a>
-				<a name="download"></a>
 			  <tr>
 			    <td class="hash_font">GET</td>
 			    <td class="hash_font">/api.php?api_key=[API_KEY]&amp;action=getfile&amp;hash=[HASH]</td>
 			    <td>Download File</td>
 			    <td>Raw data</td>
 			  </tr>
-				<a name="details"></a>
 			  <tr>
 			    <td class="hash_font">GET</td>
 			    <td class="hash_font">/api.php?api_key=[API_KEY]&amp;action=details&amp;hash=[HASH]</td>
@@ -107,44 +101,42 @@
 			    <td>Supply an array of hex-encoded hashes in a POST field named <span class="hash_font">hashes</span>.</td>
 			    <td>JSON</td>
 			  </tr>
-				<a name="list"></a>
 			  <tr>
 			    <td class="hash_font">GET</td>
 			    <td class="hash_font">/api.php?api_key=[API_KEY]&amp;action=type&amp;type=[FILE TYPE] </td>
 			    <td>List MD5/SHA1/SHA256 hashes of a specific type from the past 24 hours</td>
 			    <td>JSON</td>
 			  </tr>
-				<a name="search"></a>
 			  <tr>
 			    <td class="hash_font">GET</td>
 			    <td class="hash_font">/api.php?api_key=[API_KEY]&amp;action=search&amp;query=[SEARCH QUERY] </td>
 			    <td>Search sample hashes, sources and file names</td>
 			    <td>Raw data</td>
 			  </tr>
-				<a name="gettypes"></a>
 			  <tr>
 			    <td class="hash_font">GET</td>
 			    <td class="hash_font">/api.php?api_key=[API_KEY]&amp;action=gettypes</td>
 			    <td>Get list of file types & count from the past 24 hours</td>
 			    <td>JSON</td>
 			  </tr>  
-				<a name="upload"></a>
 			  <tr>
 			    <td class="hash_font">POST</td>
 			    <td class="hash_font">/api.php?api_key=[API_KEY]&amp;action=upload </td>
 			    <td>Upload using FormData field "upload".  Uploading files temporarily increases a users quota.</td>
 			    <td></td>
-			  </tr>
-			<a name="getlimit"></a> 
-				
+			  </tr>		
+			  <tr>
+			    <td class="hash_font">GET</td>
+			    <td class="hash_font">/api.php?api_key=[API_KEY]&amp;action=getfilenames </td>
+			    <td>Returns a list of file names from uploads in the past day</td>
+			    <td></td>
+			  </tr>					  		
 			  <tr>
 			    <td class="hash_font">GET</td>
 			    <td class="hash_font">/api.php?api_key=[API_KEY]&amp;action=getlimit </td>
 			    <td>GET allocated number of API key requests per day and remaining</td>
 			    <td>Raw data</td>
-			  </tr>
-			<a name="download_url"></a> 
-				
+			  </tr>				
 			  <tr>
 			    <td class="hash_font">POST</td>
 			    <td class="hash_font">/api.php?api_key=[API_KEY]&amp;action=download_url </td>

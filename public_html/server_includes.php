@@ -1132,6 +1132,29 @@ class ServerObject
         return json_encode($output, JSON_UNESCAPED_SLASHES);
     }
 
+    public function get_filenames()
+    {
+        header('Content-Type: application/json');
+
+        $output = array();
+        $table = $this->vars_table_uploads;
+
+        $res = $this->sql->query("SELECT distinct name as name FROM $table WHERE ( ts > ( UNIX_TIMESTAMP()-86400) and ts is not NULL ) ");
+        if (! $res) {
+            http_response_code(500);
+            $output['ERROR'] = array();
+            $output['ERROR']["CODE"] = 138043;
+            $output['ERROR']["MESSAGE"] = "Problem pulling sources for the past day.  Please report to admin@malshare.com";
+            return json_encode($output, JSON_UNESCAPED_SLASHES);
+        }
+
+        while ($row = $res->fetch_object()) {
+            array_push($output, $row->name);
+        }
+
+        return json_encode($output, JSON_UNESCAPED_SLASHES);
+    }
+
     public function get_sources()
     {
         header('Content-Type: application/json');

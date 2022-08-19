@@ -124,10 +124,10 @@ class ServerObject
             $this->sql = mysqli_init();
             $this->sql->options(MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, true);
             $this->sql->ssl_set(NULL, NULL, DB_CA_PATH, NULL, NULL);
-            $this->sql->real_connect(DB_HOST, DB_USER, DB_PASS, DB_DATABASE, DB_PORT);          
+            $this->sql->real_connect(DB_HOST, DB_USER, DB_PASS, DB_DATABASE, DB_PORT);
         }
         else{
-            $this->sql = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_DATABASE);   
+            $this->sql = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_DATABASE);
         }
 
 
@@ -205,8 +205,8 @@ class ServerObject
     }
     public function redirect($loc)
     {
-        http_response_code(302);        
-        header('Location: ' . $loc);        
+        http_response_code(302);
+        header('Location: ' . $loc);
     }
 
     public function error_die_with_code($code, $string)
@@ -275,27 +275,27 @@ class ServerObject
         if (! $res) $this->error_die("Error 13513 (Unable to get recent samples. Please contact admin@malshare.com)");
 
         $output = '<table class="table table-bordered table-striped" style="table-layout: fixed;">
-        <thead>  <tr>  
-        <th style="width: 17%;">SHA256 Hash</th>  
-        <th style="width: 5%">File type</th>  
-        <th style="width: 13%">Added</th>  
-        <th style="width: 25%">Source</th>  
+        <thead>  <tr>
+        <th style="width: 17%;">SHA256 Hash</th>
+        <th style="width: 5%">File type</th>
+        <th style="width: 13%">Added</th>
+        <th style="width: 25%">Source</th>
         <th style="width: 40%">Yara Hits</th>
         </tr>  </thead>  <tbody>';
 
         while ($s_row = $res->fetch_object()) {
             $limit++;
             $tQuery = "
-                SELECT 
-                       $table.sha256 AS sha256, 
-                       $table.added AS added, 
-                       $table.ftype AS ftype, 
-                       $table.yara AS yara, 
+                SELECT
+                       $table.sha256 AS sha256,
+                       $table.added AS added,
+                       $table.ftype AS ftype,
+                       $table.yara AS yara,
                        $table_sources.source AS source,
                        $table_sample_partners.display_name AS source_display_name
-                FROM $table 
-                    LEFT JOIN $table_sources ON $table.id = $table_sources.id 
-                    LEFT JOIN $table_sample_partners ON $table_sources.sample_partner_submission = $table_sample_partners.id 
+                FROM $table
+                    LEFT JOIN $table_sources ON $table.id = $table_sources.id
+                    LEFT JOIN $table_sample_partners ON $table_sources.sample_partner_submission = $table_sample_partners.id
                 WHERE $table.id=" . $s_row->id;
 
             $r_res = $this->sql->query($tQuery);
@@ -327,9 +327,9 @@ class ServerObject
                     $yhits .= "</div>";
                 }
             }
-            $output .= '<tr>  
-                    <td class="hash_font"><div style = "word-wrap: break-word"><a href="sample.php?action=detail&hash=' . $sample_row->sha256 . '">' . $sample_row->sha256 . '</a></div></td> 
-                    <td>' . $sample_row->ftype . '</td> 
+            $output .= '<tr>
+                    <td class="hash_font"><div style = "word-wrap: break-word"><a href="sample.php?action=detail&hash=' . $sample_row->sha256 . '">' . $sample_row->sha256 . '</a></div></td>
+                    <td>' . $sample_row->ftype . '</td>
                     <td>' . date("Y-m-d H:i:s", $sample_row->added) . ' UTC</td>';
 
             $output .= '<td class="word-wrap: wrap-word">' . $this->sourceForDisplay($sample_row) . '</td> ';
@@ -413,7 +413,7 @@ class ServerObject
         if ($api_query == false) {
             # If search by hash, just take users to the sample details page
             if (strlen($searchValue) == 32) return $this->redirect("sample.php?action=detail&hash=". $searchValue);
-            else if (strlen($searchValue) == 40) return $this->redirect("sample.php?action=detail&hash=". $searchValue);        
+            else if (strlen($searchValue) == 40) return $this->redirect("sample.php?action=detail&hash=". $searchValue);
             else if (strlen($searchValue) == 64) return $this->redirect("sample.php?action=detail&hash=". $searchValue);
         }
 
@@ -441,11 +441,11 @@ class ServerObject
         // Build header / if not API
         if ($api_query == false) {
             $output = '<table class="table table-bordered table-striped" style="table-layout: fixed;">
-        <thead>  <tr>  
-        <th style="width: 17%;">SHA256 Hash</th>  
-        <th style="width: 5%">File type</th>  
-        <th style="width: 13%">Added</th>  
-        <th style="width: 25%">Source</th>  
+        <thead>  <tr>
+        <th style="width: 17%;">SHA256 Hash</th>
+        <th style="width: 5%">File type</th>
+        <th style="width: 13%">Added</th>
+        <th style="width: 25%">Source</th>
         <th style="width: 40%">Yara Hits</th>
         </tr>  </thead>  <tbody>';
         } else {
@@ -456,20 +456,20 @@ class ServerObject
         $totalHits = 0;
         while ($s_row = $res->fetch_object()) {
             $r_res = $this->sql->query("
-                SELECT 
-                       $table.id AS id, 
-                       $table.md5 AS md5, 
-                       $table.sha1 AS sha1, 
-                       $table.sha256 AS sha256, 
-                       $table.added AS added, 
-                       $table.ftype AS ftype, 
-                       $table.yara AS yara, 
+                SELECT
+                       $table.id AS id,
+                       $table.md5 AS md5,
+                       $table.sha1 AS sha1,
+                       $table.sha256 AS sha256,
+                       $table.added AS added,
+                       $table.ftype AS ftype,
+                       $table.yara AS yara,
                        $table_sources.source AS source,
                        $table_sample_partners.display_name AS display_name_source,
-                       $table.parent_id 
-                FROM $table 
+                       $table.parent_id
+                FROM $table
                     LEFT JOIN $table_sources ON $table.id = $table_sources.id
-                    LEFT JOIN $table_sample_partners ON $table_sources.sample_partner_submission = $table_sample_partners.id 
+                    LEFT JOIN $table_sample_partners ON $table_sources.sample_partner_submission = $table_sample_partners.id
                 WHERE $table.id=" . $s_row->id);
 
             if (! $r_res) $this->error_die("Error 13842 (Problem fetching search results.  Please contact admin@malshare.com)");
@@ -481,9 +481,9 @@ class ServerObject
 
             // if not an API query, build HTML
             if ($api_query == false) {
-                $output .= '<tr>  
-                    <td class="hash_font"><div style = "word-wrap: break-word"><a href="sample.php?action=detail&hash=' . $sample_row->sha256 . '">' . $sample_row->sha256 . '</a></div></td> 
-                    <td>' . $sample_row->ftype . '</td> 
+                $output .= '<tr>
+                    <td class="hash_font"><div style = "word-wrap: break-word"><a href="sample.php?action=detail&hash=' . $sample_row->sha256 . '">' . $sample_row->sha256 . '</a></div></td>
+                    <td>' . $sample_row->ftype . '</td>
                     <td>' . date("Y-m-d H:i:s", $sample_row->added) . '</td>';
 
                 if (strlen($source) > 45) $output .= '<td>' . substr($source, 0, 45) . '...</td> ';
@@ -579,6 +579,7 @@ class ServerObject
         $table = $this->vars_table_samples;
         $table_sources = $this->vars_table_sources;
         $table_sample_partners = $this->vars_table_sample_partners;
+        $table_uploads = $this->vars_table_uploads;
 
 
         if (strlen($hash) == 32) {
@@ -610,56 +611,43 @@ class ServerObject
         $dt = new DateTime("@$f_row->added");
 
         $output = '<br />
-            <button type"submit"> 
+            <button type"submit">
             <a href="sampleshare.php?action=getfile&hash=' . $f_row->sha256 . '">Download</a></button>
             </p>
 
-            <table class="table">  
-            <thead>  
-              <tr>  
-                <th>Hashes</th>  
+            <table class="table">
+            <thead>
+              <tr>
+                <th>Hashes</th>
 
-              </tr>  
-            </thead>  
-            <tbody>        
-              <tr>  
-                <td class="hash_font"><b>MD5</b>:   ' . $f_row->md5 . '</td> 
               </tr>
-              <tr>   
-                <td class="hash_font"><b>SHA1</b>:   ' . $f_row->sha1 . '</td>    
+            </thead>
+            <tbody>
+              <tr>
+                <td class="hash_font"><b>MD5</b>:   ' . $f_row->md5 . '</td>
               </tr>
-              <tr>   
-                <td class="hash_font"><b>SHA256</b>:   ' . $f_row->sha256 . '</td>    
+              <tr>
+                <td class="hash_font"><b>SHA1</b>:   ' . $f_row->sha1 . '</td>
               </tr>
-              <tr>   
-                <td class="hash_font"><b>SSDEEP</b>:   ' . $f_row->ssdeep . '</td>    
-              </tr>          
-            </tbody>  
-            </table>  
+              <tr>
+                <td class="hash_font"><b>SHA256</b>:   ' . $f_row->sha256 . '</td>
+              </tr>
+              <tr>
+                <td class="hash_font"><b>SSDEEP</b>:   ' . $f_row->ssdeep . '</td>
+              </tr>
+            </tbody>
+            </table>
         ';
-        $output .= '            <table class="table">  
-            <thead>  
-              <tr>  
-                <th>Details</th>  
-
-              </tr>  
-            </thead>  
-            <tbody>         
-              <tr><td><b>File Type:</b>     ' . $f_row->ftype . '</td> </tr>
-              <tr><td><b>Added</b>:    ' . $dt->format('Y-m-d H:i:s') . '</td>  </tr>
-            </tbody>  
-          </table>  
-        ';
-
-        $output .= '<table class="table">  
-                                        <thead>  
-                                                <tr>  
-                                                        <th>Yara Hits</th>  
-                                                </tr>  
-                                        </thead>  
-                                        <tbody>
-                    <tr><td>
-        ';
+        $fname_search = $this->sql->query("SELECT name FROM $table_uploads WHERE md5 = '" . $f_row->md5 . "'");
+        if (! $fname_search) $this->error_die("Error 23428 (Unable to find file names  Please contact admin@malshare.com)");
+        if ($fname_search->num_rows >= 0) {
+            $output .= '<table class="table"><thead><tr><th>Observed File Names</th></tr></thead><tbody>';
+            while ($trow = $fname_search->fetch_object()) {
+                $output .= '<tr><td>' . $trow->name . '</td> </tr>';
+            }
+            $output .= '</tbody></table>';
+        }
+        $output .= '<table class="table"><thead><tr><th>Yara Hits</th></tr></thead><tbody><tr><td>';
         $jhits = json_decode($f_row->yara);
         $counter = 0;
         if (is_array($jhits->yara) || is_object($jhits->yara)) {
@@ -674,12 +662,12 @@ class ServerObject
 
         if ($f_row->parent_id != null and $f_row->parent_id != -1) {
             $output .= '
-                <table class="table">  
-                <thead>  
-                        <tr>  
-                                <th>Parent Files</th>  
-                        </tr>  
-                </thead>  
+                <table class="table">
+                <thead>
+                        <tr>
+                                <th>Parent Files</th>
+                        </tr>
+                </thead>
                 <tbody>
             ';
 
@@ -696,9 +684,9 @@ class ServerObject
                     while ($s_row = $full_res->fetch_object()) {
                         $output .= '<tr> <td><a href="sample.php?action=detail&hash=' . $s_row->sha256 . '">' . $s_row->sha256 . '</a></td> </tr>';
                     }
-                    $output .= '   
-                                    </tbody>  
-                            </table>  
+                    $output .= '
+                                    </tbody>
+                            </table>
                     ';
                 }
             }
@@ -707,76 +695,57 @@ class ServerObject
         if (! $full_res) $this->error_die("Error 23734 (Problem finding child samples.  Please contact admin@malshare.com)");
         if (! $full_res->num_rows == 0) {
             $output .= '
-                    <table class="table">  
-                            <thead>  
-                                    <tr>  
-                                            <th>Sub Files</th>  
-                                    </tr>  
-                            </thead>  
+                    <table class="table">
+                            <thead>
+                                    <tr>
+                                            <th>Sub Files</th>
+                                    </tr>
+                            </thead>
                             <tbody>
             ';
             while ($s_row = $full_res->fetch_object()) {
                 $output .= '<tr> <td><a href="sample.php?action=detail&hash=' . $s_row->sha256 . '">' . $s_row->sha256 . '</a></td> </tr>';
             }
-            $output .= '   
-                            </tbody>  
-                    </table>  
+            $output .= '
+                            </tbody>
+                    </table>
             ';
         }
 
         $full_res = $this->sql->query("
-            SELECT 
+            SELECT
                 $table_sources.source AS source,
                 $table_sample_partners.display_name AS source_display_name
             FROM $table_sources
-            LEFT JOIN $table_sample_partners ON $table_sources.sample_partner_submission = $table_sample_partners.id 
+            LEFT JOIN $table_sample_partners ON $table_sources.sample_partner_submission = $table_sample_partners.id
             WHERE $table_sources.id = " . $row->hash
         );
         if (! $full_res) $this->error_die("Error 23735 (Problem finding sources for sample.  Please contact admin@malshare.com)");
         if (! $full_res->num_rows == 0) {
             $output .= '
-                <table class="table">  
-                    <thead>  
-                        <tr>  
-                            <th>Source</th>  
-                        </tr>  
-                    </thead>  
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Source</th>
+                        </tr>
+                    </thead>
                     <tbody>
                 ';
             while ($s_row = $full_res->fetch_object()) {
-                $output .= '
-                    <tr>  
-                        <td>' . $this->sourceForDisplay($s_row) . '</td> 
-                    </tr>
-                ';
+                $output .= '<tr><td>' . $this->sourceForDisplay($s_row) . '</td></tr>';
             }
-            $output .= '    
-                    </tbody>  
-                </table>  
-            ';
+            $output .= '</tbody></table>';
         }
 
 // VT Context:
         $vt_context .= $this->load_context($hash);
         if ($vt_context != false){
-            $output .= '<table class="table">  
-                                            <thead>  
-                                                    <tr>  
-                                                            <th>VT Context</th>  
-                                                    </tr>  
-                                            </thead>  
-                                            <tbody>
-                        <tr><td>
-            ';
-            
+            $output .= '<table class="table"><thead><tr><th>VT Context</th></tr></thead><tbody><tr><td>';
             $output .= $vt_context;
-            $output .= " </td></tr>
-            </tbody>
-            </table>"; 
+            $output .= " </td></tr></tbody></table>";
 
         }
         if ($f_row->pending == 1) $output .= "<script>ShowLoading();</script>";
-
         return $output;
 
     }
@@ -791,6 +760,7 @@ class ServerObject
 
         $table = $this->vars_table_samples;
         $table_sources = $this->vars_table_sources;
+        $table_uploads = $this->vars_table_uploads;
 
         if (strlen($hash) == 32) {
             $res = $this->sql->query("SELECT id as hash FROM $table WHERE md5 = lower('$hash')");
@@ -858,7 +828,20 @@ class ServerObject
             array_push($t_source, $s_row->source);
         }
 
-        $output['SOURCES'] = $t_source;
+        $name_res = $this->sql->query("SELECT name FROM $table_uploads WHERE md5 = '" . $f_row->md5 . "'");
+        if (! $name_res) {
+            http_response_code(500);
+            $output['ERROR'] = array();
+            $output['ERROR']["CODE"] = 724323;
+            $output['ERROR']["MESSAGE"] = "Problem getting sources for hash.  Please contact admin@malshare.com";
+            return json_encode($output, JSON_UNESCAPED_SLASHES);
+        }
+        $t_names = array();
+        while ($f_row = $name_res->fetch_object()) {
+            array_push($t_names, $f_row->name);
+        }        
+
+        $output['FILENAMES'] = $t_names;
 
         return json_encode($output, JSON_UNESCAPED_SLASHES);
     }
@@ -1430,7 +1413,7 @@ class ServerObject
 
         $recursive = $this->secure($drecursive);
         $url = $this->secure($durl);
-        
+
         # https://stackoverflow.com/questions/21671179/how-to-generate-a-new-guid
         $guid = vsprintf('%s%s-%s-4000-8%.3s-%s%s%s0', str_split(dechex(microtime(true) * 1000) . bin2hex(random_bytes(8)), 4));
 

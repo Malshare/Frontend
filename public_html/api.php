@@ -42,7 +42,6 @@ if($share->uri_action=="getsources" ) {
 if($share->uri_action=="getfilenames" ) {
     $share->update_query_limit();
     $contents = $share->get_filenames();
-
     echo $contents;
     die();
 }

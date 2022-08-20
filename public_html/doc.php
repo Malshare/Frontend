@@ -46,6 +46,11 @@
 			    <td><a href="https://twitter.com/0xDroogy">@0xDroogy</a></td>
 			    <td><a href="https://github.com/Droogy/Malget">https://github.com/Droogy/Malget</a></td>
 			  </tr>				
+                          <tr>
+                            <td>Python</td>
+                            <td><a href="https://github.com/toys0ldier">@toys0ldier</a></td>
+                            <td><a href="https://github.com/toys0ldier/malware_keywords">https://github.com/toys0ldier/malware_keywords</a></td>
+                          </tr>
 			</table>
 
 

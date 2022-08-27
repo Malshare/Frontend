@@ -7,13 +7,6 @@
         <?php include('nav.php') ?>
 
 	<div class="container" style="width:90%">			
-      		<div class="hero-unit"> 
-      			<div class="row">
-        			<div class="span12">
-                        <p>A free Malware repository providing researchers access to samples, malicious feeds, and Yara results.</p>
-        			</div>
-     			</div>
-     		</div>
 		<div class="container-fluid center text-center">
 			<div class="row">
 

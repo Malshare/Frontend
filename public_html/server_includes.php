@@ -69,10 +69,12 @@ class UserObject
         }
         if ($this->active == 0) {
             http_response_code(401);
+            usleep(500000);
             die("Error 14000 (Account not activated)");
         }
         if ($this->approved == 0) {
             http_response_code(401);
+            usleep(500000);
             die("Error 14001 (Account not approved)");
         }
 
@@ -201,6 +203,7 @@ class ServerObject
     public function error_die($string)
     {
         http_response_code(500);
+        usleep(500000);
         die($string);
     }
     public function redirect($loc)
@@ -212,6 +215,7 @@ class ServerObject
     public function error_die_with_code($code, $string)
     {
         http_response_code($code);
+        usleep(500000);
         die($string);
     }
 
@@ -590,12 +594,14 @@ class ServerObject
             $res = $this->sql->query("SELECT id as hash FROM $table WHERE sha256 = lower('$hash')");
         } else {
             http_response_code(404);
+            usleep(500000);            
             die("Invalid Hash.");
         }
         if (! $res) die("Error 13417 (Problem findings sample details.  Please contact admin@malshare.com)");
         if ($res->num_rows == 0) {
+            usleep(500000);            
             http_response_code(404);
-            die("Sample not found with hash ($hash)");
+            die("Sample not found with hash ( $hash )");
         }
 
         $row = $res->fetch_object();
@@ -604,6 +610,7 @@ class ServerObject
         if (! $full_res) $this->error_die("Error 23418 (Unable to find child samples  Please contact admin@malshare.com)");
         if ($full_res->num_rows == 0) {
             http_response_code(404);
+            usleep(500000);            
             die("Error Sample not found by hash ($hash)");
         }
         $f_row = $full_res->fetch_object();
@@ -918,6 +925,7 @@ class ServerObject
                 break;
             default:
                 http_response_code(404);
+                usleep(500000);
                 die("Invalid Hash...");
         }
         $res = $this->sql->query("SELECT sha256 AS hash, md5 AS md5 FROM $table WHERE " . $searchFieldName . " = lower('$hash')");
@@ -925,11 +933,13 @@ class ServerObject
         if (! $res) die("Error 13940 (Problem finding sample.  Please contact admin@malshare.com)");
         if ($res->num_rows == 0) {
             http_response_code(404);
+            usleep(500000);            
             die("Sample not found by hash ($hash)");
         }
         $row = $res->fetch_object();
         if ($row->hash == "" || $row->md5 == "") {
             http_response_code(404);
+            usleep(500000);            
             die("Sample not found by hash ($hash)");
         }
         $this->sample = $this->sample_path($row->hash);
@@ -937,6 +947,7 @@ class ServerObject
             $this->sample = $this->sample_path($row->md5);
             if (! file_exists($this->sample)) {
                 http_response_code(404);
+                usleep(500000);                
                 die("Error 12412 (Sample Missing.  Please alert admin@malshare.com): " . $this->sample_path($row->hash));
             }
         }
@@ -1007,6 +1018,7 @@ class ServerObject
         if (! $res) $this->error_die("Error 139491 (Problem pulling sample record. Please contact admin@malshare.com)");
         if ($res->num_rows == 0) {
             http_response_code(404);
+            usleep(500000);            
             die("Sample not found by hash ($hash)");
         }
         $row = $res->fetch_object();
@@ -1016,6 +1028,7 @@ class ServerObject
         if (! $full_res) $this->error_die("Error 139432 (Problem getting sample details. Please contact admin@malshare.com)");
         if ($full_res->num_rows == 0) {
             http_response_code(404);
+            usleep(500000);            
             die("Sample not found by hash ($hash)");
         }
         $f_row = $full_res->fetch_object();
@@ -1030,6 +1043,7 @@ class ServerObject
         if (! $full_res) $this->error_die("Error 139312 (Problem sample sources. Please contact admin@malshare.com)");
         if ($full_res->num_rows == 0) {
             http_response_code(404);
+            usleep(500000);            
             die("Sample not found by hash ($hash)");
         }
         $t_source = array();

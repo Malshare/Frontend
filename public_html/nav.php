@@ -39,8 +39,6 @@
     <a href="./daily/">Daily Digest</a></li>
 <li <?php if (stripos($_SERVER['REQUEST_URI'],'doc.php') !== false) {echo 'class="active"';} ?>>
     <a href="doc.php">API</a></li>
-<li <?php if (stripos($_SERVER['REQUEST_URI'],'stats.php') !== false) {echo 'class="active"';} ?>>
-    <a href="stats.php">Stats</a></li>
 <li <?php if (stripos($_SERVER['REQUEST_URI'],'about.php') !== false) {echo 'class="active"';} ?>>
     <a href="about.php">About</a></li>
 

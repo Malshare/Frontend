@@ -39,10 +39,17 @@ define("DB_DATABASE", getenv('MALSHARE_DB_DATABASE'));
 define("DB_CA_PATH", getenv('MALSHARE_DB_CERT'));
 define("DB_PORT", getenv('MALSHARE_DB_PORT'));
 
-// Supported Hashing
-define("HASH_SUPPORTED_MD5", "true");
-define("HASH_SUPPORTED_SHA1", "true");
-define("HASH_SUPPORTED_SHA256", "true");
+// Storage Keys
+define("S3_DL_PUB_ACCESS_ID", getenv('MALSHARE_S3_DL_PUB_ACCESS_ID'));
+define("S3_DL_PUB_ACCESS_KEY", getenv('MALSHARE_S3_DL_PUB_ACCESS_KEY'));
+
+define("S3_UL_PUB_ACCESS_ID", getenv('MALSHARE_S3_UL_PUB_ACCESS_ID'));
+define("S3_UL_PUB_ACCESS_KEY", getenv('MALSHARE_S3_UL_PUB_ACCESS_KEY'));
+
+define("S3_URL", getenv('MALSHARE_S3_URL'));
+define("S3_BUCKET", getenv('MALSHARE_S3_BUCKET'));
+
+
 
 class UserObject
 {
@@ -175,6 +182,23 @@ class ServerObject
 
         $this->vt_context_key = VT_CONTEXT_KEY;
         $this->vt_context_url = VT_CONTEXT_URL;
+
+
+        $this->vars_s3_dl_access_id = MALSHARE_S3_DL_PUB_ACCESS_ID;
+        $this->vars_s3_dl_access_key = MALSHARE_S3_DL_PUB_ACCESS_KEY;
+        $this->vars_s3_ul_access_id = MALSHARE_S3_UL_PUB_ACCESS_ID;
+        $this->vars_s3_ul_access_key = MALSHARE_S3_UL_PUB_ACCESS_KEY;
+        $this->vars_s3_url = MALSHARE_S3_URL;
+        $this->vars_s3_bucket = MALSHARE_S3_BUCKET;
+    
+
+
+
+// Storage Keys
+
+
+define("S3_URL", getenv('MALSHARE_S3_URL'));
+define("S3_BUCKET", getenv('MALSHARE_S3_BUCKET'));
 
         if (! is_dir($this->vars_samples_root)) {
             http_response_code(503);

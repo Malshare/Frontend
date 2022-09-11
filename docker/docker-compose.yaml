@@ -1,6 +1,6 @@
 version: '3'
 services:
-  mysql:
+  malshare_db:
     image: mysql:5.7.35
     container_name: malshare_db
     volumes:
@@ -11,10 +11,12 @@ services:
     ports:
       - "3306:3306"
 
-  webserver:
-    image: php:7.2-apache
+  malshare_web:
+    image: php:7.3-apache
     links:
-      - "mysql"
+      - "malshare_db"
+    depends_on:
+      - "malshare_db"
     container_name: malshare_web
     volumes:
       - ./testing/samples:/mw/repository/binaries/
@@ -38,7 +40,16 @@ services:
       VT_CONTEXT_KEY: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
       VT_CONTEXT_URL: "https://www.virustotal.com/api/v3/widget/url?mode=standalone&query="
 
-    command: "/bin/sh -c 'docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql && exec apache2-foreground'"
+      MALSHARE_S3_DL_ACCESS_ID: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      MALSHARE_S3_DL_ACCESS_KEY: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      MALSHARE_S3_UL_ACCESS_ID: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      MALSHARE_S3_UL_ACCESS_KEY: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      MALSHARE_S3_URL: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      MALSHARE_S3_BUCKET: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      MALSHARE_S3_REGION: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+
+
+    command: "/bin/sh -c 'apt update && apt-get install libcurl4-gnutls-dev -y && docker-php-ext-install curl mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql && exec apache2-foreground'"
 
     ports:
       - "80:80"

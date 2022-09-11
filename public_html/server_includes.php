@@ -12,6 +12,13 @@
 error_reporting(E_ALL & ~E_NOTICE);
 
 /* GLOBAL CONFIG VARS */
+include("http_functions.php");
+include("s3.php");
+
+require "vendor/aws.phar";
+
+use Aws\S3\S3Client;
+use Aws\Exception\AwsException;
 
 // Paths
 define("SAMPLES_ROOT", getenv('MALSHARE_SAMPLES_ROOT'));
@@ -40,14 +47,13 @@ define("DB_CA_PATH", getenv('MALSHARE_DB_CERT'));
 define("DB_PORT", getenv('MALSHARE_DB_PORT'));
 
 // Storage Keys
-define("S3_DL_PUB_ACCESS_ID", getenv('MALSHARE_S3_DL_PUB_ACCESS_ID'));
-define("S3_DL_PUB_ACCESS_KEY", getenv('MALSHARE_S3_DL_PUB_ACCESS_KEY'));
-
-define("S3_UL_PUB_ACCESS_ID", getenv('MALSHARE_S3_UL_PUB_ACCESS_ID'));
-define("S3_UL_PUB_ACCESS_KEY", getenv('MALSHARE_S3_UL_PUB_ACCESS_KEY'));
-
+define("S3_DL_ACCESS_ID", getenv('MALSHARE_S3_DL_ACCESS_ID'));
+define("S3_DL_ACCESS_KEY", getenv('MALSHARE_S3_DL_ACCESS_KEY'));
+define("S3_UL_ACCESS_ID", getenv('MALSHARE_S3_UL_ACCESS_ID'));
+define("S3_UL_ACCESS_KEY", getenv('MALSHARE_S3_UL_ACCESS_KEY'));
 define("S3_URL", getenv('MALSHARE_S3_URL'));
 define("S3_BUCKET", getenv('MALSHARE_S3_BUCKET'));
+define("S3_REGION", getenv('MALSHARE_S3_REGION'));
 
 
 
@@ -184,21 +190,14 @@ class ServerObject
         $this->vt_context_url = VT_CONTEXT_URL;
 
 
-        $this->vars_s3_dl_access_id = MALSHARE_S3_DL_PUB_ACCESS_ID;
-        $this->vars_s3_dl_access_key = MALSHARE_S3_DL_PUB_ACCESS_KEY;
-        $this->vars_s3_ul_access_id = MALSHARE_S3_UL_PUB_ACCESS_ID;
-        $this->vars_s3_ul_access_key = MALSHARE_S3_UL_PUB_ACCESS_KEY;
-        $this->vars_s3_url = MALSHARE_S3_URL;
-        $this->vars_s3_bucket = MALSHARE_S3_BUCKET;
+        $this->vars_s3_dl_access_id = S3_DL_ACCESS_ID;
+        $this->vars_s3_dl_access_key = S3_DL_ACCESS_KEY;
+        $this->vars_s3_ul_access_id = S3_UL_ACCESS_ID;
+        $this->vars_s3_ul_access_key = S3_UL_ACCESS_KEY;
+        $this->vars_s3_url = S3_URL;
+        $this->vars_s3_bucket = S3_BUCKET;
+        $this->vars_s3_region = S3_REGION;
     
-
-
-
-// Storage Keys
-
-
-define("S3_URL", getenv('MALSHARE_S3_URL'));
-define("S3_BUCKET", getenv('MALSHARE_S3_BUCKET'));
 
         if (! is_dir($this->vars_samples_root)) {
             http_response_code(503);
@@ -224,24 +223,6 @@ define("S3_BUCKET", getenv('MALSHARE_S3_BUCKET'));
         return $string;
     }
 
-    public function error_die($string)
-    {
-        http_response_code(500);
-        usleep(500000);
-        die($string);
-    }
-    public function redirect($loc)
-    {
-        http_response_code(302);
-        header('Location: ' . $loc);
-    }
-
-    public function error_die_with_code($code, $string)
-    {
-        http_response_code($code);
-        usleep(500000);
-        die($string);
-    }
 
     public function load_context($hash)
     {
@@ -935,6 +916,8 @@ define("S3_BUCKET", getenv('MALSHARE_S3_BUCKET'));
     public function get_sample($hash)
     {
         if ($hash == "") $this->error_die("Empty hash specified");
+        return redirect(getSignedUrl($this->vars_s3_url, $this->vars_s3_dl_access_id, $this->vars_s3_dl_access_key, $this->vars_s3_bucket, $hash));
+
 
         $table = $this->vars_table_samples;
         switch (strlen($hash)) {
@@ -1383,6 +1366,7 @@ define("S3_BUCKET", getenv('MALSHARE_S3_BUCKET'));
 
     public function upload_sample($up_sample)
     {
+
         $root_path = $this->vars_samples_root;
         $upload_path = $up_sample['tmp_name'];
         $table = $this->vars_table_samples;
@@ -1407,6 +1391,7 @@ define("S3_BUCKET", getenv('MALSHARE_S3_BUCKET'));
         $new_path = $root_path . "/$part1/$part2/$part3/$smp_sha256";
         $dir_path = $root_path . "/$part1/$part2/$part3/";
 
+
         $res = $this->sql->query("SELECT sha256 as hash FROM $table where sha256 = '$smp_sha256' limit 1;");
         if (! $res) $this->error_die("Error 139910 (Problem saving sample. Please report to admin@malshare.com)");
         if ($res->num_rows > 0) {
@@ -1425,6 +1410,8 @@ define("S3_BUCKET", getenv('MALSHARE_S3_BUCKET'));
             return $smp_sha256;
         }
 
+        $this->upload_to_sample_s3($smp_sha256, $up_sample);
+
         if (is_dir($dir_path) != true) mkdir($dir_path, 0777, true);
         move_uploaded_file($upload_path, $new_path);
 
@@ -1432,7 +1419,6 @@ define("S3_BUCKET", getenv('MALSHARE_S3_BUCKET'));
             unlink($upload_path);
             $this->error_die("Error 139991 (Problem saving sample. Please report to admin@malshare.com)");
         }
-
         $sql_query = "INSERT INTO $table (md5, sha1, sha256, added, counter, pending,ftype) VALUES ( '$smp_md5', '$smp_sha1', '$smp_sha256', UNIX_TIMESTAMP(), 0, 1, '-')";
         $res = $this->sql->query($sql_query);
         if (! $res) {
@@ -1444,6 +1430,36 @@ define("S3_BUCKET", getenv('MALSHARE_S3_BUCKET'));
 
         return $smp_sha256;
     }
+
+
+    public function upload_to_sample_s3($smp_sha256, $up_sample)
+    {
+        $raw_credentials = array(
+           'credentials' => [
+               'key' => $this->vars_s3_dl_access_id,
+               'secret' => $this->vars_s3_dl_access_key
+           ],
+           'endpoint' => 'https://s3.wasabisys.com', // please refer to service end points for buckets in different regions
+           'region' => 'us-east-1', // please refer to service end points for buckets in different regions
+           'version' => 'latest',
+           'use_path_style_endpoint' => true
+        );
+        $s3 = S3Client::factory($raw_credentials);
+
+
+        try {
+            // put object
+            $result = $s3->putObject([
+                'Bucket' => $this->vars_s3_bucket,
+                'Key' => $smp_sha256,
+                'SourceFile' => $up_sample['tmp_name']]);
+        } catch (S3Exception $e) {
+            echo $e->getMessage() . PHP_EOL;
+        }
+
+    }
+
+
 
     public function task_url_download($user_id, $durl, $drecursive)
     {

@@ -28,23 +28,23 @@
 				} ?>
 				<div class="container"  <?php if ($showDivFlag===false){?>style="display:none"<?php } ?>>
 
-                        	<form method=get action=search.php class="form-signin" id="search_form" onsubmit="ShowLoading()">
-                                	<h2 class="form-signin-heading">Search</h2>
+                	<form method=get action=search.php class="form-signin monocle-enriched" id="search_form" onsubmit="ShowLoading()">
+                	<h2 class="form-signin-heading">Search</h2>
 
 					<div>
-                                	<input type="text" class="input-block-level" name=query placeholder="Search hashes, sources and file names...">
+                    	<input type="text" class="input-block-level" name=query placeholder="Search hashes, sources and file names...">
 					<label class="checkbox"><input type="checkbox" name=private > Private Search</label>
-                                	<button class="btn btn-small btn-primary" type="submit">Submit</button>
+                    	<button class="btn btn-small btn-primary" type="submit">Submit</button>
 					<div class="popup" onclick="myFunction()"> Syntax
 						<span class="popuptext" id="myPopup">
 						Specific Search:<br />>  [md5 | sha1 | sha256 | source]: (query) <br />  Broad:<br />>    (query)
 						</span>
 					</div>
-					</div>
-					<br />
-					<table class="table table-bordered table-striped">
-					<thead> <tr>  <th><h4>Recent Searches</h4></th>  </tr> </thead>
-					<tbody>
+				</div>
+				<br />
+				<table class="table table-bordered table-striped">
+				<thead> <tr>  <th><h4>Recent Searches</h4></th>  </tr> </thead>
+				<tbody>
 
 					<?php
 						$share = new ServerObject();

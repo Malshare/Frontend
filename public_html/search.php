@@ -28,7 +28,7 @@
 				} ?>
 				<div class="container"  <?php if ($showDivFlag===false){?>style="display:none"<?php } ?>>
 
-                	<form method=get action=search.php class="form-signin monocle-enriched" id="search_form" onsubmit="ShowLoading()">
+                	<form method=get action=search.php class="form-signin" id="search_form" onsubmit="ShowLoading()">
                 	<h2 class="form-signin-heading">Search</h2>
 
 					<div>

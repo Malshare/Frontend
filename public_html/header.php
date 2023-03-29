@@ -7,7 +7,6 @@
 	<link href="./css/bootstrap.css" rel="stylesheet">
 	<link href="./css/sticky-footer-navbar.css" rel="stylesheet">
 	<link href="./css/popup.css" rel="stylesheet">
-	<script async src="https://mcl.spur.us/d/mcl.js?tk=bKhT8qwJkzHgleAw50eBkaOkqtEKs6bzvy5KBXL6wPIFFuFFgtWQFidbqpXARySVxOkbazs9F7HdyX2a6gFgyqqHWRKNwkqMJfnPdTT6X5VGo5BZVznrc5WBKv6JjzakaYW8tW0OBtkg8TDT7rAYdlrg3YE3lfreTpFpdkM1uue62kAV1p6zkHssGEaGbwoOqtNaS8JPpCCIaEklsjaWAWdJJBq17hMZZv9cHTKieGiy8cwBUXfVqIR9jDutN4G8uCztJffB7jrgvpMHEreG4bVzvew9tVmP8jKPl1VmtUZ2wT2OzoYI7JfwSSTfmDvGzPYkT4obeeYLAVrnpwheXLob3RtAjXBgbxmNNVSol2mLPoL7UPGVJNBR9QiSyWsAJji" id="_mcl"></script>
 
 	<script>
 

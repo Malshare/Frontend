@@ -95,7 +95,7 @@
      if ($secret == "DISABLED") {
          $getDetails= true;
      } else{
-         if (strlen($_POST["g-recaptcha-response"]) > 5) {
+         if (isset($_POST["g-recaptcha-response"]) && (strlen($_POST["g-recaptcha-response"]) > 5)) {
             $reCaptcha = new ReCaptcha($secret);
 
             $response = $reCaptcha->verifyResponse(

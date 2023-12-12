@@ -1,4 +1,5 @@
 <?php
+require dirname(__FILE__) . '/../vendor/autoload.php';
 
 /* ****************************************** */
 /* Norman SampleShare Server Framework        */
@@ -44,41 +45,66 @@ define("HASH_SUPPORTED_MD5", "true");
 define("HASH_SUPPORTED_SHA1", "true");
 define("HASH_SUPPORTED_SHA256", "true");
 
+// S3 config
+define("WASABI_ENDPOINT", getenv('WASABI_ENDPOINT'));
+define("WASABI_REGION", getenv('WASABI_REGION'));
+define("WASABI_KEY", getenv('WASABI_KEY'));
+define("WASABI_SECRET", getenv('WASABI_SECRET'));
+define("WASABI_BUCKET", getenv('WASABI_BUCKET'));
+
+
 class UserObject
 {
+    public $id;
     public $api_key;
     public $active;
     public $approved;
+    public $recursiveUrlDownloadAllowed;
+    public $ready;
 
-    function __construct($sql, $submitted_api_key, $web = False)
+    function __construct($sql, $submitted_api_key, $web = false)
     {
-        $this->ready = False;
-        $res = $sql->query("SELECT id as id, api_key as api_key, active as active, approved as approved, recursive_url_download_allowed FROM tbl_users WHERE api_key='$submitted_api_key' LIMIT 1");
+        $this->ready = false;
+        $res = $sql->query(
+            "SELECT id as id, api_key as api_key, active as active, approved as approved, recursive_url_download_allowed FROM tbl_users WHERE api_key='$submitted_api_key' LIMIT 1"
+        );
         $row = $res->fetch_object();
-        $this->id = $row->id;
-        $this->api_key = $row->api_key;
-        $this->active = $row->active;
-        $this->approved = $row->approved;
-        $this->recursiveUrlDownloadAllowed = $row->recursive_url_download_allowed;
-        $res->free_result();
+        if ($row === null) {
+            $this->id = null;
+            $this->api_key = null;
+            $this->active = false;
+            $this->approved = null;
+            $this->recursiveUrlDownloadAllowed = null;
+        } else {
+            $this->id = $row->id;
+            $this->api_key = $row->api_key;
+            $this->active = $row->active;
+            $this->approved = $row->approved;
+            $this->recursiveUrlDownloadAllowed = $row->recursive_url_download_allowed;
+            $res->free_result();
 
-        if ($web == True) {
-            if ($this->active == 0) return False;
-            if ($this->approved == 0) return False;
-            $this->ready = True;
-        }
-        if ($this->active == 0) {
-            http_response_code(401);
-            usleep(500000);
-            die("Error 14000 (Account not activated)");
-        }
-        if ($this->approved == 0) {
-            http_response_code(401);
-            usleep(500000);
-            die("Error 14001 (Account not approved)");
-        }
+            if ($web) {
+                if ($this->active == 0) {
+                    return false;
+                }
+                if ($this->approved == 0) {
+                    return false;
+                }
+                $this->ready = true;
+            }
+            if ($this->active == 0) {
+                http_response_code(401);
+                usleep(500000);
+                die("Error 14000 (Account not activated)");
+            }
+            if ($this->approved == 0) {
+                http_response_code(401);
+                usleep(500000);
+                die("Error 14001 (Account not approved)");
+            }
 
-        $this->ready = True;
+            $this->ready = true;
+        }
     }
 
 }
@@ -100,7 +126,6 @@ class ServerObject
 
 
     public $vars_dirty_root;
-    public $vars_samples_root;
 
     // DB Tables
     public $vars_table_sample_sources;
@@ -122,14 +147,13 @@ class ServerObject
     {
         $this->host_ip = $_SERVER['REMOTE_ADDR'];
 
-        if (defined('DB_CA_PATH')){
+        if (defined('DB_CA_PATH')) {
             $this->sql = mysqli_init();
             $this->sql->options(MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, true);
-            $this->sql->ssl_set(NULL, NULL, DB_CA_PATH, NULL, NULL);
+            $this->sql->ssl_set(null, null, DB_CA_PATH, null, null);
             $this->sql->real_connect(DB_HOST, DB_USER, DB_PASS, DB_DATABASE, DB_PORT);
-        }
-        else{
-            $this->sql = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_DATABASE);
+        } else {
+            $this->sql = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_DATABASE);
         }
 
 
@@ -139,28 +163,31 @@ class ServerObject
             die("Error 13000 (System Unavailable. Please report to admin@malshare.com)");
         }
 
-        if ($_COOKIE['mapi_key'] != "") {
+        if (isset($_COOKIE['mapi_key']) && $_COOKIE['mapi_key'] != "") {
             $this->uri_api_key = $this->secure($_COOKIE['mapi_key']);
-        } else {
+        } elseif (isset($_REQUEST["api_key"])) {
             $this->uri_api_key = $this->secure($_REQUEST["api_key"]);
+        } else {
+            $this->uri_api_key = null;
         }
-        $this->uri_action = $this->secure($_REQUEST["action"]);
-        $this->uri_hash = $this->secure(strtolower($_REQUEST["hash"]));
-        $this->uri_query = $this->secure(strtolower($_REQUEST["query"]));
-        $this->uri_private = $this->secure(strtolower($_REQUEST["private"]));
-        $this->uri_type = $this->secure(strtolower($_REQUEST["type"]));
-        $this->uri_path = $this->secure($_REQUEST["path"]);
-        $this->filename = $this->secure(strtolower($_REQUEST["hash"]));
+        $this->uri_action = isset($_REQUEST["action"]) ? $this->secure($_REQUEST["action"]) : null;
+        $this->uri_hash = isset($_REQUEST["hash"]) ? $this->secure(strtolower($_REQUEST["hash"])) : null;
+        $this->uri_query = isset($_REQUEST["query"]) ? $this->secure(strtolower($_REQUEST["query"])) : null;
+        $this->uri_private = isset($_REQUEST["private"]) ? $this->secure(strtolower($_REQUEST["private"])) : null;
+        $this->uri_type = isset($_REQUEST["type"]) ? $this->secure(strtolower($_REQUEST["type"])) : null;
+        $this->uri_path = isset($_REQUEST["path"]) ? $this->secure($_REQUEST["path"]) : null;
+        $this->filename = isset($_REQUEST["hash"]) ? $this->secure(strtolower($_REQUEST["hash"])) : null;
 
-        if (preg_match("/[A-Za-z0-9]/", $_REQUEST["api_key"])) {
-            if (! preg_match("/[A-Za-z0-9]/", $this->uri_api_key)) {
-                http_response_code(400);
-                die("No API Key Supplied");
+        if (isset($_REQUEST["api_key"])) {
+            if (preg_match("/[A-Za-z0-9]/", $_REQUEST["api_key"])) {
+                if (! preg_match("/[A-Za-z0-9]/", $this->uri_api_key)) {
+                    http_response_code(400);
+                    die("No API Key Supplied");
+                }
             }
         }
 
         // Paths
-        $this->vars_samples_root = SAMPLES_ROOT;
         $this->vars_dirty_root = UPLOAD_SAMPLES_ROOT;
 
         // Tables
@@ -175,11 +202,6 @@ class ServerObject
 
         $this->vt_context_key = VT_CONTEXT_KEY;
         $this->vt_context_url = VT_CONTEXT_URL;
-
-        if (! is_dir($this->vars_samples_root)) {
-            http_response_code(503);
-            die("Error 12000 (System Unavailable. Please report to admin@malshare.com)");
-        }
     }
 
     public function login()
@@ -190,13 +212,14 @@ class ServerObject
 
     public function secure($string)
     {
-        if (! $this->sql) die("ERROR");
-        $string = strip_tags($string);
-        if (get_magic_quotes_gpc()) {
-            $string = stripslashes($string);
+        if (! $this->sql) {
+            die("ERROR");
         }
+        $string = strip_tags($string);
+        $string = stripslashes($string);
 
         $string = $this->sql->real_escape_string($string);
+
         return $string;
     }
 
@@ -206,6 +229,7 @@ class ServerObject
         usleep(500000);
         die($string);
     }
+
     public function redirect($loc)
     {
         http_response_code(302);
@@ -745,8 +769,8 @@ class ServerObject
         }
 
 // VT Context:
-        $vt_context .= $this->load_context($hash);
-        if ($vt_context != false){
+        $vt_context = $this->load_context($hash);
+        if ($vt_context != false) {
             $output .= '<table class="table"><thead><tr><th>VT Context</th></tr></thead><tbody><tr><td>';
             $output .= $vt_context;
             $output .= " </td></tr></tbody></table>";
@@ -900,19 +924,21 @@ class ServerObject
         return $ret;
     }
 
-    private function sample_path($hash)
+    private function sample_key($hash)
     {
         $part1 = substr($hash, 0, 3);
         $part2 = substr($hash, 3, 3);
         $part3 = substr($hash, 6, 3);
-        return $this->vars_samples_root . "/$part1/$part2/$part3/$hash";
+
+        return "$part1/$part2/$part3/$hash";
     }
 
-    public function get_sample($hash)
+    public function get_sample_url($hash)
     {
-        if ($hash == "") $this->error_die("Empty hash specified");
+        if ($hash == "") {
+            $this->error_die("Empty hash specified");
+        }
 
-        $table = $this->vars_table_samples;
         switch (strlen($hash)) {
             case 32:
                 $searchFieldName = 'md5';
@@ -928,31 +954,46 @@ class ServerObject
                 usleep(500000);
                 die("Invalid Hash...");
         }
-        $res = $this->sql->query("SELECT sha256 AS hash, md5 AS md5 FROM $table WHERE " . $searchFieldName . " = lower('$hash')");
+        $res = $this->sql->query(
+            "SELECT sha256 AS hash, md5 AS md5 FROM $this->vars_table_samples WHERE " . $searchFieldName . " = lower('$hash')"
+        );
 
-        if (! $res) die("Error 13940 (Problem finding sample.  Please contact admin@malshare.com)");
+        if (! $res) {
+            die("Error 13940 (Problem finding sample.  Please contact admin@malshare.com)");
+        }
         if ($res->num_rows == 0) {
             http_response_code(404);
-            usleep(500000);            
+            usleep(500000);
             die("Sample not found by hash ($hash)");
         }
         $row = $res->fetch_object();
         if ($row->hash == "" || $row->md5 == "") {
             http_response_code(404);
-            usleep(500000);            
+            usleep(500000);
             die("Sample not found by hash ($hash)");
         }
-        $this->sample = $this->sample_path($row->hash);
-        if (! file_exists($this->sample)) {
-            $this->sample = $this->sample_path($row->md5);
-            if (! file_exists($this->sample)) {
-                http_response_code(404);
-                usleep(500000);                
-                die("Error 12412 (Sample Missing.  Please alert admin@malshare.com): " . $this->sample_path($row->hash));
-            }
+        if (! $row->hash) {
+            http_response_code(400);
+            die("No hash specified in `hash` GET variable");
         }
 
-        return $this->sample;
+        $s3Client = new Aws\S3\S3Client([
+            'credentials' => ['key' => WASABI_KEY, 'secret' => WASABI_SECRET],
+            'endpoint' => WASABI_ENDPOINT,
+            'region' => WASABI_REGION,
+            'version' => 'latest',
+            'use_path_style_endpoint' => true,
+        ]);
+        $s3Key = $this->sample_key($row->hash);
+
+        if (! $s3Client->doesObjectExist(WASABI_BUCKET, $s3Key)) {
+            http_response_code(404);
+            die("Error 12413 (Sample Missing. Please alert admin@malshare.com @ " . WASABI_REGION . "): " . WASABI_BUCKET . ' ' . $s3Key);
+        }
+        $cmd = $s3Client->getCommand('GetObject', ['Bucket' => WASABI_BUCKET, 'Key' => $s3Key]);
+        $request = $s3Client->createPresignedRequest($cmd, '+5 minutes');
+
+        return (string)$request->getUri();
     }
 
     public function send_headers($filename)
@@ -1359,6 +1400,7 @@ class ServerObject
 
     public function upload_sample($up_sample)
     {
+        die('Not implemented yet');
         $root_path = $this->vars_samples_root;
         $upload_path = $up_sample['tmp_name'];
         $table = $this->vars_table_samples;
@@ -1384,10 +1426,14 @@ class ServerObject
         $dir_path = $root_path . "/$part1/$part2/$part3/";
 
         $res = $this->sql->query("SELECT sha256 as hash FROM $table where sha256 = '$smp_sha256' limit 1;");
-        if (! $res) $this->error_die("Error 139910 (Problem saving sample. Please report to admin@malshare.com)");
+        if (! $res) {
+            $this->error_die("Error 139910 (Problem saving sample. Please report to admin@malshare.com)");
+        }
         if ($res->num_rows > 0) {
             if (! is_file($root_path . "/$part1/$part2/$part3/$smp_sha256")) {
-                if (is_dir($dir_path) != true) mkdir($dir_path, 0777, true);
+                if (is_dir($dir_path) != true) {
+                    mkdir($dir_path, 0777, true);
+                }
 
                 move_uploaded_file($upload_path, $new_path);
 
@@ -1398,10 +1444,13 @@ class ServerObject
                 return " - " . $smp_sha256;
             }
             unlink($upload_path);
+
             return $smp_sha256;
         }
 
-        if (is_dir($dir_path) != true) mkdir($dir_path, 0777, true);
+        if (is_dir($dir_path) != true) {
+            mkdir($dir_path, 0777, true);
+        }
         move_uploaded_file($upload_path, $new_path);
 
         if (file_exists($new_path) != true) {

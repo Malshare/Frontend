@@ -15,7 +15,7 @@
 <div class="jumbotron">
 			<?php
 				include("server_includes.php");
-				if( ($_POST["query"]!="") or ($_GET["query"] != "") ){
+                if ((isset($_POST["query"]) && ($_POST["query"] != "")) or (isset($_GET["query"]) && ($_GET["query"] != ""))) {
 					$share = new ServerObject();
 
 					$sample = $share->sample_search();

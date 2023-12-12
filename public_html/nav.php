@@ -24,7 +24,7 @@
 
 <?php
 	// If user has stored API key in cookies
-	if ( $_COOKIE['mapi_key'] == '' ) {
+	if (isset($_COOKIE['mapi_key']) && ($_COOKIE['mapi_key'] == '') ) {
 		if (stripos($_SERVER['REQUEST_URI'],'register.php') !== false) {
 			echo '<li class="active">';
 		}
@@ -44,7 +44,7 @@
 
                                 </ul>
 <?php
-	if ( ( $_COOKIE['mapi_key'] == '' )) { echo " <div class=\"nav pull-right\">
+	if ( !isset($_COOKIE['mapi_key']) || ( $_COOKIE['mapi_key'] == '' )) { echo " <div class=\"nav pull-right\">
 			          <form class=\"navbar-form navbar-right\" method=post action=\"auth.php\" >
 				            <input class=\"form-control\" type=\"text\" placeholder=\"API Key\" aria-label=\"login\" name=api_key>
 				            <button class=\"btnbtn-small  btn-success \" type=\"submit\">Login</button>

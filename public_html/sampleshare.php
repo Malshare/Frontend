@@ -47,14 +47,11 @@ if($share->uri_action=="dailysum" ) {
 
 if($share->uri_action=="getfile") {
 	$hash = $share->uri_hash;
-	$sample = $share->get_sample($hash);
+	$sample = $share->get_sample_url($hash);
 	$share->update_query_limit();
-	$contents = file_get_contents($sample);
-	$share->send_headers($share->filename);
-	echo $contents;		
-
-	@unlink($contents);
-	die();
+    $presignedUrl = $share->get_sample_url($share->uri_hash);
+    header('Location: ' . $presignedUrl, true, 302);
+    exit();
 }
 if($share->uri_action=="details") {
         $hash = $share->uri_hash;

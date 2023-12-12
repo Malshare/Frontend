@@ -1,4 +1,5 @@
 <?php
+use Aws\S3\S3Client;
 
 /* ****************************************** */
 /* Norman SampleShare Client Framework	*/
@@ -14,9 +15,20 @@
 include("server_includes.php");
 
 $share = new ServerObject();
-if($share->uri_action=="") die();
+if($share->uri_action=="") {
+    http_response_code(400);
+    die("No command specified in `action` GET variable");
+}
 
+if ($share->uri_api_key === null) {
+    http_response_code(400);
+    die("No key specified in `api_key` GET variable");
+}
 $user = new UserObject($share->sql, $share->uri_api_key);
+if ($user->id === null) {
+    http_response_code(400);
+    die("User specified in `api_key` GET variable does not exist");
+}
 
 if($share->uri_action=="getlist" ) {
 	$res = $share->update_query_limit();
@@ -24,92 +36,76 @@ if($share->uri_action=="getlist" ) {
 	echo $contents;
 	die();
 }
-
-if($share->uri_action=="getlistraw" ) {
+elseif($share->uri_action=="getlistraw" ) {
 	$share->update_query_limit();
 	$contents = $share->get_list_raw();
 	die();
 }
-
-if($share->uri_action=="getsources" ) {
+elseif($share->uri_action=="getsources" ) {
 	$share->update_query_limit();
 	$contents = $share->get_sources();
 
 	echo $contents;
 	die();
 }
-
-if($share->uri_action=="getfilenames" ) {
+elseif($share->uri_action=="getfilenames" ) {
     $share->update_query_limit();
     $contents = $share->get_filenames();
     echo $contents;
     die();
 }
-
-if($share->uri_action=="getsourcesraw" ) {
+elseif($share->uri_action=="getsourcesraw" ) {
 	$share->update_query_limit();
 	$contents = $share->get_sources_raw();
 	die();
 }
-
-if($share->uri_action=="dailysum" ) {
+elseif($share->uri_action=="dailysum" ) {
 	$share->update_query_limit();
 	$contents = $share->get_sum();
 	echo $contents;
 	die();
 }
-if($share->uri_action=="getlimit" ) {
+elseif($share->uri_action=="getlimit" ) {
 	$contents = $share->get_user_limit();
 	echo $contents;
 	die();
 }
-
-if($share->uri_action=="getfile") {
+elseif($share->uri_action=="getfile") {
 	$share->update_query_limit();
-	$hash = $share->uri_hash;
-	$sample = $share->get_sample($hash);
-	$share->update_sample_count($hash);
-	$contents = file_get_contents($sample);
-	$share->send_headers($share->filename);
-	echo $contents;
-	@unlink($contents);
-	die();
+	$share->update_sample_count($share->uri_hash);
+    $presignedUrl = $share->get_sample_url($share->uri_hash);
+    header('Location: ' . $presignedUrl, true, 302);
+    exit();
 }
-
-if($share->uri_action=="details") {
+elseif($share->uri_action=="details") {
     $share->update_query_limit();
     $sample = $share->get_details_json();
     echo $sample;
     die();
 }
-
-if ($share->uri_action == 'hashlookup') {
+elseif ($share->uri_action == 'hashlookup') {
     $share->update_query_limit();
     echo(json_encode($share->get_hashes(explode("\n", file_get_contents('php://input')))));
     die();
 }
-
-if($share->uri_action=="type") {
+elseif($share->uri_action=="type") {
 	$sample = $share->search_type_day();
 	echo $sample;
 	die();
 }
-
-if($share->uri_action=="gettypes") {
+elseif($share->uri_action=="gettypes") {
 	$share->update_query_limit();
 	$res = $share->get_types();
 	echo $res;
 	die();
 }
-
-if($share->uri_action=="search") {
+elseif($share->uri_action=="search") {
 	$share->update_query_limit();
 	$sample = $share->sample_search(true);
 	echo $sample;
 	die();
 }
-
-if ($share->uri_action=="upload"){
+elseif ($share->uri_action=="upload"){
 	if ($_FILES['upload']["size"] > 10000000) {
 		http_response_code(413);
 		die("Error: file too large");
@@ -125,10 +121,8 @@ if ($share->uri_action=="upload"){
 		}
 	}
 	die();
-
 }
-
-if ($share->uri_action == 'download_url') {
+elseif ($share->uri_action == 'download_url') {
     header('Content-Type: application/json');
     if (!isset($_SERVER['REQUEST_METHOD']) or ($_SERVER['REQUEST_METHOD'] !== 'POST')) {
         http_response_code(400);
@@ -157,8 +151,7 @@ if ($share->uri_action == 'download_url') {
     echo json_encode(array('guid' => $guid));
     exit();
 }
-
-if ($share->uri_action == 'download_url_check') {
+elseif ($share->uri_action == 'download_url_check') {
     header('Content-Type: application/json');
 
     if (!isset($_SERVER['REQUEST_METHOD']) or ($_SERVER['REQUEST_METHOD'] !== 'GET')) {

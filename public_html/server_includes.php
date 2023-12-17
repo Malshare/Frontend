@@ -128,10 +128,11 @@ class ServerObject
     public $vars_dirty_root;
 
     // DB Tables
-    public $vars_table_sample_sources;
     public $vars_table_samples;
     public $vars_table_users;
+    public $vars_table_sources;
     public $vars_table_searches;
+    public $vars_table_pub_searches;
     public $vars_table_uploads;
     public $vars_table_url_download_tasks;
     public $vars_table_sample_partners;
@@ -139,12 +140,19 @@ class ServerObject
     public $vt_context_key;
     public $vt_context_url;
 
-    public $upload_data;
-
     public $table;
+
+    public $s3Client;
 
     function __construct()
     {
+        $this->s3Client = new Aws\S3\S3Client([
+            'credentials' => ['key' => WASABI_KEY, 'secret' => WASABI_SECRET],
+            'endpoint' => WASABI_ENDPOINT,
+            'region' => WASABI_REGION,
+            'version' => 'latest',
+            'use_path_style_endpoint' => true,
+        ]);
         $this->host_ip = $_SERVER['REMOTE_ADDR'];
 
         if (defined('DB_CA_PATH')) {
@@ -206,7 +214,8 @@ class ServerObject
 
     public function login()
     {
-        $uuser = new UserObject($this->sql, $this->uri_api_key, True);
+        $uuser = new UserObject($this->sql, $this->uri_api_key, true);
+
         return $uuser;
     }
 
@@ -234,6 +243,8 @@ class ServerObject
     {
         http_response_code(302);
         header('Location: ' . $loc);
+
+        return null;
     }
 
     public function error_die_with_code($code, $string)
@@ -252,19 +263,19 @@ class ServerObject
 
         $options = array(
             'http' => array(
-                'header'  => "x-apikey: ". $vt_key . "\r\n",
-                'method'  => 'GET',
-            )
+                'header' => "x-apikey: " . $vt_key . "\r\n",
+                'method' => 'GET',
+            ),
         );
 
-        $url = $this->vt_context_url.$hash;
-        $context  = stream_context_create($options);
+        $url = $this->vt_context_url . $hash;
+        $context = stream_context_create($options);
         $result = @file_get_contents($url, false, $context);
-        if ($result === FALSE) {
+        if ($result === false) {
             return false;
         }
         $vt_widget = json_decode($result);
-        $widget = '  <iframe sandbox="allow-same-origin allow-scripts allow-popups allow-forms" src="'. $vt_widget->{'data'}->{'url'}. '"
+        $widget = '  <iframe sandbox="allow-same-origin allow-scripts allow-popups allow-forms" src="' . $vt_widget->{'data'}->{'url'} . '"
           width="100%" height="500" allowfullscreen>
     <p>
       <a href="/en-US/docs/Glossary">
@@ -276,18 +287,19 @@ class ServerObject
         return $widget;
 
 
-
     }
-
 
 
     public function get_total()
     {
         $table = $this->vars_table_samples;
         $res = $this->sql->query("SELECT count(id) as rcount from $table ");
-        if (! $res) $this->error_die("Unable to get total sample count ");
+        if (! $res) {
+            $this->error_die("Unable to get total sample count ");
+        }
 
         $row = $res->fetch_object();
+
         return $row->rcount;
     }
 
@@ -298,9 +310,13 @@ class ServerObject
         $table_sources = $this->vars_table_sources;
         $table_sample_partners = $this->vars_table_sample_partners;;
 
-        $res = $this->sql->query("SELECT id from $table WHERE ( ( pending != 1 or pending is NULL ) AND ftype != 'html' ) ORDER by added DESC limit 10");
+        $res = $this->sql->query(
+            "SELECT id from $table WHERE ( ( pending != 1 or pending is NULL ) AND ftype != 'html' ) ORDER by added DESC limit 10"
+        );
 
-        if (! $res) $this->error_die("Error 13513 (Unable to get recent samples. Please contact admin@malshare.com)");
+        if (! $res) {
+            $this->error_die("Error 13513 (Unable to get recent samples. Please contact admin@malshare.com)");
+        }
 
         $output = '<table class="table table-bordered table-striped" style="table-layout: fixed;">
         <thead>  <tr>
@@ -312,7 +328,6 @@ class ServerObject
         </tr>  </thead>  <tbody>';
 
         while ($s_row = $res->fetch_object()) {
-            $limit++;
             $tQuery = "
                 SELECT
                        $table.sha256 AS sha256,
@@ -329,8 +344,14 @@ class ServerObject
             $r_res = $this->sql->query($tQuery);
 
 
-            if (! $r_res) $this->error_die("Error 13512 (Problem getting recent sample details.  Please contact admin@malshare.com)");
-            if ($r_res->num_rows == 0) next();
+            if (! $r_res) {
+                $this->error_die(
+                    "Error 13512 (Problem getting recent sample details.  Please contact admin@malshare.com)"
+                );
+            }
+            if ($r_res->num_rows == 0) {
+                next();
+            }
 
             $sample_row = $r_res->fetch_object();
 
@@ -365,6 +386,7 @@ class ServerObject
 
         }
         $output .= '</tbody></table>';
+
         return $output;
     }
 
@@ -390,18 +412,29 @@ class ServerObject
         $table = $this->vars_table_samples;
         $table_sources = $this->vars_table_sources;
 
-        $res = $this->sql->query("SELECT id from $table WHERE ( pending != 1 or pending is NULL ) ORDER by added DESC limit 5000");
+        $res = $this->sql->query(
+            "SELECT id from $table WHERE ( pending != 1 or pending is NULL ) ORDER by added DESC limit 5000"
+        );
 
-        if (! $res) $this->error_die("Error 23214 (Problem building sitemap.  Please contact admin@malshare.com)");
+        if (! $res) {
+            $this->error_die("Error 23214 (Problem building sitemap.  Please contact admin@malshare.com)");
+        }
         while ($s_row = $res->fetch_object()) {
-            $r_res = $this->sql->query("SELECT $table.md5 as md5, $table.sha1 as sha1, $table.sha256 as sha256 FROM $table WHERE $table.id=" . $s_row->id);
+            $r_res = $this->sql->query(
+                "SELECT $table.md5 as md5, $table.sha1 as sha1, $table.sha256 as sha256 FROM $table WHERE $table.id=" . $s_row->id
+            );
 
-            if (! $r_res) $this->error_die("Error 23215 (Problem building sitemap details. Please contact admin@malshare.com)");
-            if ($r_res->num_rows == 0) next();
+            if (! $r_res) {
+                $this->error_die("Error 23215 (Problem building sitemap details. Please contact admin@malshare.com)");
+            }
+            if ($r_res->num_rows == 0) {
+                next();
+            }
 
             $sample_row = $r_res->fetch_object();
             $output .= '<a href="sample.php?action=detail&hash=' . $sample_row->sha256 . '">' . $sample_row->md5 . ' | ' . $sample_row->sha1 . ' | ' . $sample_row->sha256 . '</a><br />';
         }
+
         return $output;
     }
 
@@ -414,6 +447,7 @@ class ServerObject
         $stmt->execute();
         $stmt->bind_result($yaraRuleId);
         $stmt->fetch();
+
         return $yaraRuleId;
     }
 
@@ -432,7 +466,9 @@ class ServerObject
             $searchPrivate = 1;
         }
 
-        if (strlen($searchValue) < 3) $this->error_die("Query must by longer then 3 characters");
+        if (strlen($searchValue) < 3) {
+            $this->error_die("Query must by longer then 3 characters");
+        }
 
         $src_sql_query = "INSERT INTO $table_searches (query, source, ts, private ) VALUES ( '$searchValue', '$source_ip', UNIX_TIMESTAMP(), '$searchPrivate' )";
         $this->sql->query($src_sql_query);
@@ -440,9 +476,13 @@ class ServerObject
 
         if ($api_query == false) {
             # If search by hash, just take users to the sample details page
-            if (strlen($searchValue) == 32) return $this->redirect("sample.php?action=detail&hash=". $searchValue);
-            else if (strlen($searchValue) == 40) return $this->redirect("sample.php?action=detail&hash=". $searchValue);
-            else if (strlen($searchValue) == 64) return $this->redirect("sample.php?action=detail&hash=". $searchValue);
+            if (strlen($searchValue) == 32) {
+                return $this->redirect("sample.php?action=detail&hash=" . $searchValue);
+            } elseif (strlen($searchValue) == 40) {
+                return $this->redirect("sample.php?action=detail&hash=" . $searchValue);
+            } elseif (strlen($searchValue) == 64) {
+                return $this->redirect("sample.php?action=detail&hash=" . $searchValue);
+            }
         }
 
         if (substr($searchValue, 0, 7) == "source:") {
@@ -464,7 +504,9 @@ class ServerObject
             }
         }
 
-        if (! $res) $this->error_die("Error 13843 (System error while searching.  Please contact admin@malshare.com)");
+        if (! $res) {
+            $this->error_die("Error 13843 (System error while searching.  Please contact admin@malshare.com)");
+        }
 
         // Build header / if not API
         if ($api_query == false) {
@@ -483,7 +525,8 @@ class ServerObject
         // Fetch data
         $totalHits = 0;
         while ($s_row = $res->fetch_object()) {
-            $r_res = $this->sql->query("
+            $r_res = $this->sql->query(
+                "
                 SELECT
                        $table.id AS id,
                        $table.md5 AS md5,
@@ -498,10 +541,15 @@ class ServerObject
                 FROM $table
                     LEFT JOIN $table_sources ON $table.id = $table_sources.id
                     LEFT JOIN $table_sample_partners ON $table_sources.sample_partner_submission = $table_sample_partners.id
-                WHERE $table.id=" . $s_row->id);
+                WHERE $table.id=" . $s_row->id
+            );
 
-            if (! $r_res) $this->error_die("Error 13842 (Problem fetching search results.  Please contact admin@malshare.com)");
-            if ($r_res->num_rows == 0) next();
+            if (! $r_res) {
+                $this->error_die("Error 13842 (Problem fetching search results.  Please contact admin@malshare.com)");
+            }
+            if ($r_res->num_rows == 0) {
+                next();
+            }
 
             $sample_row = $r_res->fetch_object();
             $totalHits += 1;
@@ -514,8 +562,11 @@ class ServerObject
                     <td>' . $sample_row->ftype . '</td>
                     <td>' . date("Y-m-d H:i:s", $sample_row->added) . '</td>';
 
-                if (strlen($source) > 45) $output .= '<td>' . substr($source, 0, 45) . '...</td> ';
-                else $output .= '<td>' . $source . '</td> ';
+                if (strlen($source) > 45) {
+                    $output .= '<td>' . substr($source, 0, 45) . '...</td> ';
+                } else {
+                    $output .= '<td>' . $source . '</td> ';
+                }
 
                 $yhits = "";
                 $jhits = json_decode($sample_row->yara);
@@ -552,7 +603,8 @@ class ServerObject
                     'source' => $source,
                     'yarahits' => json_decode($sample_row->yara),
                     'parentfiles' => array(),
-                    'subfiles' => array());
+                    'subfiles' => array(),
+                );
 
                 if (($sample_row->parent_id != null)) {
                     if (strpos($sample_row->parent_id, ',') !== false) {
@@ -563,20 +615,34 @@ class ServerObject
 
                     foreach ($parent_ids as $pid) {
                         $full_res = $this->sql->query("SELECT md5, sha1, sha256 FROM $table WHERE id = " . $pid);
-                        if (! $full_res) $this->error_die("Error 138413 (Problem getting sample parents. Please contact admin@malshare.com)");
+                        if (! $full_res) {
+                            $this->error_die(
+                                "Error 138413 (Problem getting sample parents. Please contact admin@malshare.com)"
+                            );
+                        }
                         if (! $full_res->num_rows == 0) {
                             while ($s_row = $full_res->fetch_object()) {
-                                array_push($t['parentfiles'], array('md5' => $s_row->md5, 'sha1' => $s_row->sha1, 'sha256' => $s_row->sha256));
+                                array_push(
+                                    $t['parentfiles'],
+                                    array('md5' => $s_row->md5, 'sha1' => $s_row->sha1, 'sha256' => $s_row->sha256)
+                                );
                             }
                         }
                     }
                 }
 
-                $full_res = $this->sql->query("SELECT md5, sha1, sha256 FROM $table WHERE parent_id = " . $sample_row->id);
-                if (! $full_res) die("Error 13849 ( Problem getting child files. Please contact admin@malshare.com)");
+                $full_res = $this->sql->query(
+                    "SELECT md5, sha1, sha256 FROM $table WHERE parent_id = " . $sample_row->id
+                );
+                if (! $full_res) {
+                    die("Error 13849 ( Problem getting child files. Please contact admin@malshare.com)");
+                }
                 if (! $full_res->num_rows == 0) {
                     while ($s_row = $full_res->fetch_object()) {
-                        array_push($t['subfiles'], array('md5' => $s_row->md5, 'sha1' => $s_row->sha1, 'sha256' => $s_row->sha256));
+                        array_push(
+                            $t['subfiles'],
+                            array('md5' => $s_row->md5, 'sha1' => $s_row->sha1, 'sha256' => $s_row->sha256)
+                        );
                     }
                 }
 
@@ -593,6 +659,7 @@ class ServerObject
 
         if ($api_query == false) {
             $output .= '</tbody></table>  ';
+
             return $output;
         } else {
             return json_encode($output, JSON_UNESCAPED_SLASHES);
@@ -612,29 +679,35 @@ class ServerObject
 
         if (strlen($hash) == 32) {
             $res = $this->sql->query("SELECT id as hash FROM $table WHERE md5 = lower('$hash')");
-        } else if (strlen($hash) == 40) {
+        } elseif (strlen($hash) == 40) {
             $res = $this->sql->query("SELECT id as hash FROM $table WHERE sha1 = lower('$hash')");
-        } else if (strlen($hash) == 64) {
+        } elseif (strlen($hash) == 64) {
             $res = $this->sql->query("SELECT id as hash FROM $table WHERE sha256 = lower('$hash')");
         } else {
             http_response_code(404);
-            usleep(500000);            
+            usleep(500000);
             die("Invalid Hash.");
         }
-        if (! $res) die("Error 13417 (Problem findings sample details.  Please contact admin@malshare.com)");
+        if (! $res) {
+            die("Error 13417 (Problem findings sample details.  Please contact admin@malshare.com)");
+        }
         if ($res->num_rows == 0) {
-            usleep(500000);            
+            usleep(500000);
             http_response_code(404);
             die("Sample not found with hash ( $hash )");
         }
 
         $row = $res->fetch_object();
 
-        $full_res = $this->sql->query("SELECT md5, sha1, sha256, ssdeep, added, ftype, yara, pending, parent_id FROM $table WHERE id = " . $row->hash);
-        if (! $full_res) $this->error_die("Error 23418 (Unable to find child samples  Please contact admin@malshare.com)");
+        $full_res = $this->sql->query(
+            "SELECT md5, sha1, sha256, ssdeep, added, ftype, yara, pending, parent_id FROM $table WHERE id = " . $row->hash
+        );
+        if (! $full_res) {
+            $this->error_die("Error 23418 (Unable to find child samples  Please contact admin@malshare.com)");
+        }
         if ($full_res->num_rows == 0) {
             http_response_code(404);
-            usleep(500000);            
+            usleep(500000);
             die("Error Sample not found by hash ($hash)");
         }
         $f_row = $full_res->fetch_object();
@@ -670,7 +743,9 @@ class ServerObject
             </table>
         ';
         $fname_search = $this->sql->query("SELECT name FROM $table_uploads WHERE md5 = '" . $f_row->md5 . "'");
-        if (! $fname_search) $this->error_die("Error 23428 (Unable to find file names  Please contact admin@malshare.com)");
+        if (! $fname_search) {
+            $this->error_die("Error 23428 (Unable to find file names  Please contact admin@malshare.com)");
+        }
         if ($fname_search->num_rows >= 0) {
             $output .= '<table class="table"><thead><tr><th>Observed File Names</th></tr></thead><tbody>';
             while ($trow = $fname_search->fetch_object()) {
@@ -710,7 +785,11 @@ class ServerObject
 
             foreach ($parent_ids as $pid) {
                 $full_res = $this->sql->query("SELECT sha256 FROM $table WHERE id = " . $pid);
-                if (! $full_res) $this->error_die("Error 23732 (Problem finding parent details for hash.  Please contact admin@malshare.com)");
+                if (! $full_res) {
+                    $this->error_die(
+                        "Error 23732 (Problem finding parent details for hash.  Please contact admin@malshare.com)"
+                    );
+                }
                 if (! $full_res->num_rows == 0) {
                     while ($s_row = $full_res->fetch_object()) {
                         $output .= '<tr> <td><a href="sample.php?action=detail&hash=' . $s_row->sha256 . '">' . $s_row->sha256 . '</a></td> </tr>';
@@ -723,7 +802,9 @@ class ServerObject
             }
         }
         $full_res = $this->sql->query("SELECT sha256 FROM $table WHERE parent_id = " . $row->hash);
-        if (! $full_res) $this->error_die("Error 23734 (Problem finding child samples.  Please contact admin@malshare.com)");
+        if (! $full_res) {
+            $this->error_die("Error 23734 (Problem finding child samples.  Please contact admin@malshare.com)");
+        }
         if (! $full_res->num_rows == 0) {
             $output .= '
                     <table class="table">
@@ -743,7 +824,8 @@ class ServerObject
             ';
         }
 
-        $full_res = $this->sql->query("
+        $full_res = $this->sql->query(
+            "
             SELECT
                 $table_sources.source AS source,
                 $table_sample_partners.display_name AS source_display_name
@@ -751,7 +833,9 @@ class ServerObject
             LEFT JOIN $table_sample_partners ON $table_sources.sample_partner_submission = $table_sample_partners.id
             WHERE $table_sources.id = " . $row->hash
         );
-        if (! $full_res) $this->error_die("Error 23735 (Problem finding sources for sample.  Please contact admin@malshare.com)");
+        if (! $full_res) {
+            $this->error_die("Error 23735 (Problem finding sources for sample.  Please contact admin@malshare.com)");
+        }
         if (! $full_res->num_rows == 0) {
             $output .= '
                 <table class="table">
@@ -776,7 +860,10 @@ class ServerObject
             $output .= " </td></tr></tbody></table>";
 
         }
-        if ($f_row->pending == 1) $output .= "<script>ShowLoading();</script>";
+        if ($f_row->pending == 1) {
+            $output .= "<script>ShowLoading();</script>";
+        }
+
         return $output;
 
     }
@@ -795,15 +882,16 @@ class ServerObject
 
         if (strlen($hash) == 32) {
             $res = $this->sql->query("SELECT id as hash FROM $table WHERE md5 = lower('$hash')");
-        } else if (strlen($hash) == 40) {
+        } elseif (strlen($hash) == 40) {
             $res = $this->sql->query("SELECT id as hash FROM $table WHERE sha1 = lower('$hash')");
-        } else if (strlen($hash) == 64) {
+        } elseif (strlen($hash) == 64) {
             $res = $this->sql->query("SELECT id as hash FROM $table WHERE sha256 = lower('$hash')");
         } else {
             http_response_code(400);
             $output['ERROR'] = array();
             $output['ERROR']["CODE"] = 400;
             $output['ERROR']["MESSAGE"] = "Invalid Hash";
+
             return json_encode($output, JSON_UNESCAPED_SLASHES);
         }
         if (! $res) {
@@ -811,6 +899,7 @@ class ServerObject
             $output['ERROR'] = array();
             $output['ERROR']["CODE"] = 724433;
             $output['ERROR']["MESSAGE"] = "Problem finding sample details for json details.  Please contact admin@malshare.com";
+
             return json_encode($output, JSON_UNESCAPED_SLASHES);
         }
         if ($res->num_rows == 0) {
@@ -818,17 +907,21 @@ class ServerObject
             $output['ERROR'] = array();
             $output['ERROR']["CODE"] = 404;
             $output['ERROR']["MESSAGE"] = "Sample not found";
+
             return json_encode($output, JSON_UNESCAPED_SLASHES);
         }
         $row = $res->fetch_object();
 
-        $full_res = $this->sql->query("SELECT md5, sha1, sha256, ssdeep, added, ftype FROM $table WHERE id = " . $row->hash);
+        $full_res = $this->sql->query(
+            "SELECT md5, sha1, sha256, ssdeep, added, ftype FROM $table WHERE id = " . $row->hash
+        );
 
         if (! $full_res) {
             http_response_code(500);
             $output['ERROR'] = array();
             $output['ERROR']["CODE"] = 724341;
             $output['ERROR']["MESSAGE"] = "problem getting details for hash (json).  Please contact admin@malshare.com";
+
             return json_encode($output, JSON_UNESCAPED_SLASHES);
         }
         if ($full_res->num_rows == 0) {
@@ -836,6 +929,7 @@ class ServerObject
             $output['ERROR'] = array();
             $output['ERROR']["CODE"] = 500;
             $output['ERROR']["MESSAGE"] = "Sample details not found";
+
             return json_encode($output, JSON_UNESCAPED_SLASHES);
         }
 
@@ -852,6 +946,7 @@ class ServerObject
             $output['ERROR'] = array();
             $output['ERROR']["CODE"] = 724323;
             $output['ERROR']["MESSAGE"] = "Problem getting sources for hash.  Please contact admin@malshare.com";
+
             return json_encode($output, JSON_UNESCAPED_SLASHES);
         }
         $t_source = array();
@@ -865,12 +960,13 @@ class ServerObject
             $output['ERROR'] = array();
             $output['ERROR']["CODE"] = 724323;
             $output['ERROR']["MESSAGE"] = "Problem getting sources for hash.  Please contact admin@malshare.com";
+
             return json_encode($output, JSON_UNESCAPED_SLASHES);
         }
         $t_names = array();
         while ($f_row = $name_res->fetch_object()) {
             array_push($t_names, $f_row->name);
-        }        
+        }
 
         $output['FILENAMES'] = $t_names;
 
@@ -886,9 +982,9 @@ class ServerObject
             $hash = trim(strtolower($hash));
             if (preg_match('/^[a-f0-9]{32}$/', $hash)) {
                 $md5s[] = $hash;
-            } else if (preg_match('/^[a-f0-9]{40}$/', $hash)) {
+            } elseif (preg_match('/^[a-f0-9]{40}$/', $hash)) {
                 $sha1s[] = $hash;
-            } else if (preg_match('/^[a-f0-9]{64}$/', $hash)) {
+            } elseif (preg_match('/^[a-f0-9]{64}$/', $hash)) {
                 $sha256s[] = $hash;
             }
         }
@@ -977,21 +1073,14 @@ class ServerObject
             die("No hash specified in `hash` GET variable");
         }
 
-        $s3Client = new Aws\S3\S3Client([
-            'credentials' => ['key' => WASABI_KEY, 'secret' => WASABI_SECRET],
-            'endpoint' => WASABI_ENDPOINT,
-            'region' => WASABI_REGION,
-            'version' => 'latest',
-            'use_path_style_endpoint' => true,
-        ]);
         $s3Key = $this->sample_key($row->hash);
 
-        if (! $s3Client->doesObjectExist(WASABI_BUCKET, $s3Key)) {
+        if (! $this->s3Client->doesObjectExist(WASABI_BUCKET, $s3Key)) {
             http_response_code(404);
             die("Error 12413 (Sample Missing. Please alert admin@malshare.com @ " . WASABI_REGION . "): " . WASABI_BUCKET . ' ' . $s3Key);
         }
-        $cmd = $s3Client->getCommand('GetObject', ['Bucket' => WASABI_BUCKET, 'Key' => $s3Key]);
-        $request = $s3Client->createPresignedRequest($cmd, '+5 minutes');
+        $cmd = $this->s3Client->getCommand('GetObject', ['Bucket' => WASABI_BUCKET, 'Key' => $s3Key]);
+        $request = $this->s3Client->createPresignedRequest($cmd, '+5 minutes');
 
         return (string)$request->getUri();
     }
@@ -1011,12 +1100,15 @@ class ServerObject
 
         $table = $this->vars_table_samples;
 
-        $res = $this->sql->query("SELECT md5 as md5, sha1 as sha1, sha256 as sha256 FROM $table WHERE ( added > ( UNIX_TIMESTAMP() - 86400) ) ");
+        $res = $this->sql->query(
+            "SELECT md5 as md5, sha1 as sha1, sha256 as sha256 FROM $table WHERE ( added > ( UNIX_TIMESTAMP() - 86400) ) "
+        );
         if (! $res) {
             http_response_code(500);
             $output['ERROR'] = array();
             $output['ERROR']["CODE"] = 131312;
             $output['ERROR']["MESSAGE"] = "Unable to generate sample list.  Please report to admin@malshare.com";
+
             return json_encode($output, JSON_UNESCAPED_SLASHES);
         }
 
@@ -1031,8 +1123,12 @@ class ServerObject
     {
         $table = $this->vars_table_samples;
 
-        $res = $this->sql->query("SELECT md5 as md5, sha1 as sha1, sha256 as sha256 FROM $table WHERE ( added > ( UNIX_TIMESTAMP() - 86400) ) ");
-        if (! $res) $this->error_die("Error 131311 (Please report to admin@malshare.com)");
+        $res = $this->sql->query(
+            "SELECT md5 as md5, sha1 as sha1, sha256 as sha256 FROM $table WHERE ( added > ( UNIX_TIMESTAMP() - 86400) ) "
+        );
+        if (! $res) {
+            $this->error_die("Error 131311 (Please report to admin@malshare.com)");
+        }
 
         while ($row = $res->fetch_object()) {
             print("$row->md5 $row->sha1 $row->sha256\n");
@@ -1046,30 +1142,37 @@ class ServerObject
         $table = $this->vars_table_samples;
         $table_sources = $this->vars_table_sources;
 
-        $lenght = strlen($hash);
-
-        if (strlen($hash) == 32) $res = $this->sql->query("SELECT id as hash FROM $table WHERE md5 = lower('$hash')");
-        else if (strlen($hash) == 40) $res = $this->sql->query("SELECT id as hash FROM $table WHERE sha1 = lower('$hash')");
-        else if (strlen($hash) == 64) $res = $this->sql->query("SELECT id as hash FROM $table WHERE sha256 = lower('$hash')");
-        else {
+        if (strlen($hash) == 32) {
+            $res = $this->sql->query("SELECT id as hash FROM $table WHERE md5 = lower('$hash')");
+        } elseif (strlen($hash) == 40) {
+            $res = $this->sql->query("SELECT id as hash FROM $table WHERE sha1 = lower('$hash')");
+        } elseif (strlen($hash) == 64) {
+            $res = $this->sql->query("SELECT id as hash FROM $table WHERE sha256 = lower('$hash')");
+        } else {
             http_response_code(404);
             $this->error_die("Invalid Hash.");
         }
 
-        if (! $res) $this->error_die("Error 139491 (Problem pulling sample record. Please contact admin@malshare.com)");
+        if (! $res) {
+            $this->error_die("Error 139491 (Problem pulling sample record. Please contact admin@malshare.com)");
+        }
         if ($res->num_rows == 0) {
             http_response_code(404);
-            usleep(500000);            
+            usleep(500000);
             die("Sample not found by hash ($hash)");
         }
         $row = $res->fetch_object();
 
 
-        $full_res = $this->sql->query("SELECT md5, sha1, sha256, ssdeep, added, ftype FROM $table WHERE id = " . $row->hash);
-        if (! $full_res) $this->error_die("Error 139432 (Problem getting sample details. Please contact admin@malshare.com)");
+        $full_res = $this->sql->query(
+            "SELECT md5, sha1, sha256, ssdeep, added, ftype FROM $table WHERE id = " . $row->hash
+        );
+        if (! $full_res) {
+            $this->error_die("Error 139432 (Problem getting sample details. Please contact admin@malshare.com)");
+        }
         if ($full_res->num_rows == 0) {
             http_response_code(404);
-            usleep(500000);            
+            usleep(500000);
             die("Sample not found by hash ($hash)");
         }
         $f_row = $full_res->fetch_object();
@@ -1081,10 +1184,12 @@ class ServerObject
         $output['ADDED'] = $f_row->added;
 
         $full_res = $this->sql->query("SELECT source FROM $table_sources WHERE id = " . $row->hash);
-        if (! $full_res) $this->error_die("Error 139312 (Problem sample sources. Please contact admin@malshare.com)");
+        if (! $full_res) {
+            $this->error_die("Error 139312 (Problem sample sources. Please contact admin@malshare.com)");
+        }
         if ($full_res->num_rows == 0) {
             http_response_code(404);
-            usleep(500000);            
+            usleep(500000);
             die("Sample not found by hash ($hash)");
         }
         $t_source = array();
@@ -1092,6 +1197,7 @@ class ServerObject
             array_push($t_source, $s_row->source);
         }
         $output['SOURCES'] = $t_source;
+
         return $output;
     }
 
@@ -1109,6 +1215,7 @@ class ServerObject
             $output['ERROR'] = array();
             $output['ERROR']["CODE"] = 139001;
             $output['ERROR']["MESSAGE"] = "Problem pulling sample count.  Please report to admin@malshare.com";
+
             return json_encode($output, JSON_UNESCAPED_SLASHES);
         }
 
@@ -1131,18 +1238,22 @@ class ServerObject
 
         $type = preg_replace("/[^a-zA-Z0-9]+/", "", $r_type);
 
-        $res = $this->sql->query("SELECT md5 as md5, sha1 as sha1, sha256 as sha256 FROM $table WHERE ( added > ( UNIX_TIMESTAMP() - 86400) and lower(ftype) = '$type') ");
+        $res = $this->sql->query(
+            "SELECT md5 as md5, sha1 as sha1, sha256 as sha256 FROM $table WHERE ( added > ( UNIX_TIMESTAMP() - 86400) and lower(ftype) = '$type') "
+        );
         if (! $res) {
             http_response_code(500);
             $output['ERROR'] = array();
             $output['ERROR']["CODE"] = 131132;
             $output['ERROR']["MESSAGE"] = "Problem pulling results for the past day.  Please report to admin@malshare.com";
+
             return json_encode($output, JSON_UNESCAPED_SLASHES);
         }
 
         while ($row = $res->fetch_object()) {
             array_push($results, array('md5' => $row->md5, 'sha1' => $row->sha1, 'sha256' => $row->sha256));
         }
+
         return json_encode($results);
     }
 
@@ -1153,12 +1264,15 @@ class ServerObject
         $output = array();
         $table = $this->vars_table_samples;
 
-        $res = $this->sql->query("SELECT ftype as ftype, count(id) as fcount from $table WHERE added > (unix_timestamp() - 86400) AND ftype != '-' GROUP BY ftype");
+        $res = $this->sql->query(
+            "SELECT ftype as ftype, count(id) as fcount from $table WHERE added > (unix_timestamp() - 86400) AND ftype != '-' GROUP BY ftype"
+        );
         if (! $res) {
             http_response_code(500);
             $output['ERROR'] = array();
             $output['ERROR']["CODE"] = 138523;
             $output['ERROR']["MESSAGE"] = "Problem pulling types from the past day.  Please report to admin@malshare.com";
+
             return json_encode($output, JSON_UNESCAPED_SLASHES);
         }
 
@@ -1177,12 +1291,15 @@ class ServerObject
         $output = array();
         $table = $this->vars_table_uploads;
 
-        $res = $this->sql->query("SELECT distinct name as name FROM $table WHERE ( ts > ( UNIX_TIMESTAMP()-86400) and ts is not NULL ) ");
+        $res = $this->sql->query(
+            "SELECT distinct name as name FROM $table WHERE ( ts > ( UNIX_TIMESTAMP()-86400) and ts is not NULL ) "
+        );
         if (! $res) {
             http_response_code(500);
             $output['ERROR'] = array();
             $output['ERROR']["CODE"] = 138043;
             $output['ERROR']["MESSAGE"] = "Problem pulling sources for the past day.  Please report to admin@malshare.com";
+
             return json_encode($output, JSON_UNESCAPED_SLASHES);
         }
 
@@ -1200,12 +1317,15 @@ class ServerObject
         $output = array();
         $table = $this->vars_table_sources;
 
-        $res = $this->sql->query("SELECT distinct source as source FROM $table WHERE ( added > ( UNIX_TIMESTAMP()-86400) and added is not NULL ) ");
+        $res = $this->sql->query(
+            "SELECT distinct source as source FROM $table WHERE ( added > ( UNIX_TIMESTAMP()-86400) and added is not NULL ) "
+        );
         if (! $res) {
             http_response_code(500);
             $output['ERROR'] = array();
             $output['ERROR']["CODE"] = 138023;
             $output['ERROR']["MESSAGE"] = "Problem pulling sources for the past day.  Please report to admin@malshare.com";
+
             return json_encode($output, JSON_UNESCAPED_SLASHES);
         }
 
@@ -1220,8 +1340,14 @@ class ServerObject
     {
         $table = $this->vars_table_sources;
 
-        $res = $this->sql->query("SELECT distinct source as source FROM $table WHERE ( added > ( UNIX_TIMESTAMP()-86400) and added is not NULL ) ");
-        if (! $res) $this->error_die("Error 138024. (Problem pulling raw source list for the past day. Please report to admin@malshare.com)");
+        $res = $this->sql->query(
+            "SELECT distinct source as source FROM $table WHERE ( added > ( UNIX_TIMESTAMP()-86400) and added is not NULL ) "
+        );
+        if (! $res) {
+            $this->error_die(
+                "Error 138024. (Problem pulling raw source list for the past day. Please report to admin@malshare.com)"
+            );
+        }
 
         while ($row = $res->fetch_object()) {
             print("$row->source\n");
@@ -1242,9 +1368,13 @@ class ServerObject
             $eoutput['ERROR'] = array();
             $eoutput['ERROR']["CODE"] = 439021;
             $eoutput['ERROR']["MESSAGE"] = "Unable to fetch limits.  Please report to admin@malshare.com";
+
             return json_encode($eoutput, JSON_UNESCAPED_SLASHES);
         }
         $row = $res->fetch_object();
+        if ($row === null) {
+            return null;
+        }
 
         try {
             $output["LIMIT"] = $row->query_base;
@@ -1255,8 +1385,10 @@ class ServerObject
             $eoutput['ERROR'] = array();
             $eoutput['ERROR']["CODE"] = 439022;
             $eoutput['ERROR']["MESSAGE"] = "Problem pulling sources for the past day.  Please report to admin@malshare.com";
+
             return json_encode($eoutput, JSON_UNESCAPED_SLASHES);
         }
+
         return json_encode($output, JSON_UNESCAPED_SLASHES);
     }
 
@@ -1266,14 +1398,18 @@ class ServerObject
         $api_key = $this->uri_api_key;
 
         $res = $this->sql->query("SELECT query_limit, last_query FROM $table WHERE api_key= '$api_key' ");
-        if (! $res) $this->error_die("Error 432101 (Please report to admin@malshare.com)");
+        if (! $res) {
+            $this->error_die("Error 432101 (Please report to admin@malshare.com)");
+        }
         $row = $res->fetch_object();
 
         if ($row->query_limit <= 0) {
 
             if (($row->last_query + 86400) < time()) {
                 $res = $this->sql->query("UPDATE $table SET query_limit = query_base - 1  WHERE api_key= '$api_key' ");
-                if (! $res) $this->error_die("Error 432103 (Please report to admin@malshare.com)");
+                if (! $res) {
+                    $this->error_die("Error 432103 (Please report to admin@malshare.com)");
+                }
 
             } else {
                 http_response_code(429);
@@ -1281,8 +1417,12 @@ class ServerObject
                 die("Error: Over Request Limit.  Please contact admin@malshare.com if you need this increased");
             }
         } else {
-            $res = $this->sql->query("UPDATE $table SET query_limit = query_limit - 1, last_query = UNIX_TIMESTAMP() WHERE api_key= '$api_key' ");
-            if (! $res) $this->error_die("Error 432104 (Please report to admin@malshare.com)");
+            $res = $this->sql->query(
+                "UPDATE $table SET query_limit = query_limit - 1, last_query = UNIX_TIMESTAMP() WHERE api_key= '$api_key' "
+            );
+            if (! $res) {
+                $this->error_die("Error 432104 (Please report to admin@malshare.com)");
+            }
 
         }
     }
@@ -1293,7 +1433,9 @@ class ServerObject
         $api_key = $this->uri_api_key;
 
         $res = $this->sql->query("UPDATE $table SET query_limit = query_limit + 1 WHERE api_key= '$api_key' ");
-        if (! $res) $this->error_die("Error 432104 (Please report to admin@malshare.com)");
+        if (! $res) {
+            $this->error_die("Error 432104 (Please report to admin@malshare.com)");
+        }
     }
 
 
@@ -1301,14 +1443,18 @@ class ServerObject
     {
         $table = $this->vars_table_samples;
         $res = $this->sql->query("UPDATE $table SET counter = counter + 1 WHERE md5 = '$hash' ");
-        if (! $res) $this->error_die("Error 432201 (Please report to admin@malshare.com)");
+        if (! $res) {
+            $this->error_die("Error 432201 (Please report to admin@malshare.com)");
+        }
     }
 
     public function mark_processing($hash)
     {
         $table = $this->vars_table_samples;
         $res = $this->sql->query("UPDATE $table SET processed = 1 WHERE md5 = '$hash' ");
-        if (! $res) $this->error_die("Error 630001 (Please report to admin@malshare.com)");
+        if (! $res) {
+            $this->error_die("Error 630001 (Please report to admin@malshare.com)");
+        }
     }
 
     public function get_next_unprocessed()
@@ -1316,8 +1462,12 @@ class ServerObject
         $table = $this->vars_table_samples;
 
         $res = $this->sql->query("SELECT md5 as hash FROM $table where processed = 0 order by added limit 1;");
-        if (! $res) $this->error_die("Error 630002 (Please report to admin@malshare.com)");
-        if ($res->num_rows == 0) $this->error_die("Error 63003 No samples waiting processing.");
+        if (! $res) {
+            $this->error_die("Error 630002 (Please report to admin@malshare.com)");
+        }
+        if ($res->num_rows == 0) {
+            $this->error_die("Error 63003 No samples waiting processing.");
+        }
 
         $row = $res->fetch_object();
 
@@ -1330,9 +1480,15 @@ class ServerObject
 
         $table = $this->vars_table_samples;
 
-        $res = $this->sql->query("SELECT ftype as ftype, count(id) as fcount from $table WHERE added > (unix_timestamp() - 86400) AND ftype != '-' GROUP BY ftype limit 8");
-        if (! $res) return "Error 132522 (Unable to list file types.  Please report to admin@malshare.com)";
-        if ($res->num_rows == 0) return "Error 132523 (Unable to list file types.  Please report to admin@malshare.com)";
+        $res = $this->sql->query(
+            "SELECT ftype as ftype, count(id) as fcount from $table WHERE added > (unix_timestamp() - 86400) AND ftype != '-' GROUP BY ftype limit 8"
+        );
+        if (! $res) {
+            return "Error 132522 (Unable to list file types.  Please report to admin@malshare.com)";
+        }
+        if ($res->num_rows == 0) {
+            return "Error 132523 (Unable to list file types.  Please report to admin@malshare.com)";
+        }
 
         while ($row = $res->fetch_object()) {
             $results[$row->ftype] = $row->fcount;
@@ -1347,9 +1503,15 @@ class ServerObject
 
         $table = $this->vars_table_samples;
 
-        $res = $this->sql->query("select yara->'$.yara' as rules from $table WHERE added > (unix_timestamp() - 86400) ");
-        if (! $res) return "Error 132621 (Unable to list file types.  Please report to admin@malshare.com)";
-        if ($res->num_rows == 0) return "Error 132622 (Unable to list file types.  Please report to admin@malshare.com)";
+        $res = $this->sql->query(
+            "select yara->'$.yara' as rules from $table WHERE added > (unix_timestamp() - 86400) "
+        );
+        if (! $res) {
+            return "Error 132621 (Unable to list file types.  Please report to admin@malshare.com)";
+        }
+        if ($res->num_rows == 0) {
+            return "Error 132622 (Unable to list file types.  Please report to admin@malshare.com)";
+        }
 
         while ($row = $res->fetch_object()) {
             $rules = json_decode($row->rules);
@@ -1373,12 +1535,17 @@ class ServerObject
         $table = $this->vars_table_pub_searches;
 
         $res = $this->sql->query("SELECT query from $table  ORDER BY ts DESC limit 10");
-        if (! $res) return $results;
-        if ($res->num_rows == 0) return $results;
+        if (! $res) {
+            return $results;
+        }
+        if ($res->num_rows == 0) {
+            return $results;
+        }
 
         while ($row = $res->fetch_object()) {
             array_push($results, $row->query);
         }
+
         return $results;
     }
 
@@ -1388,18 +1555,26 @@ class ServerObject
 
         $table = $this->vars_table_samples;
 
-        $res = $this->sql->query("SELECT FROM_UNIXTIME(added, \"%Y-%m-%d\") AS date, COUNT(*) AS sampleCount FROM $table WHERE ( added > ( unix_timestamp(now()) - 604800  ) )  GROUP BY FROM_UNIXTIME(added, \"%Y-%m-%d\") ORDER BY sampleCount DESC;");
-        if (! $res) return $results;
-        if ($res->num_rows == 0) return $results;
+        $res = $this->sql->query(
+            "SELECT FROM_UNIXTIME(added, \"%Y-%m-%d\") AS date, COUNT(*) AS sampleCount FROM $table WHERE ( added > ( unix_timestamp(now()) - 604800  ) )  GROUP BY FROM_UNIXTIME(added, \"%Y-%m-%d\") ORDER BY sampleCount DESC;"
+        );
+        if (! $res) {
+            return $results;
+        }
+        if ($res->num_rows == 0) {
+            return $results;
+        }
 
         while ($row = $res->fetch_object()) {
             array_push($results, array($row->date, $row->sampleCount));
         }
+
         return $results;
     }
 
     public function upload_sample($up_sample)
     {
+        $this->s3Client
         die('Not implemented yet');
         $root_path = $this->vars_samples_root;
         $upload_path = $up_sample['tmp_name'];
@@ -1411,7 +1586,6 @@ class ServerObject
         $smp_sha256 = $this->secure(strtolower(hash_file("sha256", "$upload_path")));
 
         $source_ip = $this->secure($_SERVER['REMOTE_ADDR']);
-
         $orig_name = $this->secure($up_sample['name']);
 
         $src_sql_query = "INSERT INTO $table_uploads (name, md5, source, ts ) VALUES ( '$orig_name', '$smp_md5', '$source_ip', UNIX_TIMESTAMP() )";
@@ -1478,14 +1652,20 @@ class ServerObject
         $url = $this->secure($durl);
 
         # https://stackoverflow.com/questions/21671179/how-to-generate-a-new-guid
-        $guid = vsprintf('%s%s-%s-4000-8%.3s-%s%s%s0', str_split(dechex(microtime(true) * 1000) . bin2hex(random_bytes(8)), 4));
+        $guid = vsprintf(
+            '%s%s-%s-4000-8%.3s-%s%s%s0',
+            str_split(dechex(microtime(true) * 1000) . bin2hex(random_bytes(8)), 4)
+        );
 
-        if ($recursive != 1) $recursive = 0;
+        if ($recursive != 1) {
+            $recursive = 0;
+        }
         $sql_query = "INSERT INTO $table (guid, user_id, url, fetchall) VALUES ( '$guid', '$user_id', '$url', $recursive )";
 
         $res = $this->sql->query($sql_query);
         if (! $res) {
             $this->error_die("Error 149991 (URL Tasking failed. Please report to admin@malshare.com)");
+
             return "false";
         }
 
@@ -1497,6 +1677,7 @@ class ServerObject
         if (! preg_match("/^[A-Fa-f0-9]{8}\-[A-Fa-f0-9]{4}\-4000-8[A-Fa-f0-9]{3}\-[A-Fa-f0-9]{12}$/", $guid)) {
             return false;
         }
+
         return true;
     }
 
@@ -1505,7 +1686,9 @@ class ServerObject
         $table = $this->vars_table_url_download_tasks;
         $sql = 'SELECT started_at, finished_at FROM ' . $table . ' WHERE (guid = ?) AND (user_id = ?)';
         if (! ($stmt = $this->sql->prepare($sql))) {
-            $this->error_die("Error 149992 (Problem fetching URL Download task status.  Please contact admin@malshare.com)");
+            $this->error_die(
+                "Error 149992 (Problem fetching URL Download task status.  Please contact admin@malshare.com)"
+            );
         }
         $stmt->bind_param('si', $guid, $userId);
         $stmt->execute();

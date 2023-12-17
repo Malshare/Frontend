@@ -1,34 +1,20 @@
 <?php
-$SUCCESS = false;
-$RESULTS = "";
-if( (array_key_exists( 'fsample', $_FILES ) && ($_FILES['fsample'])) ){
-	if ($_FILES["fsample"]["size"] > 26214400) {
-		$RESULTS = "File too Large: <i> 25MB Max</i>";
-	}
-	else{
-		include("server_includes.php");
+$errorMessage = '';
+if ((array_key_exists('fsample', $_FILES) && ($_FILES['fsample']))) {
+    if ($_FILES["fsample"]["size"] > 26214400) {
+        $errorMessage = "File too Large: <i> 25MB Max</i>";
+    } else {
+        include("server_includes.php");
 
-		$h_server = new ServerObject();
-		$sub_result = $h_server->upload_sample($_FILES['fsample']);
-		if ( $sub_result == false ){
-			if( $_REQUEST['mode'] == "cli"){
-				die("Probem with Upload");
-			}
-			else {
-				$RESULTS = "Possible Problem";
-			}
-		} else {
-			if ($_REQUEST['mode'] == "cli" ){
-				die("Uploaded");
-			}
-			else{
-				$SUCCESS=true;
-				header("Location:sample.php?action=detail&hash=" . $sub_result );
-			}
-		}
-	}
+        $res = (new ServerObject())->upload_sample($_FILES['fsample']);
+        if ($res['type'] === 'error') {
+            $errorMessage = $res['message'];
+        } elseif ($res['type'] === 'success') {
+            header("Location:sample.php?action=detail&hash=" . $res['sha256']);
+            exit();
+        }
+    }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -54,13 +40,8 @@ if( (array_key_exists( 'fsample', $_FILES ) && ($_FILES['fsample'])) ){
 	<div class="container">
 		<div class="jumbotron">
 			<?php
-				if ($SUCCESS == false){
-					if (strlen($RESULTS) > 1){
-						echo '<center><font color="red"><h4 class="form-signin-heading">' . $RESULTS. '</h2></font></center>';
-					}
-				}
-				else{
-					echo '<center><font color="green"><h4 class="form-signin-heading">Thank you for your submission.  This file will be processed in the next few minutes</h2></font></center>';
+				if ($errorMessage){
+                    echo '<center><font color="red"><h4 class="form-signin-heading">' . $errorMessage. '</h2></font></center>';
 				}
 			?>
 
@@ -70,9 +51,8 @@ if( (array_key_exists( 'fsample', $_FILES ) && ($_FILES['fsample'])) ){
 				<input type="file" name="fsample" id="fsample" class="fileupload" data-icon="false">
 				<button class="btn btn-small btn-primary" onClick="return validate() && showScroll()" type="submit">Submit</button>
 			</form>
-		</div>			
-	</div> 
-
+		</div>
+	</div>
 
 	<?php include_once('footer.php'); ?>
 

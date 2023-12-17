@@ -104,23 +104,26 @@ elseif($share->uri_action=="search") {
 	$sample = $share->sample_search(true);
 	echo $sample;
 	die();
-}
-elseif ($share->uri_action=="upload"){
-	if ($_FILES['upload']["size"] > 10000000) {
-		http_response_code(413);
-		die("Error: file too large");
-	}
-	foreach ($_FILES as $upload){
-		$sub_result = $share->upload_sample($upload);
-		if ( $sub_result != false ){
-			$share->increment_query_limit();
-			echo "Success - $sub_result";
-		} else {
-			http_response_code(500);
-			echo "Failed - $sub_result";
-		}
-	}
-	die();
+} elseif ($share->uri_action == "upload") {
+    if ($_FILES['upload']["size"] > 10000000) {
+        http_response_code(413);
+        die("Error: file too large");
+    }
+    foreach ($_FILES as $upload) {
+        $res = $share->upload_sample($upload);
+        if ($res['type'] === 'success') {
+            echo('Success - ' . $res['sha256']);
+            if (isset($res['message'])) {
+                echo(' - ' . $res['message']);
+            } else {
+                $share->increment_query_limit();
+            }
+        } else {
+            http_response_code(400);
+            echo('Failed - ' . $res['message']);
+        }
+    }
+    die();
 }
 elseif ($share->uri_action == 'download_url') {
     header('Content-Type: application/json');

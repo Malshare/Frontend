@@ -755,8 +755,7 @@ class ServerObject
         }
         $output .= '<table class="table"><thead><tr><th>Yara Hits</th></tr></thead><tbody><tr><td>';
         $jhits = json_decode($f_row->yara);
-        $counter = 0;
-        if (is_array($jhits->yara) || is_object($jhits->yara)) {
+        if ($jhits && (is_array($jhits->yara) || is_object($jhits->yara))) {
             foreach ($jhits->yara as $yh) {
                 $output .= '<span class="label label-info">' . $yh . '</span> | ';
             }
@@ -1572,76 +1571,62 @@ class ServerObject
         return $results;
     }
 
-    public function upload_sample($up_sample)
+    public function sha256ExistsInDatabase($sha256): bool
     {
-        $this->s3Client
-        die('Not implemented yet');
-        $root_path = $this->vars_samples_root;
-        $upload_path = $up_sample['tmp_name'];
-        $table = $this->vars_table_samples;
-        $table_uploads = $this->vars_table_uploads;
-
-        $smp_md5 = $this->secure(strtolower(hash_file("md5", "$upload_path")));
-        $smp_sha1 = $this->secure(strtolower(hash_file("sha1", "$upload_path")));
-        $smp_sha256 = $this->secure(strtolower(hash_file("sha256", "$upload_path")));
-
-        $source_ip = $this->secure($_SERVER['REMOTE_ADDR']);
-        $orig_name = $this->secure($up_sample['name']);
-
-        $src_sql_query = "INSERT INTO $table_uploads (name, md5, source, ts ) VALUES ( '$orig_name', '$smp_md5', '$source_ip', UNIX_TIMESTAMP() )";
-        $res = $this->sql->query($src_sql_query);
-        $this->sql->commit();
-
-        $part1 = substr($smp_sha256, 0, 3);
-        $part2 = substr($smp_sha256, 3, 3);
-        $part3 = substr($smp_sha256, 6, 3);
-
-        $new_path = $root_path . "/$part1/$part2/$part3/$smp_sha256";
-        $dir_path = $root_path . "/$part1/$part2/$part3/";
-
-        $res = $this->sql->query("SELECT sha256 as hash FROM $table where sha256 = '$smp_sha256' limit 1;");
-        if (! $res) {
-            $this->error_die("Error 139910 (Problem saving sample. Please report to admin@malshare.com)");
+        $sql = "SELECT sha256 FROM {$this->vars_table_samples} where sha256 = ? limit 1";
+        if (! ($stmt = $this->sql->prepare($sql))) {
+            die('Error 148993. Please contact admin@malshare.com');
         }
-        if ($res->num_rows > 0) {
-            if (! is_file($root_path . "/$part1/$part2/$part3/$smp_sha256")) {
-                if (is_dir($dir_path) != true) {
-                    mkdir($dir_path, 0777, true);
-                }
+        $stmt->bind_param('s', $sha256);
+        $stmt->execute();
+        $stmt->bind_result($hash);
 
-                move_uploaded_file($upload_path, $new_path);
+        return !!$stmt->fetch();
+    }
 
-                if (file_exists($upload_path) == true) {
-                    unlink($upload_path);
-                }
+    public function upload_sample($uploadedSample): array
+    {
+        $tmpPath = $uploadedSample['tmp_name'];
+        if (!$tmpPath) {
+            return ['type' => 'error', 'message' => 'No file specified'];
+        }
+        $md5 = strtolower(hash_file("md5", "$tmpPath"));
+        $sha1 = strtolower(hash_file("sha1", "$tmpPath"));
+        $sha156 = strtolower(hash_file("sha256", "$tmpPath"));
+        $s3Key = $this->sample_key($sha156);
 
-                return " - " . $smp_sha256;
+        $remoteAddress = $this->secure($_SERVER['REMOTE_ADDR']);
+        $clientFileName = $this->secure($uploadedSample['name']);
+
+        try {
+            $sql = "INSERT INTO {$this->vars_table_uploads} (name, md5, source, ts) VALUES (?, ?, ?, UNIX_TIMESTAMP())";
+            if (! ($stmt = $this->sql->prepare($sql))) {
+                return ['type' => 'error', 'message' => 'Error 148992. Please contact admin@malshare.com'];
             }
-            unlink($upload_path);
+            $stmt->bind_param('sss', $clientFileName, $md5, $remoteAddress);
+            $stmt->execute();
 
-            return $smp_sha256;
-        }
-
-        if (is_dir($dir_path) != true) {
-            mkdir($dir_path, 0777, true);
-        }
-        move_uploaded_file($upload_path, $new_path);
-
-        if (file_exists($new_path) != true) {
-            unlink($upload_path);
-            $this->error_die("Error 139991 (Problem saving sample. Please report to admin@malshare.com)");
-        }
-
-        $sql_query = "INSERT INTO $table (md5, sha1, sha256, added, counter, pending,ftype) VALUES ( '$smp_md5', '$smp_sha1', '$smp_sha256', UNIX_TIMESTAMP(), 0, 1, '-')";
-        $res = $this->sql->query($sql_query);
-        if (! $res) {
-            if (file_exists($upload_path)) {
-                unlink($upload_path);
+            if ($this->sha256ExistsInDatabase($sha156)) {
+                if ($this->s3Client->doesObjectExist(WASABI_BUCKET, $s3Key)) {
+                    return ['type' => 'success', 'sha256' => $sha156, 'message' => 'sample already exists'];
+                }
             }
-            $this->error_die("Error 139999 (Upload failed. Please report to admin@malshare.com)");
+
+            $this->s3Client->putObject(['Bucket' => WASABI_BUCKET, 'Key' => $s3Key, 'SourceFile' => $tmpPath]);
+
+            $sql = "INSERT INTO {$this->vars_table_samples} (md5, sha1, sha256, added, counter, pending,ftype) VALUES (?, ?, ?, UNIX_TIMESTAMP(), 0, 1, '-')";
+            if (! ($stmt = $this->sql->prepare($sql))) {
+                return ['type' => 'error', 'message' => 'Error 139999. Please report to admin@malshare.com'];
+            }
+            $stmt->bind_param('sss', $md5, $sha1, $sha156);
+            $stmt->execute();
+        } finally {
+            if (file_exists($tmpPath)) {
+                unlink($tmpPath);
+            }
         }
 
-        return $smp_sha256;
+        return ['type' => 'success', 'sha256' => $sha156];
     }
 
     public function task_url_download($user_id, $durl, $drecursive)

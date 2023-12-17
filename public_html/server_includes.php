@@ -399,7 +399,7 @@ class ServerObject
                 return $row->source;
             }
         } else {
-            if ($row->source_display_name) {
+            if (isset($row->source_display_name) && $row->source_display_name) {
                 return $row->source_display_name;
             } else {
                 return 'User Submission';

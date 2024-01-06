@@ -16,13 +16,13 @@ error_reporting(E_ALL & ~E_NOTICE);
 
 /* GLOBAL CONFIG VARS */
 
-define(USERS_TABLE, "tbl_users");
+define("USERS_TABLE", "tbl_users");
+
 // DB Connection
 define("DB_HOST", getenv('MALSHARE_DB_HOST'));
 define("DB_USER", getenv('MALSHARE_DB_USER'));
 define("DB_PASS", getenv('MALSHARE_DB_PASS'));
 define("DB_DATABASE", getenv('MALSHARE_DB_DATABASE'));
-define("DB_CA_PATH", getenv('MALSHARE_DB_CERT'));
 define("DB_PORT", getenv('MALSHARE_DB_PORT'));
 
 
@@ -89,9 +89,6 @@ class ServerObject {
 	public function secure($string) { 
 		if(!$this->sql) die("Error");
 			$string = strip_tags($string);
-		if(get_magic_quotes_gpc()) {
-			$string = stripslashes($string);
-		}
 	
 		$string = $this->sql->real_escape_string($string);	
 		return $string;

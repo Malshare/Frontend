@@ -24,7 +24,8 @@
 
 <?php
 	// If user has stored API key in cookies
-	if (isset($_COOKIE['mapi_key']) && ($_COOKIE['mapi_key'] == '') ) {
+	if (isset($_COOKIE['mapi_key']) == False or ($_COOKIE['mapi_key'] == '') ) {
+		echo "<!--?-->";
 		if (stripos($_SERVER['REQUEST_URI'],'register.php') !== false) {
 			echo '<li class="active">';
 		}
@@ -35,8 +36,8 @@
 	}
 ?>
 
-<li>
-    <a href="./daily/">Daily Digest</a></li>
+<!-- <li>
+    <a href="./daily/">Daily Digest</a></li> -->
 <li <?php if (stripos($_SERVER['REQUEST_URI'],'doc.php') !== false) {echo 'class="active"';} ?>>
     <a href="doc.php">API</a></li>
 <li <?php if (stripos($_SERVER['REQUEST_URI'],'about.php') !== false) {echo 'class="active"';} ?>>

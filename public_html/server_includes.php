@@ -409,6 +409,7 @@ class ServerObject
 
     public function get_sitemap()
     {
+        $output = "";
         $table = $this->vars_table_samples;
         $table_sources = $this->vars_table_sources;
 

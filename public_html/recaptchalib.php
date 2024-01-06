@@ -42,8 +42,7 @@ class ReCaptchaResponse
 class ReCaptcha
 {
     private static $_signupUrl = "https://www.google.com/recaptcha/admin";
-    private static $_siteVerifyUrl =
-        "https://www.google.com/recaptcha/api/siteverify?";
+    private static $_siteVerifyUrl = "https://www.google.com/recaptcha/api/siteverify?";
     private $_secret;
     private static $_version = "php_1.0";
 
@@ -58,7 +57,7 @@ class ReCaptcha
             die("To use reCAPTCHA you must get an API key from <a href='"
                 . self::$_signupUrl . "'>" . self::$_signupUrl . "</a>");
         }
-        $this->_secret=$secret;
+        $this->_secret = getenv('MALSHARE_RECAPTCHA_SECRET');
     }
 
     /**
@@ -72,7 +71,7 @@ class ReCaptcha
     {
         $req = "";
         foreach ($data as $key => $value) {
-            $req .= $key . '=' . urlencode(stripslashes($value)) . '&';
+            $req .= $key . '=' . urlencode($value) . '&';
         }
 
         // Cut the last '&'
@@ -117,7 +116,7 @@ class ReCaptcha
         $getResponse = $this->_submitHttpGet(
             self::$_siteVerifyUrl,
             array (
-                'secret' => $this->_secret,
+                'secret' => getenv('MALSHARE_RECAPTCHA_SECRET'),
                 'remoteip' => $remoteIp,
                 'v' => self::$_version,
                 'response' => $response

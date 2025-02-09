@@ -38,7 +38,7 @@
 			<h3> Yara Feeds:</h3>
 			<h4>
 				<a href="https://cuckoosandbox.org/">Cuckoo Sandbox</a> <br />
-				<a href="http://yararules.com/">YaraRules Project</a> <br />
+				<a href="https://github.com/Yara-Rules/rules">YaraRules Project</a> <br />
 				<a href="https://github.com/Neo23x0">Florian Roth</a> <br />
 				<a href="https://github.com/kevthehermit/YaraRules">KevTheHermit</a> <br />
 				<a href="https://github.com/bwall/bamfdetect">BAMFDetect</a> <br />

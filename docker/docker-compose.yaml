@@ -12,14 +12,14 @@ services:
       - "3306:3306"
 
   webserver:
-    image: php:7.2-apache
+    image: php:8.2-apache
     links:
       - "mysql"
     container_name: malshare_web
     volumes:
       - ./testing/samples:/mw/repository/binaries/
       - ./testing/uploads:/mw/uploads/
-      - ../public_html:/var/www/html/
+      - ../:/var/www/
     environment:
       MALSHARE_SAMPLES_ROOT: "/mw/repository/binaries/"
       MALSHARE_UPLOAD_SAMPLES_ROOT: "/mw/uploads/"
@@ -37,8 +37,17 @@ services:
 
       VT_CONTEXT_KEY: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
       VT_CONTEXT_URL: "https://www.virustotal.com/api/v3/widget/url?mode=standalone&query="
+      WASABI_ENDPOINT:  "http://s3:80"
+      WASABI_REGION: "local"
+      WASABI_KEY: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      WASABI_SECRET: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      WASABI_BUCKET: "malshare-samples"
+
 
     command: "/bin/sh -c 'docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql && exec apache2-foreground'"
+#    command: "/bin/sh -c 'docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql && cd /var/www/ && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && apt update && apt install zip && composer install && exec apache2-foreground'"
+
+
 
     ports:
-      - "80:80"
+      - "8080:80"

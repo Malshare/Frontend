@@ -718,7 +718,6 @@ class ServerObject
         $output = '<br />
             <button type"submit">
             <a href="sampleshare.php?action=getfile&hash=' . $f_row->sha256 . '">Download</a></button>
-            </p>
 
             <table class="table">
             <thead>

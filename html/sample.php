@@ -76,7 +76,7 @@
         <div class="container">            
             <div class="jumbotron">
 <?php
-        include("server_includes.php");
+    include("server_includes.php");
     require_once "recaptchalib.php";
 
 

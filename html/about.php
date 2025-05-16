@@ -17,12 +17,6 @@
 		<p>A list of those who have helped secure MalShare through security reports can be found:  <a href="thanks.php">here</a></p>
 		<br /><center>
 		<a href="https://github.com/malshare"><img src="images/github.png" height="20" width="20">  GitHub  </a>|<a href="https://twitter.com/mal_share"><img src="images/twitter.png" height="20" width="20">  Twitter</a> 
-        <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-                <input type="hidden" name="cmd" value="_s-xclick">
-                <input type="hidden" name="hosted_button_id" value="M7W5EJNCH6B3W">
-                <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
-                <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
-        </form>
         </center>
 		
 	<div class="row">
@@ -37,11 +31,7 @@
 		<div class="span5">
 			<h3> Yara Feeds:</h3>
 			<h4>
-				<a href="https://cuckoosandbox.org/">Cuckoo Sandbox</a> <br />
 				<a href="https://github.com/Yara-Rules/rules">YaraRules Project</a> <br />
-				<a href="https://github.com/Neo23x0">Florian Roth</a> <br />
-				<a href="https://github.com/kevthehermit/YaraRules">KevTheHermit</a> <br />
-				<a href="https://github.com/bwall/bamfdetect">BAMFDetect</a> <br />
 			</h4>
 		</div>
         </div>

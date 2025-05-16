@@ -1,0 +1,418 @@
+{
+  "info": {
+    "name": "MalShare",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "List Hashes (json)",
+      "event": [],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "",
+        "url": {
+          "raw": "malshare.com/api.php?api_key={{APIKEY}}&action=getlist",
+          "protocol": "",
+          "host": [
+            "malshare",
+            "com"
+          ],
+          "path": [
+            "api.php?api_key={{APIKEY}}&action=getlist"
+          ],
+          "query": [
+            {
+              "key": "api_key",
+              "value": "{{APIKEY}}"
+            },
+            {
+              "key": "action",
+              "value": "getlist"
+            }
+          ],
+          "variable": []
+        }
+      }
+    },
+    {
+      "name": "List Hashes (text)",
+      "event": [],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "",
+        "url": {
+          "raw": "malshare.com/api.php?api_key={{APIKEY}}&action=getlistraw",
+          "protocol": "",
+          "host": [
+            "malshare",
+            "com"
+          ],
+          "path": [
+            "api.php?api_key={{APIKEY}}&action=getlistraw"
+          ],
+          "query": [
+            {
+              "key": "api_key",
+              "value": "{{APIKEY}}"
+            },
+            {
+              "key": "action",
+              "value": "getlistraw"
+            }
+          ],
+          "variable": []
+        }
+      }
+    },
+    {
+      "name": "List Sources (json)",
+      "event": [],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "",
+        "url": {
+          "raw": "malshare.com/api.php?api_key={{APIKEY}}&action=getsources",
+          "protocol": "",
+          "host": [
+            "malshare",
+            "com"
+          ],
+          "path": [
+            "api.php?api_key={{APIKEY}}&action=getsources"
+          ],
+          "query": [
+            {
+              "key": "api_key",
+              "value": "{{APIKEY}}"
+            },
+            {
+              "key": "action",
+              "value": "getsources"
+            }
+          ],
+          "variable": []
+        }
+      }
+    },
+    {
+      "name": "List Sources (text)",
+      "event": [],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "",
+        "url": {
+          "raw": "malshare.com/api.php?api_key={{APIKEY}}&action=getsourcesraw",
+          "protocol": "",
+          "host": [
+            "malshare",
+            "com"
+          ],
+          "path": [
+            "api.php?api_key={{APIKEY}}&action=getsourcesraw"
+          ],
+          "query": [
+            {
+              "key": "api_key",
+              "value": "{{APIKEY}}"
+            },
+            {
+              "key": "action",
+              "value": "getsourcesraw"
+            }
+          ],
+          "variable": []
+        }
+      }
+    },
+    {
+      "name": "Download",
+      "event": [],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "",
+        "url": {
+          "raw": "malshare.com/api.php?api_key={{APIKEY}}&action=getfile&hash=042f700242f18554207c1dc740475ae0",
+          "protocol": "",
+          "host": [
+            "malshare",
+            "com"
+          ],
+          "path": [
+            "api.php?api_key={{APIKEY}}&action=getfile&hash=042f700242f18554207c1dc740475ae0"
+          ],
+          "query": [
+            {
+              "key": "api_key",
+              "value": "{{APIKEY}}"
+            },
+            {
+              "key": "action",
+              "value": "getfile"
+            },
+            {
+              "key": "hash",
+              "value": "042f700242f18554207c1dc740475ae0"
+            }
+          ],
+          "variable": []
+        }
+      }
+    },
+    {
+      "name": "Get Details",
+      "event": [],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "",
+        "url": {
+          "raw": "malshare.com/api.php?api_key={{APIKEY}}&action=details&hash=042f700242f18554207c1dc740475ae0",
+          "protocol": "",
+          "host": [
+            "malshare",
+            "com"
+          ],
+          "path": [
+            "api.php?api_key={{APIKEY}}&action=details&hash=042f700242f18554207c1dc740475ae0"
+          ],
+          "query": [
+            {
+              "key": "api_key",
+              "value": "{{APIKEY}}"
+            },
+            {
+              "key": "action",
+              "value": "details"
+            },
+            {
+              "key": "hash",
+              "value": "042f700242f18554207c1dc740475ae0"
+            }
+          ],
+          "variable": []
+        }
+      }
+    },
+    {
+      "name": "Hash Lookup",
+      "event": [],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "",
+        "url": {
+          "raw": "malshare.com/api.php?api_key={{APIKEY}}&action=hashlookupdetails&hash=042f700242f18554207c1dc740475ae0",
+          "protocol": "",
+          "host": [
+            "malshare",
+            "com"
+          ],
+          "path": [
+            "api.php?api_key={{APIKEY}}&action=hashlookupdetails&hash=042f700242f18554207c1dc740475ae0"
+          ],
+          "query": [
+            {
+              "key": "api_key",
+              "value": "{{APIKEY}}"
+            },
+            {
+              "key": "action",
+              "value": "hashlookupdetails"
+            },
+            {
+              "key": "hash",
+              "value": "042f700242f18554207c1dc740475ae0"
+            }
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "0932edb59a0aac276a3afe4507141ac4c0688f18f52bc40c0b267a470b0a4c8b\n30ea3c94131cca124ada0e5af00ee43b338521d674476dbd268f65a6034e3b0e\ne379a48b5a9596fe4245e137c55b898a7d66ccee120cbdbb29911fc6a83e4120\ne0a689054086e6373ff974bd29a1d6e5210c45e7c8454d3d380905a238edeb1c\n",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "List Type",
+      "event": [],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "",
+        "url": {
+          "raw": "malshare.com/api.php?api_key={{APIKEY}}&action=type&type=PE32",
+          "protocol": "",
+          "host": [
+            "malshare",
+            "com"
+          ],
+          "path": [
+            "api.php?api_key={{APIKEY}}&action=type&type=PE32"
+          ],
+          "query": [
+            {
+              "key": "api_key",
+              "value": "{{APIKEY}}"
+            },
+            {
+              "key": "action",
+              "value": "type"
+            },
+            {
+              "key": "type",
+              "value": "PE32"
+            }
+          ],
+          "variable": []
+        }
+      }
+    },
+    {
+      "name": "Search",
+      "event": [],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "",
+        "url": {
+          "raw": "malshare.com/api.php?api_key={{APIKEY}}&action=type&type=PE32",
+          "protocol": "",
+          "host": [
+            "malshare",
+            "com"
+          ],
+          "path": [
+            "api.php?api_key={{APIKEY}}&action=type&type=PE32"
+          ],
+          "query": [
+            {
+              "key": "api_key",
+              "value": "{{APIKEY}}"
+            },
+            {
+              "key": "action",
+              "value": "type"
+            },
+            {
+              "key": "type",
+              "value": "PE32"
+            }
+          ],
+          "variable": []
+        }
+      }
+    },
+    {
+      "name": "Get Types and counts",
+      "event": [],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "",
+        "url": {
+          "raw": "malshare.com/api.php?api_key={{APIKEY}}&action=gettypes",
+          "protocol": "",
+          "host": [
+            "malshare",
+            "com"
+          ],
+          "path": [
+            "api.php?api_key={{APIKEY}}&action=gettypes"
+          ],
+          "query": [
+            {
+              "key": "api_key",
+              "value": "{{APIKEY}}"
+            },
+            {
+              "key": "action",
+              "value": "gettypes"
+            }
+          ],
+          "variable": []
+        }
+      }
+    },
+    {
+      "name": "Get file names",
+      "event": [],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "",
+        "url": {
+          "raw": "malshare.com/api.php?api_key={{APIKEY}}&action=gettypes",
+          "protocol": "",
+          "host": [
+            "malshare",
+            "com"
+          ],
+          "path": [
+            "api.php?api_key={{APIKEY}}&action=gettypes"
+          ],
+          "query": [
+            {
+              "key": "api_key",
+              "value": "{{APIKEY}}"
+            },
+            {
+              "key": "action",
+              "value": "gettypes"
+            }
+          ],
+          "variable": []
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "APIKEY",
+      "value": "",
+      "type": "default"
+    }
+  ]
+}

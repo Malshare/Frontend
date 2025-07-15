@@ -1,10 +1,11 @@
 version: '3'
 services:
   mysql:
-    image: mysql:5.7.35
+    image: mysql:8
     container_name: malshare_db
     volumes:
-      - ../malshare_db.sql:/docker-entrypoint-initdb.d/dump.sql
+      - malshare_db_data:/var/lib/mysql
+      - ../malshare_db.sql:/docker-entrypoint-initdb.d/init.sql:ro
     environment:
       - MYSQL_ROOT_PASSWORD=this_is_not_the_prod_password
       - MYSQL_DATABASE=malshare_db
@@ -51,3 +52,7 @@ services:
 
     ports:
       - "8080:80"
+
+
+volumes:
+  malshare_db_data:

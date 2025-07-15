@@ -10,7 +10,7 @@ require dirname(__FILE__) . '/../vendor/autoload.php';
 /*                                            */
 /* ****************************************** */
 
-error_reporting(E_ALL & ~E_NOTICE);
+// error_reporting(E_ALL & ~E_NOTICE);
 
 /* GLOBAL CONFIG VARS */
 
@@ -123,6 +123,8 @@ class ServerObject
     public $uri_hash;
     public $uri_type;
     public $uri_query;
+    public $uri_private;
+    public $uri_path;
 
 
     public $vars_dirty_root;
@@ -224,6 +226,7 @@ class ServerObject
         if (! $this->sql) {
             die("ERROR");
         }
+
         $string = strip_tags($string);
         $string = stripslashes($string);
 
@@ -452,9 +455,12 @@ class ServerObject
         return $yaraRuleId;
     }
 
+
+
     public function sample_search($api_query = false)
     {
         $table = $this->vars_table_samples;
+        $table_samples = $this->vars_table_samples;
         $table_sources = $this->vars_table_sources;
         $table_searches = $this->vars_table_searches;
         $table_pub_searches = $this->vars_table_pub_searches;
@@ -484,24 +490,37 @@ class ServerObject
             } elseif (strlen($searchValue) == 64) {
                 return $this->redirect("sample.php?action=detail&hash=" . $searchValue);
             }
-        }
-
-        if (substr($searchValue, 0, 7) == "source:") {
-            $rhash = trim(explode(":", $searchValue)[1]);
-            $res = $this->sql->query("SELECT distinct(id) from $table_sources where source like '%$rhash%' LIMIT 1");
         } else {
-            if (substr($searchValue, 0, 4) == "yrp/") { // startswith
-                $yaraId = $this->getRuleIdByName(substr($_REQUEST["query"], 4));
-                if (! $yaraId) {
-                    return '<p>YARA rule with this name could not be found</p>';
-                }
-                $sql = 'SELECT s.id FROM tbl_samples s LEFT JOIN tbl_matches m ON (s.id = m.sample_id) WHERE (m.yara_id = ' . $yaraId . ') ORDER BY s.added DESC LIMIT 100';
+            if (strlen($searchValue) == 32) {
+                $sql = 'SELECT id FROM tbl_samples WHERE md5 = = "' . $searchValue .'"';
                 $res = $this->sql->query($sql);
-            } else {
-                $searchValueLower = strtolower($searchValue);
-                $res = $this->sql->query(
-                    "SELECT id FROM tbl_sample_sources WHERE source LIKE '$searchValueLower%' LIMIT 100"
-                );
+
+            } elseif (strlen($searchValue) == 40) {
+                $sql = 'SELECT id FROM tbl_samples WHERE sha1 = "' . $searchValue .'"';
+                $res = $this->sql->query($sql);
+            } elseif (strlen($searchValue) == 64) {
+                $sql = 'SELECT id FROM tbl_samples WHERE sha256 = "' . $searchValue .'"';
+                $res = $this->sql->query($sql);
+            }            
+            else {
+                if (substr($searchValue, 0, 7) == "source:") {
+                    $rhash = trim(explode(":", $searchValue)[1]);
+                    $res = $this->sql->query("SELECT distinct(id) from $table_sources where source like '%$rhash%' LIMIT 1");
+                } else {
+                    if (substr($searchValue, 0, 4) == "yrp/") { // startswith
+                        $yaraId = $this->getRuleIdByName(substr($_REQUEST["query"], 4));
+                        if (! $yaraId) {
+                            return '<p>YARA rule with this name could not be found</p>';
+                        }
+                        $sql = 'SELECT s.id FROM tbl_samples s LEFT JOIN tbl_matches m ON (s.id = m.sample_id) WHERE (m.yara_id = ' . $yaraId . ') ORDER BY s.added DESC LIMIT 100';
+                        $res = $this->sql->query($sql);
+                    } else {
+                        $searchValueLower = strtolower($searchValue);
+                        $res = $this->sql->query(
+                            "SELECT id FROM tbl_sample_sources WHERE source LIKE '$searchValueLower%' LIMIT 100"
+                        );
+                    }
+                }
             }
         }
 
@@ -1353,6 +1372,26 @@ class ServerObject
         }
     }
 
+    public function terminate_api_key()
+    {
+        header('Content-Type: application/json');
+
+        $table = $this->vars_table_users;
+        $api_key =  $this->secure($this->uri_api_key);
+
+
+        $res = $this->sql->query(
+            "UPDATE $table SET active = 0 WHERE api_key = '$api_key' "
+        );
+        if (! $res) {
+            $this->error_die("Error 432999 (Please report to admin@malshare.com)");
+        }
+
+        $output["message"] = "Thank you";
+
+        return json_encode($output, JSON_UNESCAPED_SLASHES);
+    }
+
     public function get_user_limit()
     {
         header('Content-Type: application/json');
@@ -1420,7 +1459,7 @@ class ServerObject
                 "UPDATE $table SET query_limit = query_limit - 1, last_query = UNIX_TIMESTAMP() WHERE api_key= '$api_key' "
             );
             if (! $res) {
-                $this->error_die("Error 432104 (Please report to admin@malshare.com)");
+                $this->error_die("Error 492104 (Please report to admin@malshare.com)");
             }
 
         }
@@ -1433,7 +1472,7 @@ class ServerObject
 
         $res = $this->sql->query("UPDATE $table SET query_limit = query_limit + 1 WHERE api_key= '$api_key' ");
         if (! $res) {
-            $this->error_die("Error 432104 (Please report to admin@malshare.com)");
+            $this->error_die("Error 432114 (Please report to admin@malshare.com)");
         }
     }
 

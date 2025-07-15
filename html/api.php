@@ -30,6 +30,12 @@ if ($user->id === null) {
     die("User specified in `api_key` GET variable does not exist");
 }
 
+if($share->uri_action=="terminate" ) {
+    $contents = $share->terminate_api_key();
+    echo $contents;
+    die();
+}
+
 if($share->uri_action=="getlist" ) {
 	$res = $share->update_query_limit();
 	$contents = $share->get_list();
@@ -104,7 +110,8 @@ elseif($share->uri_action=="search") {
 	$sample = $share->sample_search(true);
 	echo $sample;
 	die();
-} elseif ($share->uri_action == "upload") {
+} 
+elseif ($share->uri_action == "upload") {
     if ($_FILES['upload']["size"] > 10000000) {
         http_response_code(413);
         die("Error: file too large");

@@ -70,20 +70,24 @@ CREATE TABLE `tbl_sample_partners` (
 
 DROP TABLE IF EXISTS `tbl_sample_sources`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbl_sample_sources` (
-  `id` int(10) unsigned NOT NULL,
+  `id` int unsigned NOT NULL,
   `source` text,
-  `added` int(20) DEFAULT NULL,
-  `sample_partner_submission` int(11) DEFAULT NULL,
+  `added` int DEFAULT NULL,
+  `sample_partner_submission` int DEFAULT NULL,
+  `baseid` int NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`baseid`),
   KEY `id` (`id`),
   KEY `sample_source` (`source`(128)),
   KEY `idx_tbl_sample_sourced_added` (`added`),
   KEY `sample_partner_submission` (`sample_partner_submission`),
   CONSTRAINT `tbl_sample_sources_ibfk_1` FOREIGN KEY (`id`) REFERENCES `tbl_samples` (`id`),
   CONSTRAINT `tbl_sample_sources_ibfk_2` FOREIGN KEY (`sample_partner_submission`) REFERENCES `tbl_sample_partners` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=9364345 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+
 
 --
 -- Table structure for table `tbl_samples`
@@ -260,7 +264,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `tbl_sample_sources` WRITE;
 /*!40000 ALTER TABLE `tbl_sample_sources` DISABLE KEYS */;
-INSERT INTO `tbl_sample_sources` VALUES (3775773,'http://www.gtCartographic.co.uk/9hgfdfyr6',1507255280,NULL,1369555),(3775773,'http://ilibarcelos.pt/9hgfdfyr6',1507255302,NULL,1369557),(3775773,'http://www.100kisses.org/9hgfdfyr6\r',1507331085,NULL,1369699),(3775773,'http://pnkparamount.com/9hgfdfyr6\r',1507331106,NULL,1369700),(3775773,'http://highpressurewelding.co.uk/9hgfdfyr6\r',1507331108,NULL,1369701),(3775773,'http://georginabringas.com/9hgfdfyr6\r',1507331108,NULL,1369702),(3775773,'http://eurecas.org/9hgfdfyr6\r',1507331111,NULL,1369703),(3775773,'http://emeryconsult.com/9hgfdfyr6\r',1507331112,NULL,1369704),(3775773,'http://ecofloraholland.nl/9hgfdfyr6\r',1507331116,NULL,1369705),(3775773,'http://demopowerindo.com/9hgfdfyr6\r',1507331119,NULL,1369706),(3775773,'http://conxibit.com/9hgfdfyr6\r',1507331127,NULL,1369707),(3775773,'http://pnkparamount.com/9hgfdfyr6',1507380682,NULL,1369784),(3775773,'http://highpressurewelding.co.uk/9hgfdfyr6',1507380707,NULL,1369786),(3775773,'http://georginabringas.com/9hgfdfyr6',1507380713,NULL,1369788),(3775773,'http://emeryconsult.com/9hgfdfyr6',1507380728,NULL,1369790),(3775773,'http://ecofloraholland.nl/9hgfdfyr6',1507380731,NULL,1369791),(3775773,'http://conxibit.com/9hgfdfyr6',1507380735,NULL,1369793),(3775773,'http://www.100kisses.org/9hgfdfyr6',1507423742,NULL,1369807),(3775773,'http://eurecas.org/9hgfdfyr6',1507423773,NULL,1369810),(3775773,'http://demopowerindo.com/9hgfdfyr6',1507423790,NULL,1369811),(3775773,'http://unifiedfloor.com/9hgfdfyr6\r',1507596400,NULL,1369945),(3775773,'http://unifiedfloor.com/9hgfdfyr6',1507639573,NULL,1370009);
+INSERT INTO `tbl_sample_sources` VALUES (3775773,'http://www.gtCartographic.co.uk/9hgfdfyr6',1507255280,NULL,1369555),(3775773,'http://ilibarcelos.pt/9hgfdfyr6',1507255302,NULL,1369557),(3775773,'http://www.100kisses.org/9hgfdfyr6',1507331085,NULL,1369699),(3775773,'http://pnkparamount.com/9hgfdfyr6',1507331106,NULL,1369700),(3775773,'http://highpressurewelding.co.uk/9hgfdfyr6',1507331108,NULL,1369701),(3775773,'http://georginabringas.com/9hgfdfyr6',1507331108,NULL,1369702),(3775773,'http://eurecas.org/9hgfdfyr6',1507331111,NULL,1369703),(3775773,'http://emeryconsult.com/9hgfdfyr6',1507331112,NULL,1369704),(3775773,'http://ecofloraholland.nl/9hgfdfyr6',1507331116,NULL,1369705),(3775773,'http://demopowerindo.com/9hgfdfyr6',1507331119,NULL,1369706),(3775773,'http://conxibit.com/9hgfdfyr6',1507331127,NULL,1369707),(3775773,'http://pnkparamount.com/9hgfdfyr6',1507380682,NULL,1369784),(3775773,'http://highpressurewelding.co.uk/9hgfdfyr6',1507380707,NULL,1369786),(3775773,'http://georginabringas.com/9hgfdfyr6',1507380713,NULL,1369788),(3775773,'http://emeryconsult.com/9hgfdfyr6',1507380728,NULL,1369790),(3775773,'http://ecofloraholland.nl/9hgfdfyr6',1507380731,NULL,1369791),(3775773,'http://conxibit.com/9hgfdfyr6',1507380735,NULL,1369793),(3775773,'http://www.100kisses.org/9hgfdfyr6',1507423742,NULL,1369807),(3775773,'http://eurecas.org/9hgfdfyr6',1507423773,NULL,1369810),(3775773,'http://demopowerindo.com/9hgfdfyr6',1507423790,NULL,1369811),(3775773,'http://unifiedfloor.com/9hgfdfyr6',1507596400,NULL,1369945),(3775773,'http://unifiedfloor.com/9hgfdfyr6',1507639573,NULL,1370009);
 /*!40000 ALTER TABLE `tbl_sample_sources` ENABLE KEYS */;
 UNLOCK TABLES;
 

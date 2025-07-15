@@ -456,15 +456,13 @@ class ServerObject
     }
 
 
-
     public function sample_search($api_query = false)
     {
-        $table = $this->vars_table_samples;
         $table_samples = $this->vars_table_samples;
         $table_sources = $this->vars_table_sources;
-        $table_searches = $this->vars_table_searches;
-        $table_pub_searches = $this->vars_table_pub_searches;
         $table_sample_partners = $this->vars_table_sample_partners;
+        $table_matches = "tbl_matches";
+        $table_yara = "tbl_yara";
 
         $searchValue = $this->secure($this->uri_query);
         $searchPrivate = 0;
@@ -474,55 +472,46 @@ class ServerObject
         }
 
         if (strlen($searchValue) < 3) {
-            $this->error_die("Query must by longer then 3 characters");
+            $this->error_die("Query must be longer than 3 characters");
         }
 
-        $src_sql_query = "INSERT INTO $table_searches (query, source, ts, private ) VALUES ( '$searchValue', '$source_ip', UNIX_TIMESTAMP(), '$searchPrivate' )";
-        $this->sql->query($src_sql_query);
+        // Log the search
+        $src_sql_query = "INSERT INTO {$this->vars_table_searches} (query, source, ts, private ) VALUES ( ?, ?, UNIX_TIMESTAMP(), ? )";
+        $stmt = $this->sql->prepare($src_sql_query);
+        $stmt->bind_param('ssi', $searchValue, $source_ip, $searchPrivate);
+        $stmt->execute();
         $this->sql->commit();
 
-        if ($api_query == false) {
-            # If search by hash, just take users to the sample details page
-            if (strlen($searchValue) == 32) {
-                return $this->redirect("sample.php?action=detail&hash=" . $searchValue);
-            } elseif (strlen($searchValue) == 40) {
-                return $this->redirect("sample.php?action=detail&hash=" . $searchValue);
-            } elseif (strlen($searchValue) == 64) {
-                return $this->redirect("sample.php?action=detail&hash=" . $searchValue);
-            }
-        } else {
-            if (strlen($searchValue) == 32) {
-                $sql = 'SELECT id FROM tbl_samples WHERE md5 = = "' . $searchValue .'"';
-                $res = $this->sql->query($sql);
+        // Updated SQL: includes YARA rule name search
+        $query = "
+            SELECT DISTINCT s.id
+            FROM {$table_samples} s
+            LEFT JOIN {$table_sources} src ON s.id = src.id
+            LEFT JOIN {$table_matches} m ON s.id = m.sample_id
+            LEFT JOIN {$table_yara} y ON m.yara_id = y.id
+            WHERE
+                s.md5 = ?
+                OR s.sha1 = ?
+                OR s.sha256 = ?
+                OR src.source LIKE CONCAT('%', ?, '%')
+                OR y.rule_name LIKE CONCAT('%', ?, '%')
+            GROUP BY s.id
+            LIMIT 100
+        ";
+        // echo($query);
+        $stmt = $this->sql->prepare($query);
+        $stmt->bind_param(
+            'sssss',
+            $searchValue,
+            $searchValue,
+            $searchValue,
+            $searchValue,
+            $searchValue // for YARA rule name
+        );
+        $stmt->execute();
+        $res = $stmt->get_result();
 
-            } elseif (strlen($searchValue) == 40) {
-                $sql = 'SELECT id FROM tbl_samples WHERE sha1 = "' . $searchValue .'"';
-                $res = $this->sql->query($sql);
-            } elseif (strlen($searchValue) == 64) {
-                $sql = 'SELECT id FROM tbl_samples WHERE sha256 = "' . $searchValue .'"';
-                $res = $this->sql->query($sql);
-            }            
-            else {
-                if (substr($searchValue, 0, 7) == "source:") {
-                    $rhash = trim(explode(":", $searchValue)[1]);
-                    $res = $this->sql->query("SELECT distinct(id) from $table_sources where source like '%$rhash%' LIMIT 1");
-                } else {
-                    if (substr($searchValue, 0, 4) == "yrp/") { // startswith
-                        $yaraId = $this->getRuleIdByName(substr($_REQUEST["query"], 4));
-                        if (! $yaraId) {
-                            return '<p>YARA rule with this name could not be found</p>';
-                        }
-                        $sql = 'SELECT s.id FROM tbl_samples s LEFT JOIN tbl_matches m ON (s.id = m.sample_id) WHERE (m.yara_id = ' . $yaraId . ') ORDER BY s.added DESC LIMIT 100';
-                        $res = $this->sql->query($sql);
-                    } else {
-                        $searchValueLower = strtolower($searchValue);
-                        $res = $this->sql->query(
-                            "SELECT id FROM tbl_sample_sources WHERE source LIKE '$searchValueLower%' LIMIT 100"
-                        );
-                    }
-                }
-            }
-        }
+        // echo($res);
 
         if (! $res) {
             $this->error_die("Error 13843 (System error while searching.  Please contact admin@malshare.com)");
@@ -531,44 +520,56 @@ class ServerObject
         // Build header / if not API
         if ($api_query == false) {
             $output = '<table class="table table-bordered table-striped" style="table-layout: fixed;">
-        <thead>  <tr>
-        <th style="width: 17%;">SHA256 Hash</th>
-        <th style="width: 5%">File type</th>
-        <th style="width: 13%">Added</th>
-        <th style="width: 25%">Source</th>
-        <th style="width: 40%">Yara Hits</th>
-        </tr>  </thead>  <tbody>';
+            <thead>  <tr>
+            <th style="width: 17%;">SHA256 Hash</th>
+            <th style="width: 5%">File type</th>
+            <th style="width: 13%">Added</th>
+            <th style="width: 25%">Source</th>
+            <th style="width: 40%">Yara Hits</th>
+            </tr>  </thead>  <tbody>';
         } else {
             header('Content-Type: application/json');
             $output = array();
+
+            if ($res->num_rows == 0) {
+                http_response_code(404);
+                return json_encode($output, JSON_UNESCAPED_SLASHES);
+
+            }
+
         }
+
         // Fetch data
         $totalHits = 0;
         while ($s_row = $res->fetch_object()) {
-            $r_res = $this->sql->query(
-                "
+            $details_query = "
                 SELECT
-                       $table.id AS id,
-                       $table.md5 AS md5,
-                       $table.sha1 AS sha1,
-                       $table.sha256 AS sha256,
-                       $table.added AS added,
-                       $table.ftype AS ftype,
-                       $table.yara AS yara,
-                       $table_sources.source AS source,
-                       $table_sample_partners.display_name AS display_name_source,
-                       $table.parent_id
-                FROM $table
-                    LEFT JOIN $table_sources ON $table.id = $table_sources.id
-                    LEFT JOIN $table_sample_partners ON $table_sources.sample_partner_submission = $table_sample_partners.id
-                WHERE $table.id=" . $s_row->id
-            );
+                       s.id AS id,
+                       s.md5 AS md5,
+                       s.sha1 AS sha1,
+                       s.sha256 AS sha256,
+                       s.added AS added,
+                       s.ftype AS ftype,
+                       s.yara AS yara,
+                       src.source AS source,
+                       sp.display_name AS display_name_source,
+                       s.parent_id
+                FROM {$table_samples} s
+                    LEFT JOIN {$table_sources} src ON s.id = src.id
+                    LEFT JOIN {$table_sample_partners} sp ON src.sample_partner_submission = sp.id
+                WHERE s.id=?
+                LIMIT 1
+            ";
+            $details_stmt = $this->sql->prepare($details_query);
+            $details_stmt->bind_param('i', $s_row->id);
+            $details_stmt->execute();
+            $r_res = $details_stmt->get_result();
 
             if (! $r_res) {
                 $this->error_die("Error 13842 (Problem fetching search results.  Please contact admin@malshare.com)");
             }
             if ($r_res->num_rows == 0) {
-                next();
+                continue;
             }
 
             $sample_row = $r_res->fetch_object();
@@ -591,16 +592,14 @@ class ServerObject
                 $yhits = "";
                 $jhits = json_decode($sample_row->yara);
 
-                if (is_array($jhits->yara) || is_object($jhits->yara)) {
+                if ($jhits && (is_array($jhits->yara) || is_object($jhits->yara))) {
                     $extend = 0;
                     $counter = 0;
                     foreach ($jhits->yara as $yh) {
                         $counter += 1;
                         if ($counter > 4 && $extend == 0) {
-
-                            $yhits .= '<a id="c_yara_' . $sample_row->sha256 . '" class="none" href="#" onclick="document.getElementById(\'yara_' . $sample_row->sha256 . '\').style= \'block\'; document.getElementById(\'c_yara_' . $sample_row->sha256 . '\').className = \'hidden\';">[+]</a>';
+                            $yhits .= '<a id="c_yara_' . $sample_row->sha256 . '" class="none" href="#" onclick="document.getElementById(\'yara_' . $sample_row->sha256 . '\').style= \'block\'; document.getElementById(\'c_yara_' . $sample_row->sha256 . '\').style.display=\'none\'; return false;">More...</a>';
                             $yhits .= '<div id="yara_' . $sample_row->sha256 . '" style="display: none;">';
-
                             $extend = 1;
                         }
                         $yhits .= '<a href="search.php?query=' . $yh . '"><span class="label label-info">' . $yh . '</span></a>  ';
@@ -610,11 +609,8 @@ class ServerObject
                     }
                 }
                 $output .= '<td>' . $yhits . '</td></tr>';
-                $output .= '</tr>';
             } else {
                 $t = array(
-                    //                    'id' => $sample_row->id,
-                    //                    'parentid' => $sample_row->parent_id,
                     'md5' => $sample_row->md5,
                     'sha1' => $sample_row->sha1,
                     'sha256' => $sample_row->sha256,
@@ -634,57 +630,54 @@ class ServerObject
                     }
 
                     foreach ($parent_ids as $pid) {
-                        $full_res = $this->sql->query("SELECT md5, sha1, sha256 FROM $table WHERE id = " . $pid);
+                        $full_res = $this->sql->query("SELECT md5, sha1, sha256 FROM {$table_samples} WHERE id = " . intval($pid));
                         if (! $full_res) {
-                            $this->error_die(
-                                "Error 138413 (Problem getting sample parents. Please contact admin@malshare.com)"
-                            );
+                            $this->error_die("Error 138413 (Problem getting sample parents. Please contact admin@malshare.com)");
                         }
-                        if (! $full_res->num_rows == 0) {
-                            while ($s_row = $full_res->fetch_object()) {
+                        if ($full_res->num_rows > 0) {
+                            while ($parent_row = $full_res->fetch_object()) {
                                 array_push(
                                     $t['parentfiles'],
-                                    array('md5' => $s_row->md5, 'sha1' => $s_row->sha1, 'sha256' => $s_row->sha256)
+                                    array('md5' => $parent_row->md5, 'sha1' => $parent_row->sha1, 'sha256' => $parent_row->sha256)
                                 );
                             }
                         }
                     }
                 }
 
-                $full_res = $this->sql->query(
-                    "SELECT md5, sha1, sha256 FROM $table WHERE parent_id = " . $sample_row->id
-                );
+                $full_res = $this->sql->query("SELECT md5, sha1, sha256 FROM {$table_samples} WHERE parent_id = " . intval($sample_row->id));
                 if (! $full_res) {
                     die("Error 13849 ( Problem getting child files. Please contact admin@malshare.com)");
                 }
-                if (! $full_res->num_rows == 0) {
-                    while ($s_row = $full_res->fetch_object()) {
+                if ($full_res->num_rows > 0) {
+                    while ($sub_row = $full_res->fetch_object()) {
                         array_push(
                             $t['subfiles'],
-                            array('md5' => $s_row->md5, 'sha1' => $s_row->sha1, 'sha256' => $s_row->sha256)
+                            array('md5' => $sub_row->md5, 'sha1' => $sub_row->sha1, 'sha256' => $sub_row->sha256)
                         );
                     }
                 }
 
-                #$output .= json_encode($t, JSON_UNESCAPED_SLASHES);
                 array_push($output, $t);
             }
         }
 
         if (($api_query == false) && ($totalHits > 0) && ($searchPrivate == 0)) {
-            $src_sql_query = "INSERT INTO $table_pub_searches (query, ts ) VALUES ( '$searchValue',  UNIX_TIMESTAMP() )";
-            $res = $this->sql->query($src_sql_query);
+            $src_sql_query = "INSERT INTO {$this->vars_table_pub_searches} (query, ts ) VALUES ( ?, UNIX_TIMESTAMP() )";
+            $stmt = $this->sql->prepare($src_sql_query);
+            $stmt->bind_param('s', $searchValue);
+            $stmt->execute();
             $this->sql->commit();
         }
 
         if ($api_query == false) {
-            $output .= '</tbody></table>  ';
-
+            $output .= '</tbody></table>';
             return $output;
         } else {
             return json_encode($output, JSON_UNESCAPED_SLASHES);
         }
     }
+
 
     public function get_details()
     {
@@ -1377,8 +1370,7 @@ class ServerObject
         header('Content-Type: application/json');
 
         $table = $this->vars_table_users;
-        $api_key =  $this->secure($this->uri_api_key);
-
+        $api_key = $this->uri_api_key;
 
         $res = $this->sql->query(
             "UPDATE $table SET active = 0 WHERE api_key = '$api_key' "

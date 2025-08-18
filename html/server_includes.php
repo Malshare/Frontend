@@ -480,6 +480,7 @@ class ServerObject
         $src_sql_query = "INSERT INTO $table_searches (query, source, ts, private ) VALUES ( '$searchValue', '$source_ip', UNIX_TIMESTAMP(), '$searchPrivate' )";
         $this->sql->query($src_sql_query);
         $this->sql->commit();
+        $res = null;
 
         if ($api_query == false) {
             # If search by hash, just take users to the sample details page

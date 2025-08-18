@@ -494,7 +494,9 @@ class ServerObject
             } elseif (strlen($searchValue) == 64) {
                 return $this->redirect("sample.php?action=detail&hash=" . $searchValue);
             }
-        } elseif (strlen($searchValue) == 32) {
+        }
+
+        if (strlen($searchValue) == 32) {
             $sql = 'SELECT id FROM tbl_samples WHERE md5 = "' . $searchValue . '"';
             $res = $this->sql->query($sql);
         } elseif (strlen($searchValue) == 40) {

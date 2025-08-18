@@ -403,7 +403,7 @@ class ServerObject
                 return $row->source;
             }
         } else {
-            if (isset($hasSdn) {
+            if ($hasSdn) {
                 return $row->source_display_name;
             } else {
                 return 'User Submission';

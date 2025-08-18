@@ -493,7 +493,7 @@ class ServerObject
             }
         } else {
             if (strlen($searchValue) == 32) {
-                $sql = 'SELECT id FROM tbl_samples WHERE md5 = = "' . $searchValue .'"';
+                $sql = 'SELECT id FROM tbl_samples WHERE md5 = "' . $searchValue .'"';
                 $res = $this->sql->query($sql);
 
             } elseif (strlen($searchValue) == 40) {

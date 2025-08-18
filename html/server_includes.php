@@ -395,14 +395,15 @@ class ServerObject
 
     public function sourceForDisplay($row, $separator = ' | ')
     {
+        $hasSdn = isset($row->source_display_name) && $row->source_display_name;
         if ($row->source) {
-            if ($row->source_display_name) {
+            if ($hasSdn) {
                 return $row->source . $separator . $row->source_display_name;
             } else {
                 return $row->source;
             }
         } else {
-            if (isset($row->source_display_name) && $row->source_display_name) {
+            if (isset($hasSdn) {
                 return $row->source_display_name;
             } else {
                 return 'User Submission';

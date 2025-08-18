@@ -483,7 +483,9 @@ class ServerObject
         $this->sql->commit();
         $res = null;
 
-        if ($api_query == false) {
+        $searchValueLower = strtolower($searchValue);
+        $notAnApiQuery = $api_query == false;
+        if ($notAnApiQuery) {
             # If search by hash, just take users to the sample details page
             if (strlen($searchValue) == 32) {
                 return $this->redirect("sample.php?action=detail&hash=" . $searchValue);
@@ -504,7 +506,7 @@ class ServerObject
         } elseif (substr($searchValue, 0, 7) == "source:") {
             $rhash = trim(explode(":", $searchValue)[1]);
             $res = $this->sql->query("SELECT distinct(id) from $table_sources where source like '%$rhash%' LIMIT 1");
-        } elseif (substr($searchValue, 0, 4) == "yrp/") { // startswith
+        } elseif (substr($searchValueLower, 0, 4) == "yrp/") { // startswith
             $yaraId = $this->getRuleIdByName(substr($_REQUEST["query"], 4));
             if (!$yaraId) {
                 return '<p>YARA rule with this name could not be found</p>';
@@ -512,7 +514,6 @@ class ServerObject
             $sql = 'SELECT s.id FROM tbl_samples s LEFT JOIN tbl_matches m ON (s.id = m.sample_id) WHERE (m.yara_id = ' . $yaraId . ') ORDER BY s.added DESC LIMIT 100';
             $res = $this->sql->query($sql);
         } else {
-            $searchValueLower = strtolower($searchValue);
             $res = $this->sql->query(
                 "SELECT id FROM tbl_sample_sources WHERE source LIKE '$searchValueLower%' LIMIT 100"
             );
@@ -523,7 +524,7 @@ class ServerObject
         }
 
         // Build header / if not API
-        if ($api_query == false) {
+        if ($notAnApiQuery) {
             $output = '<table class="table table-bordered table-striped" style="table-layout: fixed;">
         <thead>  <tr>
         <th style="width: 17%;">SHA256 Hash</th>
@@ -570,7 +571,7 @@ class ServerObject
             $source = $this->sourceForDisplay($sample_row, '<br/>');
 
             // if not an API query, build HTML
-            if ($api_query == false) {
+            if ($notAnApiQuery) {
                 $output .= '<tr>
                     <td class="hash_font"><div style = "word-wrap: break-word"><a href="sample.php?action=detail&hash=' . $sample_row->sha256 . '">' . $sample_row->sha256 . '</a></div></td>
                     <td>' . $sample_row->ftype . '</td>
@@ -665,13 +666,13 @@ class ServerObject
             }
         }
 
-        if (($api_query == false) && ($totalHits > 0) && ($searchPrivate == 0)) {
+        if ($notAnApiQuery && ($totalHits > 0) && ($searchPrivate == 0)) {
             $src_sql_query = "INSERT INTO $table_pub_searches (query, ts ) VALUES ( '$searchValue',  UNIX_TIMESTAMP() )";
             $res = $this->sql->query($src_sql_query);
             $this->sql->commit();
         }
 
-        if ($api_query == false) {
+        if ($notAnApiQuery) {
             $output .= '</tbody></table>  ';
 
             return $output;

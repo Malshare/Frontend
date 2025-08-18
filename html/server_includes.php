@@ -492,38 +492,30 @@ class ServerObject
             } elseif (strlen($searchValue) == 64) {
                 return $this->redirect("sample.php?action=detail&hash=" . $searchValue);
             }
-        } else {
-            if (strlen($searchValue) == 32) {
-                $sql = 'SELECT id FROM tbl_samples WHERE md5 = "' . $searchValue .'"';
-                $res = $this->sql->query($sql);
-
-            } elseif (strlen($searchValue) == 40) {
-                $sql = 'SELECT id FROM tbl_samples WHERE sha1 = "' . $searchValue .'"';
-                $res = $this->sql->query($sql);
-            } elseif (strlen($searchValue) == 64) {
-                $sql = 'SELECT id FROM tbl_samples WHERE sha256 = "' . $searchValue .'"';
-                $res = $this->sql->query($sql);
-            }            
-            else {
-                if (substr($searchValue, 0, 7) == "source:") {
-                    $rhash = trim(explode(":", $searchValue)[1]);
-                    $res = $this->sql->query("SELECT distinct(id) from $table_sources where source like '%$rhash%' LIMIT 1");
-                } else {
-                    if (substr($searchValue, 0, 4) == "yrp/") { // startswith
-                        $yaraId = $this->getRuleIdByName(substr($_REQUEST["query"], 4));
-                        if (! $yaraId) {
-                            return '<p>YARA rule with this name could not be found</p>';
-                        }
-                        $sql = 'SELECT s.id FROM tbl_samples s LEFT JOIN tbl_matches m ON (s.id = m.sample_id) WHERE (m.yara_id = ' . $yaraId . ') ORDER BY s.added DESC LIMIT 100';
-                        $res = $this->sql->query($sql);
-                    } else {
-                        $searchValueLower = strtolower($searchValue);
-                        $res = $this->sql->query(
-                            "SELECT id FROM tbl_sample_sources WHERE source LIKE '$searchValueLower%' LIMIT 100"
-                        );
-                    }
-                }
+        } elseif (strlen($searchValue) == 32) {
+            $sql = 'SELECT id FROM tbl_samples WHERE md5 = "' . $searchValue . '"';
+            $res = $this->sql->query($sql);
+        } elseif (strlen($searchValue) == 40) {
+            $sql = 'SELECT id FROM tbl_samples WHERE sha1 = "' . $searchValue . '"';
+            $res = $this->sql->query($sql);
+        } elseif (strlen($searchValue) == 64) {
+            $sql = 'SELECT id FROM tbl_samples WHERE sha256 = "' . $searchValue . '"';
+            $res = $this->sql->query($sql);
+        } elseif (substr($searchValue, 0, 7) == "source:") {
+            $rhash = trim(explode(":", $searchValue)[1]);
+            $res = $this->sql->query("SELECT distinct(id) from $table_sources where source like '%$rhash%' LIMIT 1");
+        } elseif (substr($searchValue, 0, 4) == "yrp/") { // startswith
+            $yaraId = $this->getRuleIdByName(substr($_REQUEST["query"], 4));
+            if (!$yaraId) {
+                return '<p>YARA rule with this name could not be found</p>';
             }
+            $sql = 'SELECT s.id FROM tbl_samples s LEFT JOIN tbl_matches m ON (s.id = m.sample_id) WHERE (m.yara_id = ' . $yaraId . ') ORDER BY s.added DESC LIMIT 100';
+            $res = $this->sql->query($sql);
+        } else {
+            $searchValueLower = strtolower($searchValue);
+            $res = $this->sql->query(
+                "SELECT id FROM tbl_sample_sources WHERE source LIKE '$searchValueLower%' LIMIT 100"
+            );
         }
 
         if (! $res) {

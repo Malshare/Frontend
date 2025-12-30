@@ -111,23 +111,33 @@ elseif($share->uri_action=="search") {
 	echo $sample;
 	die();
 } 
-elseif ($share->uri_action == "upload") {
-    if ($_FILES['upload']["size"] > 10000000) {
-        http_response_code(413);
-        die("Error: file too large");
+} elseif ($share->uri_action == "upload") {
+    if (!isset($_FILES['upload']) || !isset($_FILES['upload']['tmp_name'])) {
+        http_response_code(400);
+        die('Missing file upload');
     }
     foreach ($_FILES as $upload) {
+        if (!isset($upload['tmp_name']) || !is_uploaded_file($upload['tmp_name'])) {
+            http_response_code(400);
+            echo('Failed - invalid upload');
+            continue;
+        }
+        if (isset($upload['size']) && $upload['size'] > 10000000) {
+            http_response_code(413);
+            echo('Error: file too large');
+            continue;
+        }
         $res = $share->upload_sample($upload);
         if ($res['type'] === 'success') {
-            echo('Success - ' . $res['sha256']);
+            echo('Success - ' . htmlspecialchars($res['sha256'], ENT_QUOTES, 'UTF-8'));
             if (isset($res['message'])) {
-                echo(' - ' . $res['message']);
+                echo(' - ' . htmlspecialchars($res['message'], ENT_QUOTES, 'UTF-8'));
             } else {
                 $share->increment_query_limit();
             }
         } else {
             http_response_code(400);
-            echo('Failed - ' . $res['message']);
+            echo('Failed - ' . htmlspecialchars($res['message'] ?? 'unknown', ENT_QUOTES, 'UTF-8'));
         }
     }
     die();
@@ -138,19 +148,22 @@ elseif ($share->uri_action == 'download_url') {
         http_response_code(400);
         die(json_encode(array('error' => 'invalid method, only POST allowed on this endpoint')));
     }
-    if (!isset($_POST['url'])) {
+    $url = filter_input(INPUT_POST, 'url', FILTER_SANITIZE_URL) ?: '';
+    if ($url === '') {
         http_response_code(400);
         die(json_encode(array('error' => 'missing POST field "url"')));
     }
-    if (!filter_var($_POST['url'], FILTER_VALIDATE_URL)) {
+    if (!filter_var($url, FILTER_VALIDATE_URL)) {
         http_response_code(400);
         die(json_encode(array('error' => 'invalid value in field "url"')));
     }
 
-    $url = $_POST['url'];
     $recursive = 0;
-    if (isset($_POST['recursive'])) {
-	    if ( strtolower($_POST['recursive']) == "true" or $_POST['recursive'] == 1) $recursive = 1;
+    $recursive_raw = filter_input(INPUT_POST, 'recursive');
+    if ($recursive_raw !== null) {
+        if (strtolower($recursive_raw) === 'true' || $recursive_raw === '1' || $recursive_raw === 1) {
+            $recursive = 1;
+        }
     }
     if ($recursive && !$user->recursiveUrlDownloadAllowed) {
         http_response_code(403);

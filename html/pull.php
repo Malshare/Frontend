@@ -1,8 +1,11 @@
 <?php
 
-if(array_key_exists("hash", $_POST) && $_POST["hash"]!="" ) {
-        header("Location:sampleshare.php?action=getfile&api_key=".$_POST["api_key"]."&hash=".$_POST["hash"]);
-        die();
+$hash_post = filter_input(INPUT_POST, 'hash') ?: '';
+$api_post = filter_input(INPUT_POST, 'api_key') ?: '';
+if ($hash_post !== '') {
+	$loc = 'sampleshare.php?action=getfile&api_key=' . rawurlencode($api_post) . '&hash=' . rawurlencode($hash_post);
+	header('Location: ' . $loc);
+	die();
 }
 
 ?>

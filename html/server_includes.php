@@ -574,58 +574,53 @@ class ServerObject
 
         $searchValueLower = strtolower($searchValue);
         $notAnApiQuery = $api_query == false;
-        if ($notAnApiQuery) {
-            # If search by hash, just take users to the sample details page
-            if (strlen($searchValue) == 32) {
-                return $this->redirect("sample.php?action=detail&hash=" . $searchValue);
-            } elseif (strlen($searchValue) == 40) {
-                return $this->redirect("sample.php?action=detail&hash=" . $searchValue);
-            } elseif (strlen($searchValue) == 64) {
-                return $this->redirect("sample.php?action=detail&hash=" . $searchValue);
-            }
+
+        // If this is a web search and the query is a hash, redirect to details page.
+        if ($notAnApiQuery && (strlen($searchValue) == 32 || strlen($searchValue) == 40 || strlen($searchValue) == 64)) {
+            return $this->redirect("sample.php?action=detail&hash=" . $searchValue);
+        }
+
+        // Run the same selection logic for API and web searches (web hashes already redirected above).
+        if (strlen($searchValue) == 32) {
+            $stmt = $this->sql->prepare('SELECT id FROM tbl_samples WHERE md5 = ?');
+            $stmt->bind_param('s', $searchValue);
+            $stmt->execute();
+            $res = $stmt->get_result();
+        } elseif (strlen($searchValue) == 40) {
+            $stmt = $this->sql->prepare('SELECT id FROM tbl_samples WHERE sha1 = ?');
+            $stmt->bind_param('s', $searchValue);
+            $stmt->execute();
+            $res = $stmt->get_result();
+        } elseif (strlen($searchValue) == 64) {
+            $stmt = $this->sql->prepare('SELECT id FROM tbl_samples WHERE sha256 = ?');
+            $stmt->bind_param('s', $searchValue);
+            $stmt->execute();
+            $res = $stmt->get_result();
         } else {
-            if (strlen($searchValue) == 32) {
-                $stmt = $this->sql->prepare('SELECT id FROM tbl_samples WHERE md5 = ?');
-                $stmt->bind_param('s', $searchValue);
+            if (substr($searchValue, 0, 7) == "source:") {
+                $rhash = trim(explode(":", $searchValue)[1]);
+                $like = "%" . $rhash . "%";
+                $stmt = $this->sql->prepare("SELECT distinct(id) from $table_sources where source like ? LIMIT 1");
+                $stmt->bind_param('s', $like);
                 $stmt->execute();
                 $res = $stmt->get_result();
-            } elseif (strlen($searchValue) == 40) {
-                $stmt = $this->sql->prepare('SELECT id FROM tbl_samples WHERE sha1 = ?');
-                $stmt->bind_param('s', $searchValue);
-                $stmt->execute();
-                $res = $stmt->get_result();
-            } elseif (strlen($searchValue) == 64) {
-                $stmt = $this->sql->prepare('SELECT id FROM tbl_samples WHERE sha256 = ?');
-                $stmt->bind_param('s', $searchValue);
-                $stmt->execute();
-                $res = $stmt->get_result();
-            }            
-            else {
-                if (substr($searchValue, 0, 7) == "source:") {
-                    $rhash = trim(explode(":", $searchValue)[1]);
-                    $like = "%" . $rhash . "%";
-                    $stmt = $this->sql->prepare("SELECT distinct(id) from $table_sources where source like ? LIMIT 1");
-                    $stmt->bind_param('s', $like);
+            } else {
+                if (substr($searchValue, 0, 4) == "yrp/") { // startswith
+                    $yaraId = $this->getRuleIdByName(substr($searchValue, 4));
+                    if (! $yaraId) {
+                        return '<p>YARA rule with this name could not be found</p>';
+                    }
+                    $stmt = $this->sql->prepare('SELECT s.id FROM tbl_samples s LEFT JOIN tbl_matches m ON (s.id = m.sample_id) WHERE (m.yara_id = ?) ORDER BY s.added DESC LIMIT 100');
+                    $stmt->bind_param('i', $yaraId);
                     $stmt->execute();
                     $res = $stmt->get_result();
                 } else {
-                        if (substr($searchValue, 0, 4) == "yrp/") { // startswith
-                        $yaraId = $this->getRuleIdByName(substr($searchValue, 4));
-                        if (! $yaraId) {
-                            return '<p>YARA rule with this name could not be found</p>';
-                        }
-                        $stmt = $this->sql->prepare('SELECT s.id FROM tbl_samples s LEFT JOIN tbl_matches m ON (s.id = m.sample_id) WHERE (m.yara_id = ?) ORDER BY s.added DESC LIMIT 100');
-                        $stmt->bind_param('i', $yaraId);
-                        $stmt->execute();
-                        $res = $stmt->get_result();
-                    } else {
-                        $searchValueLower = strtolower($searchValue);
-                        $like = $searchValueLower . '%';
-                        $stmt = $this->sql->prepare("SELECT id FROM tbl_sample_sources WHERE source LIKE ? LIMIT 100");
-                        $stmt->bind_param('s', $like);
-                        $stmt->execute();
-                        $res = $stmt->get_result();
-                    }
+                    $searchValueLower = strtolower($searchValue);
+                    $like = $searchValueLower . '%';
+                    $stmt = $this->sql->prepare("SELECT id FROM tbl_sample_sources WHERE source LIKE ? LIMIT 100");
+                    $stmt->bind_param('s', $like);
+                    $stmt->execute();
+                    $res = $stmt->get_result();
                 }
             }
         }
@@ -1167,11 +1162,54 @@ class ServerObject
         if (! $where) {
             return [];
         }
-        $sql = 'SELECT sha256, md5, sha1 FROM ' . $this->vars_table_samples .
-            ' WHERE (' . implode(' OR ', $where) . ')';
+        $clauses = [];
+        $params = [];
+        $types = '';
+
+        if ($md5s) {
+            $placeholders = implode(',', array_fill(0, count($md5s), '?'));
+            $clauses[] = '(md5 IN (' . $placeholders . '))';
+            foreach ($md5s as $m) {
+                $params[] = $m;
+                $types .= 's';
+            }
+        }
+        if ($sha1s) {
+            $placeholders = implode(',', array_fill(0, count($sha1s), '?'));
+            $clauses[] = '(sha1 IN (' . $placeholders . '))';
+            foreach ($sha1s as $s) {
+                $params[] = $s;
+                $types .= 's';
+            }
+        }
+        if ($sha256s) {
+            $placeholders = implode(',', array_fill(0, count($sha256s), '?'));
+            $clauses[] = '(sha256 IN (' . $placeholders . '))';
+            foreach ($sha256s as $s2) {
+                $params[] = $s2;
+                $types .= 's';
+            }
+        }
+
+        if (! $clauses) {
+            return [];
+        }
+
+        $sql = 'SELECT sha256, md5, sha1 FROM ' . $this->vars_table_samples . ' WHERE (' . implode(' OR ', $clauses) . ')';
         if (! ($stmt = $this->sql->prepare($sql))) {
             return [];
         }
+
+        if ($params) {
+            // bind_param requires references
+            $bind_names = [];
+            $bind_names[] = &$types;
+            for ($i = 0; $i < count($params); $i++) {
+                $bind_names[] = &$params[$i];
+            }
+            call_user_func_array([$stmt, 'bind_param'], $bind_names);
+        }
+
         $stmt->execute();
         $stmt->bind_result($sha256, $md5, $sha1);
         $ret = [];
@@ -1182,6 +1220,7 @@ class ServerObject
                 'sha1' => $sha1,
             ];
         }
+        $stmt->close();
 
         return $ret;
     }

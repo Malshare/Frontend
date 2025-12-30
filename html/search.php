@@ -15,10 +15,12 @@
 <div class="jumbotron">
 			<?php
 				include("server_includes.php");
-                if ((isset($_POST["query"]) && ($_POST["query"] != "")) or (isset($_GET["query"]) && ($_GET["query"] != ""))) {
+                $post_query = filter_input(INPUT_POST, 'query') ?: '';
+                $get_query = filter_input(INPUT_GET, 'query') ?: '';
+                if (($post_query !== '') || ($get_query !== '')) {
 					$share = new ServerObject();
 
-					$sample = $share->sample_search();
+				$sample = $share->sample_search();
 					echo $sample;
 
 

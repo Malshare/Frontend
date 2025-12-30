@@ -95,18 +95,19 @@
      if ($secret == "DISABLED") {
          $getDetails= true;
      } else{
-         if (isset($_POST["g-recaptcha-response"]) && (strlen($_POST["g-recaptcha-response"]) > 5)) {
+         $g_recaptcha = filter_input(INPUT_POST, 'g-recaptcha-response') ?: '';
+         if ($g_recaptcha !== '' && strlen($g_recaptcha) > 5) {
             $reCaptcha = new ReCaptcha($secret);
 
             $response = $reCaptcha->verifyResponse(
-                "malshare.com", //$_SERVER["REMOTE_ADDR"],
-                $_POST["g-recaptcha-response"]
+                "malshare.com",
+                $g_recaptcha
             );
             if ($response != null && $response->success) {
                 $getDetails = true;
             }
 
-         }          
+         }
      }
 
 

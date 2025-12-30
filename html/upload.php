@@ -7,12 +7,12 @@ if ((array_key_exists('fsample', $_FILES) && ($_FILES['fsample']))) {
         include("server_includes.php");
 
         $res = (new ServerObject())->upload_sample($_FILES['fsample']);
-        if ($res['type'] === 'error') {
-            $errorMessage = $res['message'];
-        } elseif ($res['type'] === 'success') {
-            header("Location:sample.php?action=detail&hash=" . $res['sha256']);
-            exit();
-        }
+		if ($res['type'] === 'error') {
+			$errorMessage = $res['message'];
+		} elseif ($res['type'] === 'success') {
+			header("Location:sample.php?action=detail&hash=" . rawurlencode($res['sha256']));
+			exit();
+		}
     }
 }
 ?>
@@ -41,7 +41,7 @@ if ((array_key_exists('fsample', $_FILES) && ($_FILES['fsample']))) {
 		<div class="jumbotron">
 			<?php
 				if ($errorMessage){
-                    echo '<center><font color="red"><h4 class="form-signin-heading">' . $errorMessage. '</h2></font></center>';
+					echo '<center><font color="red"><h4 class="form-signin-heading">' . htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8') . '</h2></font></center>';
 				}
 			?>
 

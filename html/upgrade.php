@@ -16,46 +16,49 @@
 				<?php
 				require_once "recaptchalib.php";
 				$capt_checked = false;
-				if (strlen($_POST["g-recaptcha-response"]) > 5) {
+				$g_recaptcha = filter_input(INPUT_POST, 'g-recaptcha-response') ?: '';
+				$api_key_post = filter_input(INPUT_POST, 'api_key') ?: '';
+				$code_post = filter_input(INPUT_POST, 'code') ?: '';
+
+				if (strlen($g_recaptcha) > 5) {
 					$secret = getenv('MALSHARE_RECAPTCHA_SECRET');
 					$response = null;
 					$reCaptcha = new ReCaptcha($secret);
-	
+
 					$response = $reCaptcha->verifyResponse(
 						$_SERVER["REMOTE_ADDR"],
-						$_POST["g-recaptcha-response"]
+						$g_recaptcha
 					);
-					if  ($response != null && $response->success) { 
+					if  ($response != null && $response->success) {
 						$capt_checked = true;
 					}
 				}
 
-				if ( array_key_exists( 'api_key', $_POST) &&  array_key_exists("code", $_POST) && 
-					$_POST["api_key"]!="" && $_POST["code"]!="" && $capt_checked == true)  {
+				if ($api_key_post !== '' && $code_post !== '' && $capt_checked == true)  {
 
 					include("server_includes.php");
 				
 					$share = new ServerObject();
-					$user = new UserObject($share->sql, $share->uri_api_key, true);
-					if ($user->active == 0){
+					$user = new UserObject($share->sql, $api_key_post, true);
+					if ($user->active == 0) {
                                                 echo '<center><h3 class="form-signin-heading">Code Problem</h3>
 	                                                        Invalid API Key <br />
 		                                      </center>';
 					} else {
 
-						$result = $user->do_upgrade($_POST["code"]);
+						$result = $user->do_upgrade($code_post);
 						
 						if ($result[0] == true){
 							echo '
 							<center>
 								<h3 class="form-signin-heading">Code Successful</h3>
-								' . $result[1] . ' <br />
+								' . htmlspecialchars($result[1], ENT_QUOTES, 'UTF-8') . ' <br />
 							</center>
 							';
 						}
 						else {
-				        	        echo '<center><h3 class="form-signin-heading">Code Problem</h3>
-								' . $result[1] . ' <br />
+								echo '<center><h3 class="form-signin-heading">Code Problem</h3>
+								' . htmlspecialchars($result[1], ENT_QUOTES, 'UTF-8') . ' <br />
 							</center>';
 						}
 					}					

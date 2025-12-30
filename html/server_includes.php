@@ -441,6 +441,7 @@ class ServerObject
 
     public function sourceForDisplay($row, $separator = ' | ')
     {
+        $hasSdn = isset($row->source_display_name) && $row->source_display_name;
         if ($row->source) {
             if ($row->source_display_name) {
                 return $this->escape_html($row->source) . $separator . $this->escape_html($row->source_display_name);
@@ -571,7 +572,9 @@ class ServerObject
             $this->sql->commit();
         }
 
-        if ($api_query == false) {
+        $searchValueLower = strtolower($searchValue);
+        $notAnApiQuery = $api_query == false;
+        if ($notAnApiQuery) {
             # If search by hash, just take users to the sample details page
             if (strlen($searchValue) == 32) {
                 return $this->redirect("sample.php?action=detail&hash=" . $searchValue);
@@ -632,7 +635,7 @@ class ServerObject
         }
 
         // Build header / if not API
-        if ($api_query == false) {
+        if ($notAnApiQuery) {
             $output = '<table class="table table-bordered table-striped" style="table-layout: fixed;">
         <thead>  <tr>
         <th style="width: 17%;">SHA256 Hash</th>
@@ -685,7 +688,7 @@ class ServerObject
             $source = $this->sourceForDisplay($sample_row, '<br/>');
 
             // if not an API query, build HTML
-            if ($api_query == false) {
+            if ($notAnApiQuery) {
                 $output .= '<tr>
                     <td class="hash_font"><div style = "word-wrap: break-word"><a href="sample.php?action=detail&hash=' . $sample_row->sha256 . '">' . $sample_row->sha256 . '</a></div></td>
                     <td>' . $sample_row->ftype . '</td>
@@ -805,7 +808,7 @@ class ServerObject
             }
         }
 
-        if ($api_query == false) {
+        if ($notAnApiQuery) {
             $output .= '</tbody></table>  ';
 
             return $output;

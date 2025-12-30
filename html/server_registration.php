@@ -57,8 +57,10 @@ class ServerObject {
 			die("ERROR! => 2809.  Please report to admin@malshare.com\n");
 		}		
 	
-		$this->email = preg_replace("/\s+/", "", filter_var(strip_tags($this->secure($_REQUEST["email"])),FILTER_SANITIZE_EMAIL));
-		$this->name = filter_var(strip_tags($this->secure($_REQUEST["name"])),FILTER_SANITIZE_STRING);
+		$email_raw = filter_input(INPUT_POST, 'email') ?: filter_input(INPUT_GET, 'email') ?: '';
+		$name_raw = filter_input(INPUT_POST, 'name') ?: filter_input(INPUT_GET, 'name') ?: '';
+		$this->email = preg_replace("/\s+/", "", filter_var(strip_tags($this->secure($email_raw)),FILTER_SANITIZE_EMAIL));
+		$this->name = filter_var(strip_tags($this->secure($name_raw)),FILTER_SANITIZE_STRING);
 		$this->api_key = $this->generate_api_key();
 		$this->valid = true;
 
@@ -97,25 +99,34 @@ class ServerObject {
 	public function register() { 
 		if (! $this->valid) return false;
 
-                $res = $this->sql->query("SELECT `name`, `email`, `api_key` from `tbl_users` WHERE `email` = '" . $this->email ."'");
-                if(!$res) die("Error: 2191011.  Please contact admin@malshare.com");
-		if ( mysqli_num_rows($res) == 1 ){
-			$s_row = $res->fetch_object();
-			$this->api_key = $s_row->api_key;
-			$this->email= $s_row->email;
-			$this->send_register_email();
-			return false;
-		}
-		else {
-			$reg_query = "INSERT INTO `tbl_users`(`name`, `email`, `api_key`, `approved`, `active`, `r_ip_address`) VALUES ('" . $this->name . "', '" . $this->email . "', '" . $this->api_key . "', 1 , 1, '" . $this->host_ip . "')";
-		
-			if (!$this->sql->query($reg_query)) {
-				return false;
-			}   
-			else{
-				return $this->send_register_email();
-			}
-		}
+				$stmt = $this->sql->prepare("SELECT `name`, `email`, `api_key` from `tbl_users` WHERE `email` = ? LIMIT 1");
+				if (! $stmt) {
+					die("Error: 2191011.  Please contact admin@malshare.com");
+				}
+				$stmt->bind_param('s', $this->email);
+				$stmt->execute();
+				$res = $stmt->get_result();
+				if ($res && $res->num_rows == 1) {
+					$s_row = $res->fetch_object();
+					$this->api_key = $s_row->api_key;
+					$this->email= $s_row->email;
+					$stmt->close();
+					$this->send_register_email();
+					return false;
+				} else {
+					$stmt->close();
+					$ins = $this->sql->prepare("INSERT INTO `tbl_users`(`name`, `email`, `api_key`, `approved`, `active`, `r_ip_address`) VALUES (?, ?, ?, 1, 1, ?)");
+					if (! $ins) {
+						return false;
+					}
+					$ins->bind_param('ssss', $this->name, $this->email, $this->api_key, $this->host_ip);
+					if (! $ins->execute()) {
+						$ins->close();
+						return false;
+					}
+					$ins->close();
+					return $this->send_register_email();
+				}
 	}	
 
 

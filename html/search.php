@@ -17,25 +17,31 @@
 				include("server_includes.php");
                 $post_query = filter_input(INPUT_POST, 'query') ?: '';
                 $get_query = filter_input(INPUT_GET, 'query') ?: '';
-                if (($post_query !== '') || ($get_query !== '')) {
+				if (($post_query !== '') || ($get_query !== '')) {
 					$share = new ServerObject();
 
-				$sample = $share->sample_search();
+					$sample = $share->sample_search();
 					echo $sample;
-
 
 					$showDivFlag=false;
 				} else{
 					$showDivFlag=true;
-				} ?>
-				<div class="container"  <?php if ($showDivFlag===false){?>style="display:none"<?php } ?>>
+				}
 
-                	<form method=get action=search.php class="form-signin" id="search_form" onsubmit="ShowLoading()">
+				// Pre-fill search input with the sanitized query (prefer POST over GET)
+				$display_query = htmlspecialchars(($post_query !== '' ? $post_query : $get_query), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+				// Preserve private checkbox state
+				$private_flag = filter_input(INPUT_GET, 'private');
+				$private_checked = ($private_flag !== null && $private_flag !== false && $private_flag !== '') ? 'checked' : '';
+				?>
+				<div class="container" <?php if ($showDivFlag===false){?>style="display:none"<?php } ?>>
+
+					<form method="get" action="search.php" class="form-signin" id="search_form" onsubmit="ShowLoading()">
                 	<h2 class="form-signin-heading">Search</h2>
 
 					<div>
-                    	<input type="text" class="input-block-level" name=query placeholder="Search hashes, sources and file names...">
-					<label class="checkbox"><input type="checkbox" name=private > Private Search</label>
+						<input type="text" class="input-block-level" name="query" placeholder="Search hashes, sources and file names..." value="<?php echo $display_query; ?>">
+						<label class="checkbox"><input type="checkbox" name="private" <?php echo $private_checked; ?> > Private Search</label>
                     	<button class="btn btn-small btn-primary" type="submit">Submit</button>
 					<div class="popup" onclick="myFunction()"> Syntax
 						<span class="popuptext" id="myPopup">
@@ -51,9 +57,9 @@
 					<?php
 						$share = new ServerObject();
 						$stats = $share->get_recent_searches();
-					        foreach ($stats as $skey ){
-				        	        echo '                  <tr><td>' . $skey . ' </td>';
-					        }
+						foreach ($stats as $skey ){
+							echo '                  <tr><td>' . $share->escape_html($skey) . ' </td>';
+						}
 					?>
 					</tbody></table>
 

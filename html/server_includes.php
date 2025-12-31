@@ -242,8 +242,8 @@ class ServerObject
         if (! $this->sql) {
             die("ERROR");
         }
-
-        $string = strip_tags($string);
+        // Ensure we never pass null to strip_tags (PHP 8.1+ deprecation)
+        $string = strip_tags((string)$string);
         $string = stripslashes($string);
 
         $string = $this->sql->real_escape_string($string);

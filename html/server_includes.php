@@ -167,8 +167,13 @@ class ServerObject
             $this->sql->options(MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, true);
             $this->sql->ssl_set(null, null, DB_CA_PATH, null, null);
             $this->sql->real_connect(DB_HOST, DB_USER, DB_PASS, DB_DATABASE, DB_PORT);
+            // Ensure connection uses utf8mb4 to match database collation
+            // and avoid "Conversion from collation ... impossible for parameter" errors.
+            $this->sql->set_charset('utf8mb4');
         } else {
             $this->sql = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_DATABASE);
+            // Ensure connection uses utf8mb4 to match database collation
+            $this->sql->set_charset('utf8mb4');
         }
 
 

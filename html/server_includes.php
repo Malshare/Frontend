@@ -449,20 +449,22 @@ class ServerObject
 
     public function sourceForDisplay($row, $separator = ' | ')
     {
-        $hasSdn = isset($row->source_display_name) && $row->source_display_name;
-        if ($row->source) {
-            if ($row->source_display_name) {
-                return $this->escape_html($row->source) . $separator . $this->escape_html($row->source_display_name);
-            } else {
-                return $this->escape_html($row->source);
+        $source = isset($row->source) ? $row->source : null;
+        $source_display = isset($row->source_display_name) ? $row->source_display_name : null;
+
+        if ($source) {
+            if ($source_display) {
+                return $this->escape_html($source) . $separator . $this->escape_html($source_display);
             }
-        } else {
-            if (isset($row->source_display_name) && $row->source_display_name) {
-                return $this->escape_html($row->source_display_name);
-            } else {
-                return $this->escape_html('User Submission');
-            }
+
+            return $this->escape_html($source);
         }
+
+        if ($source_display) {
+            return $this->escape_html($source_display);
+        }
+
+        return $this->escape_html('User Submission');
     }
 
     public function get_sitemap()

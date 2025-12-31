@@ -475,37 +475,22 @@ class ServerObject
         $output = "";
         $table = $this->vars_table_samples;
         $table_sources = $this->vars_table_sources;
-        $main_stmt = $this->sql->prepare("SELECT id from $table WHERE ( pending != 1 or pending is NULL ) ORDER by added DESC limit 1000");
-        if (! $main_stmt) {
+        $sql = "SELECT md5, sha1, sha256 FROM $table WHERE ( pending != 1 or pending is NULL ) ORDER by added DESC limit 1000";
+        if (! ($stmt = $this->sql->prepare($sql))) {
             $this->error_die("Error 23214 (Problem building sitemap.  Please contact admin@malshare.com)");
         }
-        $main_stmt->execute();
-        $res = $main_stmt->get_result();
+        $stmt->execute();
+        $res = $stmt->get_result();
         if (! $res) {
-            $main_stmt->close();
+            $stmt->close();
             $this->error_die("Error 23214 (Problem building sitemap.  Please contact admin@malshare.com)");
         }
-        while ($s_row = $res->fetch_object()) {
-            if (! ($stmt = $this->sql->prepare("SELECT md5 as md5, sha1 as sha1, sha256 as sha256 FROM $table WHERE id = ?"))) {
-                $this->error_die("Error 23215 (Problem building sitemap details. Please contact admin@malshare.com)");
-            }
-            $stmt->bind_param('i', $s_row->id);
-            $stmt->execute();
-            $r_res = $stmt->get_result();
-            if (! $r_res) {
-                $stmt->close();
-                $this->error_die("Error 23215 (Problem building sitemap details. Please contact admin@malshare.com)");
-            }
-            if ($r_res->num_rows == 0) {
-                $stmt->close();
-                next();
-            }
 
-            $sample_row = $r_res->fetch_object();
-            $stmt->close();
+        while ($sample_row = $res->fetch_object()) {
             $output .= '<a href="sample.php?action=detail&hash=' . $sample_row->sha256 . '">' . $sample_row->md5 . ' | ' . $sample_row->sha1 . ' | ' . $sample_row->sha256 . '</a><br />';
         }
-        $main_stmt->close();
+
+        $stmt->close();
 
         return $output;
     }

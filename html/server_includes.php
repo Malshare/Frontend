@@ -300,33 +300,54 @@ class ServerObject
 
         $vt_key = $this->vt_context_key;
 
-        $options = array(
-            'http' => array(
-                'header' => "x-apikey: " . $vt_key . "\r\n",
-                'method' => 'GET',
-            ),
-        );
+        // Simple file cache to avoid blocking remote calls on every pageview
+        $cache_ttl = 3600; // seconds
+        $cache_dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'malshare_vt_cache';
+        if (! is_dir($cache_dir)) {
+            @mkdir($cache_dir, 0755, true);
+        }
+        $cache_file = $cache_dir . DIRECTORY_SEPARATOR . $hash . '.json';
 
-        $url = $this->vt_context_url . $hash;
-        $context = stream_context_create($options);
-        $result = @file_get_contents($url, false, $context);
-        if ($result === false) {
+        $result = null;
+        if (is_file($cache_file) && (filemtime($cache_file) + $cache_ttl) > time()) {
+            $contents = @file_get_contents($cache_file);
+            if ($contents !== false && $contents !== '') {
+                $result = $contents;
+            }
+        } else {
+            $options = array(
+                'http' => array(
+                    'header' => "x-apikey: " . $vt_key . "\r\n",
+                    'method' => 'GET',
+                    'timeout' => 2,
+                ),
+            );
+
+            $url = $this->vt_context_url . $hash;
+            $context = stream_context_create($options);
+            $fetched = @file_get_contents($url, false, $context);
+            if ($fetched !== false && $fetched !== null && $fetched !== '') {
+                $result = $fetched;
+                @file_put_contents($cache_file, $fetched);
+            }
+        }
+
+        if ($result === null) {
             return false;
         }
-        $vt_widget = null;
-        if ($result !== null && $result !== '') {
-            $vt_widget = json_decode($result);
-        }
-        $widget = '  <iframe sandbox="allow-same-origin allow-scripts allow-popups allow-forms" src="' . $vt_widget->{'data'}->{'url'} . '"
-          width="100%" height="500" allowfullscreen>
-    <p>
-      <a href="/en-US/docs/Glossary">
-         VT Context:
-      </a>
-    </p>
-  </iframe>';
 
-        return $widget;
+        $vt_widget = json_decode($result);
+        if (! $vt_widget || ! isset($vt_widget->data->url)) {
+            return false;
+        }
+
+        $vt_url = $vt_widget->data->url;
+
+        // Return a lightweight placeholder; JavaScript will lazy-load the iframe on DOMContentLoaded
+        $placeholder = '<div class="vt-widget-placeholder" data-vt-url="' . $this->escape_html($vt_url) . '" data-vt-hash="' . $this->escape_html($hash) . '">Loading VT context...</div>';
+        $placeholder .= "<script>document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.vt-widget-placeholder').forEach(function(el){var url=el.dataset.vtUrl; if(url){var iframe=document.createElement('iframe'); iframe.setAttribute('sandbox','allow-same-origin allow-scripts allow-popups allow-forms'); iframe.src = url; iframe.width = '100%'; iframe.height = '500'; iframe.setAttribute('allowfullscreen',''); el.innerHTML=''; el.appendChild(iframe);} });});</script>";
+
+        return $placeholder;
 
 
     }
@@ -358,7 +379,15 @@ class ServerObject
         $table_sources = $this->vars_table_sources;
         $table_sample_partners = $this->vars_table_sample_partners;;
 
-        $stmt = $this->sql->prepare("SELECT id from $table WHERE ( ( pending != 1 or pending is NULL ) AND ftype != 'html' ) ORDER by added DESC limit 10");
+        $sql = "SELECT s.sha256 AS sha256, s.added AS added, s.ftype AS ftype, s.yara AS yara, ts.source AS source, tsp.display_name AS source_display_name
+                FROM {$table} s
+                LEFT JOIN {$table_sources} ts ON s.id = ts.id
+                LEFT JOIN {$table_sample_partners} tsp ON ts.sample_partner_submission = tsp.id
+                WHERE ( ( s.pending != 1 OR s.pending IS NULL ) AND s.ftype != 'html' )
+                ORDER BY s.added DESC
+                LIMIT 10";
+
+        $stmt = $this->sql->prepare($sql);
         if (! $stmt) {
             $this->error_die("Error 13513 (Unable to get recent samples. Please contact admin@malshare.com)");
         }
@@ -371,34 +400,14 @@ class ServerObject
 
         $output = '<table class="table table-bordered table-striped" style="table-layout: fixed;">
         <thead>  <tr>
-        <th style="width: 17%;">SHA256 Hash</th>
+        <th style="width: 17%">SHA256 Hash</th>
         <th style="width: 5%">File type</th>
         <th style="width: 13%">Added</th>
         <th style="width: 25%">Source</th>
         <th style="width: 40%">Yara Hits</th>
         </tr>  </thead>  <tbody>';
 
-        while ($s_row = $res->fetch_object()) {
-            if ($stmt = $this->sql->prepare("SELECT s.sha256 AS sha256, s.added AS added, s.ftype AS ftype, s.yara AS yara, ts.source AS source, tsp.display_name AS source_display_name FROM {$table} s LEFT JOIN {$table_sources} ts ON s.id = ts.id LEFT JOIN {$table_sample_partners} tsp ON ts.sample_partner_submission = tsp.id WHERE s.id = ?")) {
-                $stmt->bind_param('i', $s_row->id);
-                $stmt->execute();
-                $r_res = $stmt->get_result();
-            } else {
-                $r_res = false;
-            }
-
-
-            if (! $r_res) {
-                $this->error_die(
-                    "Error 13512 (Problem getting recent sample details.  Please contact admin@malshare.com)"
-                );
-            }
-            if ($r_res->num_rows == 0) {
-                next();
-            }
-
-            $sample_row = $r_res->fetch_object();
-
+        while ($sample_row = $res->fetch_object()) {
             $yhits = "";
             $jhits = null;
             $yara_json = $sample_row->yara ?? '';

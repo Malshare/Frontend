@@ -47,35 +47,13 @@ class ServerObject {
 	        $this->sql->options(MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, true);
 	        $this->sql->ssl_set(NULL, NULL, DB_CA_PATH, NULL, NULL);
 			$this->sql->real_connect(DB_HOST, DB_USER, DB_PASS, DB_DATABASE, DB_PORT);
-			$cs_res = $this->sql->query("SELECT @@character_set_database AS cs");
-			if ($cs_res) {
-				$cs_row = $cs_res->fetch_assoc();
-				$db_cs = $cs_row['cs'] ?? null;
-				if ($db_cs) {
-					$this->sql->set_charset($db_cs);
-				} else {
-					$this->sql->set_charset('utf8mb4');
-				}
-				$cs_res->close();
-			} else {
-				$this->sql->set_charset('utf8mb4');
-			}
+			// Ensure connection uses utf8mb4 to match database collation
+			$this->sql->set_charset('utf8mb4');
 		}
 		else{
 			$this->sql = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_DATABASE);
-			$cs_res = $this->sql->query("SELECT @@character_set_database AS cs");
-			if ($cs_res) {
-				$cs_row = $cs_res->fetch_assoc();
-				$db_cs = $cs_row['cs'] ?? null;
-				if ($db_cs) {
-					$this->sql->set_charset($db_cs);
-				} else {
-					$this->sql->set_charset('utf8mb4');
-				}
-				$cs_res->close();
-			} else {
-				$this->sql->set_charset('utf8mb4');
-			}
+			// Ensure connection uses utf8mb4 to match database collation
+			$this->sql->set_charset('utf8mb4');
 		}
 
 

@@ -92,13 +92,22 @@ class ServerObject {
 	}
 
 	
-	public function secure($string) { 
-		if(!$this->sql) die("Error");
-			$string = strip_tags($string);
-	
-		$string = $this->sql->real_escape_string($string);	
-		return $string;
-	}	
+    public function secure($string)
+    {
+        if (! $this->sql) {
+            die("ERROR");
+        }
+        // Ensure we never pass null to strip_tags (PHP 8.1+ deprecation)
+        $string = strip_tags((string)$string);
+        $string = stripslashes($string);
+
+        // Strip non-ASCII characters to avoid collation conversion issues
+        $string = preg_replace('/[^\x00-\x7F]/', '', $string);
+
+        $string = $this->sql->real_escape_string($string);
+
+        return $string;
+    }
 
 	public function register() { 
 		if (! $this->valid) return false;

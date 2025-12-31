@@ -251,6 +251,9 @@ class ServerObject
         $string = strip_tags((string)$string);
         $string = stripslashes($string);
 
+        // Strip non-ASCII characters to avoid collation conversion issues
+        $string = preg_replace('/[^\x00-\x7F]/', '', $string);
+
         $string = $this->sql->real_escape_string($string);
 
         return $string;

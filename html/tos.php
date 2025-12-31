@@ -1,112 +1,19 @@
+<?php
+// Soft 404 page — returns HTTP 200 but indicates a not-found resource to users
+http_response_code(200);
+header('X-Soft-404: 1');
+header('X-Robots-Tag: noindex, follow');
+
+// Include standard site header/footer for consistent look
+if (file_exists(dirname(__FILE__) . '/header.php')) {
+    include dirname(__FILE__) . '/header.php';
+}
+if (file_exists(dirname(__FILE__) . '/nav.php')) {
+    include dirname(__FILE__) . '/nav.php';
+}
+?>
 <!DOCTYPE html>
-<html lang="en">
-	<head>
-	<meta charset="utf-8">
-	<title>MalShare - Terms of Service</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="The MalShare Project is a community driven public malware repository that works to provide free access to malware samples and tooling to the infomation security community.">
-	
-	<link href="./css/bootstrap.css" rel="stylesheet">
-	<style type="text/css">
-		body {
-			padding-top: 40px;
-			padding-bottom: 40px;
-			background-color: #f5f5f5;
-		}
-	
-		.form-signin {
-			max-width: 300px;
-			padding: 19px 29px 29px;
-			margin: 0 auto 20px;
-			background-color: #fff;
-			border: 1px solid #e5e5e5;
-				-webkit-border-radius: 5px;
-				-moz-border-radius: 5px;
-			border-radius: 5px;
-				-webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
-				-moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
-			box-shadow: 0 1px 2px rgba(0,0,0,.05);
-		}
-		.form-signin .form-signin-heading,
-		.form-signin .checkbox {
-			margin-bottom: 10px;
-		}
-		.form-signin input[type="text"],
-		.form-signin input[type="password"] {
-			font-size: 16px;
-			height: auto;
-			margin-bottom: 15px;
-			padding: 7px 9px;
-		}
-		.jumbotron {
-			margin: 60px 0;
-		}
-		.jumbotron h1 {
-			font-size: 72px;
-			line-height: 1;
-		}
-		.jumbotron .btn {
-			font-size: 21px;
-			padding: 14px 24px;
-		}	
-      #push,
-      #footer {
-        height: 60px;
-      }
-      #footer {
-        background-color: #f5f5f5;
-      }
-
-      @media (max-width: 767px) {
-        #footer {
-          margin-left: -20px;
-          margin-right: -20px;
-          padding-left: 20px;
-          padding-right: 20px;
-        }
-      }			
-	
-	</style>
-	<link href="./css/sticky-footer-navbar.css" rel="stylesheet">
-	<script type="text/javascript">
-
-	  var _gaq = _gaq || [];
-	  _gaq.push(['_setAccount', 'UA-49931431-1']);
-	  _gaq.push(['_trackPageview']);
-
-	  (function() {
-	    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-	    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-	  })();
-
-	</script>
-	</head>
-
-	<body>
-		<div class="navbar navbar-inverse navbar-fixed-top">
-			<div class="navbar-inner">
-				<div class="container">
-				<a class="brand" href="index.php">MalShare</a>
-				<div class="nav-collapse collapse">
-					<ul class="nav">
-						<li><a href="index.php">Home</a></li>
-                                                <li><a href="search.php">Search</a></li>
-						<li><a href="pull.php">Download</a></li>
-						<li><a href="register.php">Request API Key</a></li>
-						<li><a href="./daily/">Daily Digest</a></li>
-                                                <li><a href="doc.php">Documentation</a></li>
-                                                <li><a href="http://malshare.blogspot.com" target="_blank">Blog</a></li>
-						<li><a href="stats.php">Stats</a></li>
-						<li><a href="about.php">About</a></li>
-					</ul>
-				</div>
-				</div>
-			</div>
-		</div>
-		<div class="container" style="width:90%">			
-			<div class="jumbotron">
-
+<div class="container" style="margin-top: 30px;">
 
 <h2>Terms of Service</h2>
 <h3>1. Terms</h3>
@@ -143,6 +50,15 @@
 
 			</div>			
 		</div> 
+
+</div>
+
+<?php
+if (file_exists(dirname(__FILE__) . '/footer.php')) {
+    include dirname(__FILE__) . '/footer.php';
+}
+
+?>
 
 			
 	

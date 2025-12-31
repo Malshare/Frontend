@@ -366,14 +366,14 @@ class ServerObject
         $table_sources = $this->vars_table_sources;
         $table_sample_partners = $this->vars_table_sample_partners;;
 
-        $stmt = $this->sql->prepare("SELECT id from $table WHERE ( ( pending != 1 or pending is NULL ) AND ftype != 'html' ) ORDER by added DESC limit 10");
-        if (! $stmt) {
+        $main_stmt = $this->sql->prepare("SELECT id from $table WHERE ( ( pending != 1 or pending is NULL ) AND ftype != 'html' ) ORDER by added DESC limit 10");
+        if (! $main_stmt) {
             $this->error_die("Error 13513 (Unable to get recent samples. Please contact admin@malshare.com)");
         }
-        $stmt->execute();
-        $res = $stmt->get_result();
+        $main_stmt->execute();
+        $res = $main_stmt->get_result();
         if (! $res) {
-            $stmt->close();
+            $main_stmt->close();
             $this->error_die("Error 13513 (Unable to get recent samples. Please contact admin@malshare.com)");
         }
 
@@ -387,10 +387,10 @@ class ServerObject
         </tr>  </thead>  <tbody>';
 
         while ($s_row = $res->fetch_object()) {
-            if ($stmt = $this->sql->prepare("SELECT s.sha256 AS sha256, s.added AS added, s.ftype AS ftype, s.yara AS yara, ts.source AS source, tsp.display_name AS source_display_name FROM {$table} s LEFT JOIN {$table_sources} ts ON s.id = ts.id LEFT JOIN {$table_sample_partners} tsp ON ts.sample_partner_submission = tsp.id WHERE s.id = ?")) {
-                $stmt->bind_param('i', $s_row->id);
-                $stmt->execute();
-                $r_res = $stmt->get_result();
+            if ($detail_stmt = $this->sql->prepare("SELECT s.sha256 AS sha256, s.added AS added, s.ftype AS ftype, s.yara AS yara, ts.source AS source, tsp.display_name AS source_display_name FROM {$table} s LEFT JOIN {$table_sources} ts ON s.id = ts.id LEFT JOIN {$table_sample_partners} tsp ON ts.sample_partner_submission = tsp.id WHERE s.id = ?")) {
+                $detail_stmt->bind_param('i', $s_row->id);
+                $detail_stmt->execute();
+                $r_res = $detail_stmt->get_result();
             } else {
                 $r_res = false;
             }
@@ -406,6 +406,9 @@ class ServerObject
             }
 
             $sample_row = $r_res->fetch_object();
+            if (isset($detail_stmt) && $detail_stmt) {
+                $detail_stmt->close();
+            }
 
             $yhits = "";
             $jhits = null;
@@ -442,7 +445,7 @@ class ServerObject
 
         }
         $output .= '</tbody></table>';
-        $stmt->close();
+        $main_stmt->close();
 
         return $output;
     }
@@ -472,14 +475,14 @@ class ServerObject
         $output = "";
         $table = $this->vars_table_samples;
         $table_sources = $this->vars_table_sources;
-        $stmt = $this->sql->prepare("SELECT id from $table WHERE ( pending != 1 or pending is NULL ) ORDER by added DESC limit 5000");
-        if (! $stmt) {
+        $main_stmt = $this->sql->prepare("SELECT id from $table WHERE ( pending != 1 or pending is NULL ) ORDER by added DESC limit 1000");
+        if (! $main_stmt) {
             $this->error_die("Error 23214 (Problem building sitemap.  Please contact admin@malshare.com)");
         }
-        $stmt->execute();
-        $res = $stmt->get_result();
+        $main_stmt->execute();
+        $res = $main_stmt->get_result();
         if (! $res) {
-            $stmt->close();
+            $main_stmt->close();
             $this->error_die("Error 23214 (Problem building sitemap.  Please contact admin@malshare.com)");
         }
         while ($s_row = $res->fetch_object()) {
@@ -502,7 +505,7 @@ class ServerObject
             $stmt->close();
             $output .= '<a href="sample.php?action=detail&hash=' . $sample_row->sha256 . '">' . $sample_row->md5 . ' | ' . $sample_row->sha1 . ' | ' . $sample_row->sha256 . '</a><br />';
         }
-        $stmt->close();
+        $main_stmt->close();
 
         return $output;
     }

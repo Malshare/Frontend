@@ -110,7 +110,6 @@ elseif($share->uri_action=="search") {
 	$sample = $share->sample_search(true);
 	echo $sample;
 	die();
-} 
 } elseif ($share->uri_action == "upload") {
     if (!isset($_FILES['upload']) || !isset($_FILES['upload']['tmp_name'])) {
         http_response_code(400);

@@ -9,8 +9,8 @@
         <?php
                 include('nav.php')
         ?>
-		<div class="container">
-			<br /> <br />
+		<div class="container py-4">
+			<div class="ms-form-card">
 				<?php
 
 				require_once "recaptchalib.php";
@@ -47,39 +47,44 @@
                     			if ($result){
                     			safe_echo_email:;
                         		echo '
-                        		<center>
-                        			<h3 class="form-signin-heading">Registration Successful.</h3>
-                        			An API Key has been emailed to ' . htmlspecialchars($email_post, ENT_QUOTES, 'UTF-8') . ' <br />
-                        		</center>
+                        		<div class="text-center">
+                        			<h3 class="text-success"><i class="bi bi-check-circle me-2"></i>Registration Successful</h3>
+                        			<p>An API Key has been emailed to ' . htmlspecialchars($email_post, ENT_QUOTES, 'UTF-8') . '</p>
+                        		</div>
                         		';
                     		}
 					else {
-                        	        	echo '<h3 class="form-signin-heading">
-                            		<center>Registration Problem</center></h3>
-                            		<p> Email was either already registered or there was an error.  If registered, your API key will be emailed to ' . htmlspecialchars($email_post, ENT_QUOTES, 'UTF-8') . ' (please check SPAM folder).  If you cannot find your registration, please contact an admin: Error 2587 - admin@malshare.com.</p>'; 
+                        	        	echo '<div class="text-center">
+						<h3 class="text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Registration Problem</h3>
+                            			<p>Email was either already registered or there was an error. If registered, your API key will be emailed to ' . htmlspecialchars($email_post, ENT_QUOTES, 'UTF-8') . ' (please check SPAM folder). If you cannot find your registration, please contact an admin: Error 2587 - admin@malshare.com.</p>
+					</div>'; 
 					}
 					
 				}
 				else
 				{
 					echo '
-					<form method=post action=register.php class="form-signin">
-						<h2 class="form-signin-heading">Register</h2>
-						<input type="text" class="input-block-level" name=name placeholder="Name"> <br />
-						<input type="text" class="input-block-level" name=email placeholder="Email Address"><center>';
+					<form method="post" action="register.php">
+						<h2><i class="bi bi-person-plus me-2"></i>Register</h2>
+						<div class="mb-3">
+							<input type="text" class="form-control" name="name" placeholder="Name">
+						</div>
+						<div class="mb-3">
+							<input type="text" class="form-control" name="email" placeholder="Email Address">
+						</div>
+						<div class="text-center">';
 					if ($secret != "DISABLED"){
-						echo '<div class="g-recaptcha" data-sitekey="6LfippkUAAAAAG9CeuGbV6Yev1FoCMAQzVyPLfE7"></div>';
+						echo '<div class="d-inline-block mb-3"><div class="g-recaptcha" data-sitekey="6LfippkUAAAAAG9CeuGbV6Yev1FoCMAQzVyPLfE7"></div></div>';
 			    }
 			    echo '<br />
-							<button class="btn btn-small btn-primary" type="submit">Submit</button>
-						</center>
+							<button class="btn btn-primary" type="submit">Submit</button>
+						</div>
 					</form>
 					';
 				}
 			?>
-		</div> 
-
-      <div id="push"></div>
+			</div>
+		</div>
 	
 <?php
 include_once('footer.php');

@@ -6,22 +6,29 @@
 	<body>
         <?php include('nav.php') ?>
 
-	<div class="container" style="width:90%">			
-		<div class="container-fluid center text-center">
-			<div class="row">
-
-			<form method=get action=search.php id="search_form" class="form-search" onsubmit="ShowLoading()">
-				<label class="lead" for="inputSearch">Quick Search: </label>
-				<input type="text" name=query id='inputSearch' class="input-xxlarge">
-				<button type="submit" class="btn">Search</button>
-			</form>
-
-
+	<div class="container py-4">
+		<div class="text-center mb-4">
+			<div class="ms-search-bar">
+				<form method="get" action="search.php" id="search_form">
+					<label class="form-label fs-5 fw-semibold mb-2" for="inputSearch">Quick Search</label>
+					<div class="input-group input-group-lg">
+						<input type="text" name="query" id="inputSearch" class="form-control" placeholder="Search by hash, source, or filename...">
+						<button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i> Search</button>
+					</div>
+				</form>
 			</div>
 		</div>
 
-		
-		<p class="lead text-center">Recently added Samples</p>
+		<script>
+		document.getElementById('search_form').addEventListener('submit', function() {
+			var overlay = document.createElement('div');
+			overlay.className = 'ms-loading-overlay';
+			overlay.innerHTML = '<div class="spinner-border" role="status"><span class="visually-hidden">Searching…</span></div><div class="ms-loading-text">Searching…</div>';
+			document.body.appendChild(overlay);
+		});
+		</script>
+
+		<h5 class="ms-section-title">Recently Added Samples</h5>
 			<?php
 				include("server_includes.php");
 				$share = new ServerObject();
@@ -34,4 +41,3 @@
 
 	</body>
 </html>
-

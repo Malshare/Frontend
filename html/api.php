@@ -2,13 +2,13 @@
 use Aws\S3\S3Client;
 
 /* ****************************************** */
-/* Norman SampleShare Client Framework	*/
-/* Version 1.30			       */
+/* Norman SampleShare Client Framework        */
+/* Version 1.30                               */
 /* Created by Trygve Brox - Norman ASA - 2010 */
 /* ****************************************** */
 /* Modified by Silas Cutler for Malshare.com  */
-/* Version 1.0				*/
-/*					    */
+/* Version 1.0                                */
+/*                                            */
 /* ****************************************** */
 
 
@@ -37,22 +37,22 @@ if($share->uri_action=="terminate" ) {
 }
 
 if($share->uri_action=="getlist" ) {
-	$res = $share->update_query_limit();
-	$contents = $share->get_list();
-	echo $contents;
-	die();
+    $res = $share->update_query_limit();
+    $contents = $share->get_list();
+    echo $contents;
+    die();
 }
 elseif($share->uri_action=="getlistraw" ) {
-	$share->update_query_limit();
-	$contents = $share->get_list_raw();
-	die();
+    $share->update_query_limit();
+    $contents = $share->get_list_raw();
+    die();
 }
 elseif($share->uri_action=="getsources" ) {
-	$share->update_query_limit();
-	$contents = $share->get_sources();
+    $share->update_query_limit();
+    $contents = $share->get_sources();
 
-	echo $contents;
-	die();
+    echo $contents;
+    die();
 }
 elseif($share->uri_action=="getfilenames" ) {
     $share->update_query_limit();
@@ -61,24 +61,24 @@ elseif($share->uri_action=="getfilenames" ) {
     die();
 }
 elseif($share->uri_action=="getsourcesraw" ) {
-	$share->update_query_limit();
-	$contents = $share->get_sources_raw();
-	die();
+    $share->update_query_limit();
+    $contents = $share->get_sources_raw();
+    die();
 }
 elseif($share->uri_action=="dailysum" ) {
-	$share->update_query_limit();
-	$contents = $share->get_sum();
-	echo $contents;
-	die();
+    $share->update_query_limit();
+    $contents = $share->get_sum();
+    echo $contents;
+    die();
 }
 elseif($share->uri_action=="getlimit" ) {
-	$contents = $share->get_user_limit();
-	echo $contents;
-	die();
+    $contents = $share->get_user_limit();
+    echo $contents;
+    die();
 }
 elseif($share->uri_action=="getfile") {
-	$share->update_query_limit();
-	$share->update_sample_count($share->uri_hash);
+    $share->update_query_limit();
+    $share->update_sample_count($share->uri_hash);
     $presignedUrl = $share->get_sample_url($share->uri_hash);
     header('Location: ' . $presignedUrl, true, 302);
     exit();
@@ -95,21 +95,21 @@ elseif ($share->uri_action == 'hashlookup') {
     die();
 }
 elseif($share->uri_action=="type") {
-	$sample = $share->search_type_day();
-	echo $sample;
-	die();
+    $sample = $share->search_type_day();
+    echo $sample;
+    die();
 }
 elseif($share->uri_action=="gettypes") {
-	$share->update_query_limit();
-	$res = $share->get_types();
-	echo $res;
-	die();
+    $share->update_query_limit();
+    $res = $share->get_types();
+    echo $res;
+    die();
 }
 elseif($share->uri_action=="search") {
-	$share->update_query_limit();
-	$sample = $share->sample_search(true);
-	echo $sample;
-	die();
+    $share->update_query_limit();
+    $sample = $share->sample_search(true);
+    echo $sample;
+    die();
 } elseif ($share->uri_action == "upload") {
     if (!isset($_FILES['upload']) || !isset($_FILES['upload']['tmp_name'])) {
         http_response_code(400);

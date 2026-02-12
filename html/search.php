@@ -4,15 +4,15 @@
         <?php include('header.php'); ?>
 
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js">  
-	<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+	<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
 
 	</head>
 <body>
 <?php include('nav.php') ?>
 
-<div class="container" style="width:90%">			
-<div class="jumbotron">
+<div class="container py-4">
 			<?php
 				include("server_includes.php");
                 $post_query = filter_input(INPUT_POST, 'query') ?: '';
@@ -34,65 +34,61 @@
 				$private_flag = filter_input(INPUT_GET, 'private');
 				$private_checked = ($private_flag !== null && $private_flag !== false && $private_flag !== '') ? 'checked' : '';
 				?>
-				<div class="container" <?php if ($showDivFlag===false){?>style="display:none"<?php } ?>>
+				<div <?php if ($showDivFlag===false){?>style="display:none"<?php } ?>>
 
-					<form method="get" action="search.php" class="form-signin" id="search_form" onsubmit="ShowLoading()">
-                	<h2 class="form-signin-heading">Search</h2>
+					<div class="ms-form-card">
+						<form method="get" action="search.php" id="search_form">
+							<h2><i class="bi bi-search me-2"></i>Search</h2>
 
-					<div>
-						<input type="text" class="input-block-level" name="query" placeholder="Search hashes, sources and file names..." value="<?php echo $display_query; ?>">
-						<label class="checkbox"><input type="checkbox" name="private" <?php echo $private_checked; ?> > Private Search</label>
-                    	<button class="btn btn-small btn-primary" type="submit">Submit</button>
-					<div class="popup" onclick="myFunction()"> Syntax
-						<span class="popuptext" id="myPopup">
-						Specific Search:<br />>  [md5 | sha1 | sha256 | source]: (query) <br />  Broad:<br />>    (query)
-						</span>
+							<div class="mb-3">
+								<input type="text" class="form-control" name="query" placeholder="Search hashes, sources and file names..." value="<?php echo $display_query; ?>">
+							</div>
+							<div class="form-check mb-3">
+								<input class="form-check-input" type="checkbox" name="private" id="privateCheck" <?php echo $private_checked; ?>>
+								<label class="form-check-label" for="privateCheck">Private Search</label>
+							</div>
+							<div class="d-flex align-items-center gap-2">
+								<button class="btn btn-primary" type="submit">Submit</button>
+								<div class="popup" onclick="myFunction()">
+									<span class="badge bg-secondary" role="button"><i class="bi bi-info-circle me-1"></i>Syntax</span>
+									<span class="popuptext" id="myPopup">
+										Specific Search:<br />&gt; [md5 | sha1 | sha256 | source]: (query) <br />Broad:<br />&gt; (query)
+									</span>
+								</div>
+							</div>
+						</form>
+
+						<hr class="my-4">
+
+						<table class="table table-striped table-hover">
+							<thead><tr><th><h6 class="mb-0">Recent Searches</h6></th></tr></thead>
+							<tbody>
+								<?php
+									$share = new ServerObject();
+									$stats = $share->get_recent_searches();
+									foreach ($stats as $skey ){
+										echo '<tr><td>' . $share->escape_html($skey) . '</td>';
+									}
+								?>
+							</tbody>
+						</table>
 					</div>
+
 				</div>
-				<br />
-				<table class="table table-bordered table-striped">
-				<thead> <tr>  <th><h4>Recent Searches</h4></th>  </tr> </thead>
-				<tbody>
 
-					<?php
-						$share = new ServerObject();
-						$stats = $share->get_recent_searches();
-						foreach ($stats as $skey ){
-							echo '                  <tr><td>' . $share->escape_html($skey) . ' </td>';
-						}
-					?>
-					</tbody></table>
-
-                        	</form>
-                	</div>
-
-			
-			</div>			
-		</div> 
+</div> 
 <script>
 function myFunction() {
     var popup = document.getElementById("myPopup");
     popup.classList.toggle("show");
 }
-function ShowLoading(e) {
-        setTimeout(function(){
-        window.location.reload(1);
-     }, 20000);
 
-     var div = document.createElement('div');
-     var img = document.createElement('img');
-       
-     div.innerHTML = "<br /> <br /><h1>Searching...</h1><br />";
-
-     img.src = 'images/ajax-loader.gif';
-     div.style.cssText = 'position: fixed; top: 5%; left: 40%; z-index: 5000; width: 422px; text-align: center;';
-     div.appendChild(img);
-     document.body.appendChild(div);
-     return true;
-     // These 2 lines cancel form submission, so only use if needed.
-     //window.event.cancelBubble = true;
-     //e.stopPropagation();
-}
+document.getElementById('search_form').addEventListener('submit', function() {
+    var overlay = document.createElement('div');
+    overlay.className = 'ms-loading-overlay';
+    overlay.innerHTML = '<div class="spinner-border" role="status"><span class="visually-hidden">Searching…</span></div><div class="ms-loading-text">Searching…</div>';
+    document.body.appendChild(overlay);
+});
 
 $(document).ready( function () {
 	$('#searchres').DataTable({
@@ -115,4 +111,3 @@ include_once('footer.php');
 
   </body>
 </html>
-

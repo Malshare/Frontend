@@ -19,28 +19,26 @@ if ($hash_post !== '') {
 	<body>
         <?php include('nav.php') ?>
 
-<div class="container" style="width:90%">
-<div class="jumbotron">
-<div class="container">		
+<div class="container py-4">
+	<div class="ms-form-card">
 
-			<form method=post action=pull.php class="form-signin">
-				<h2 class="form-signin-heading">Pull Request</h2>
-				<?php
-				if (array_key_exists('mapi_key', $_COOKIE) && $_COOKIE['mapi_key'] != "" ){}
-				else{
-					echo '<input type="text" class="input-block-level" name=api_key placeholder="API Key">';
-				}
-				?>
-				<input type="text" class="input-block-level" name=hash placeholder="MD5 / SHA1 / SHA256"> <br />
+		<form method="post" action="pull.php">
+			<h2><i class="bi bi-download me-2"></i>Pull Request</h2>
+			<?php
+			if (array_key_exists('mapi_key', $_COOKIE) && $_COOKIE['mapi_key'] != "" ){}
+			else{
+				echo '<div class="mb-3"><input type="text" class="form-control" name="api_key" placeholder="API Key"></div>';
+			}
+			?>
+			<div class="mb-3">
+				<input type="text" class="form-control" name="hash" placeholder="MD5 / SHA1 / SHA256">
+			</div>
 
-				
-				<button class="btn btn-small btn-primary" type="submit">Submit</button>
-			</form>
-			
-			
-			 </div> 
-			</div> 
+			<button class="btn btn-primary" type="submit">Submit</button>
+		</form>
+
 	</div>
+</div>
 
 <?php
 include_once('footer.php');

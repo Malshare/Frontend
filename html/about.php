@@ -1,60 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-        	<?php include('header.php'); ?>
+		<?php include('header.php'); ?>
 	</head>
 
 	<body>
-        <?php include('nav.php') ?>
-	<div class="container">
-		<div class="hero-unit">
-		<center><img src="images/logo_header.png" width="333" height="119" alt="Malshare Logo" ></center>
-		The MalShare Project is a collaborative effort to create a community driven public malware repository that works to build additional tools to benefit the security community at large.   <br /><br />
-		<p>Not all files in our system are malicious and our data feeds are considered as is. We offer free public API keys.  Standard keys allow 2000 API calls per day (including downloading samples, details lookup and search).  If you require more, contact <a href="mailto:admin@MalShare.com">admin@MalShare.com</a> for further assistance. </p>
+	<?php include('nav.php') ?>
 
-		<p>Feature requests, bug reports and any other issues can be reported <a href="https://github.com/Malshare/MalShare/issues">here</a></p>
-                <p>Large updates and general information can be found on our <a href="https://malshare.blogspot.com/">blog</a></p>
-		<p>A list of those who have helped secure MalShare through security reports can be found:  <a href="thanks.php">here</a></p>
-		<br /><center>
-		<a href="https://github.com/malshare"><img src="images/github.png" height="20" width="20">  GitHub  </a>|<a href="https://twitter.com/mal_share"><img src="images/twitter.png" height="20" width="20">  Twitter</a> 
-        </center>
-		
-	<div class="row">
-		<div class="span5">
-        	<h3> Admin Team</h3>
-				<p> <b> Silas Cutler </b>  <i> - Founder / Lead Developer</i> <br /> - <a href="https://twitter.com/silascutler?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @silascutler</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
-				<p> <b> Brandon Levene</b>  <i> </i> <br /> - <a href="https://twitter.com/SeraphimDomain?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @SeraphimDomain</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
-				<p> <b> Lars A. Wallenborn </b>  <i> - Developer</i> <br /> - <a href="https://twitter.com/larsborn?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @larsborn</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
-				<p> <b> Alexandru Constantin </b>  <i> - Client Developer</i> <br /> - <a href="https://twitter.com/AlexBK1996?twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @AlexBK1996</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
+	<div class="container py-4">
+		<!-- Hero -->
+		<div class="ms-hero text-center mb-4">
+			<img src="images/logo_header.png" width="333" height="119" alt="Malshare Logo" class="mb-3">
+			<p class="lead mb-0">A collaborative, community-driven public malware repository building tools to benefit the security community at large.</p>
 		</div>
-	<div class="row">
-		<div class="span5">
-			<h3> Yara Feeds:</h3>
-			<h4>
-				<a href="https://github.com/Yara-Rules/rules">YaraRules Project</a> <br />
-			</h4>
-		</div>
-        </div>
-                <div> 
-			<center><h3>Partners </h3>
-			<a href="https://www.zemana.com/"><img src="images/zemana_logo.png" width="182" height="140" alt="Zemana"></a>
-            <a href="https://www.virussamples.com/"><img src="images/malware_virus_samples_logo2.png" width="182" height="120" alt="VirusSamples"></a>
 
-			<br />
-			<img src="images/ET-PP-Logo.png" width="214" height="72" alt="Emerging Threats / Proofpoint">
-			<img src="images/12-1362_Crowd_Strike_Logo_Red_D0_01.gif" height="134" width="209" alt="CrowdStrike">
-			<img src="images/2uB3xrjd.jpg" height="100" width="100"  alt="QuadraNet" >
-			<img src="images/TEHTRIS.png" height="100" width="206"  alt="Tehtris" >
-			<img src="images/TPSC.png" height="100" width="100"  alt="The PC Security Channel" >
-			<img src="images/farsight-logo.svg" height="200" width="200"  alt="Farsight Security" >
-			</center>
+		<!-- About -->
+		<div class="ms-card">
+			<p>Not all files in our system are malicious and our data feeds are considered as is. We offer free public API keys. Standard keys allow 2000 API calls per day (including downloading samples, details lookup and search). If you require more, contact <a href="mailto:admin@MalShare.com">admin@MalShare.com</a> for further assistance.</p>
+			<p>Feature requests, bug reports and any other issues can be reported <a href="https://github.com/Malshare/MalShare/issues">here</a>.</p>
+			<p>Large updates and general information can be found on our <a href="https://malshare.blogspot.com/">blog</a>.</p>
+			<p class="mb-0">A list of those who have helped secure MalShare through security reports can be found <a href="thanks.php">here</a>.</p>
+			<hr>
+			<div class="text-center">
+				<a href="https://github.com/malshare" class="btn btn-outline-dark btn-sm me-2"><i class="bi bi-github me-1"></i>GitHub</a>
+				<a href="https://twitter.com/mal_share" class="btn btn-outline-primary btn-sm"><i class="bi bi-twitter me-1"></i>Twitter</a>
+			</div>
+		</div>
+
+		<div class="row g-4">
+			<!-- Team -->
+			<div class="col-lg-6">
+				<div class="ms-card h-100">
+					<h5 class="ms-section-title"><i class="bi bi-people me-2"></i>Admin Team</h5>
+					<p><strong>Silas Cutler</strong> <span class="text-body-secondary">— Founder / Lead Developer</span><br><a href="https://twitter.com/silascutler?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @silascutler</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
+					<p><strong>Brandon Levene</strong><br><a href="https://twitter.com/SeraphimDomain?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @SeraphimDomain</a></p>
+					<p><strong>Lars A. Wallenborn</strong> <span class="text-body-secondary">— Developer</span><br><a href="https://twitter.com/larsborn?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @larsborn</a></p>
+					<p class="mb-0"><strong>Alexandru Constantin</strong> <span class="text-body-secondary">— Client Developer</span><br><a href="https://twitter.com/AlexBK1996?twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @AlexBK1996</a></p>
+				</div>
+			</div>
+
+			<!-- Yara Feeds -->
+			<div class="col-lg-6">
+				<div class="ms-card h-100">
+					<h5 class="ms-section-title"><i class="bi bi-rss me-2"></i>Yara Feeds</h5>
+					<p><a href="https://github.com/Yara-Rules/rules" class="fs-5">YaraRules Project</a></p>
+				</div>
+			</div>
+		</div>
+
+		<!-- Partners -->
+		<div class="ms-card mt-4">
+			<h5 class="ms-section-title text-center"><i class="bi bi-handshake me-2"></i>Partners</h5>
+			<div class="d-flex flex-wrap justify-content-center align-items-center gap-4 py-3">
+				<a href="https://www.zemana.com/"><img src="images/zemana_logo.png" class="ms-partner-logo" alt="Zemana"></a>
+				<a href="https://www.virussamples.com/"><img src="images/malware_virus_samples_logo2.png" class="ms-partner-logo" alt="VirusSamples"></a>
+				<img src="images/ET-PP-Logo.png" class="ms-partner-logo" alt="Emerging Threats / Proofpoint">
+				<img src="images/12-1362_Crowd_Strike_Logo_Red_D0_01.gif" class="ms-partner-logo" alt="CrowdStrike">
+				<img src="images/2uB3xrjd.jpg" class="ms-partner-logo" alt="QuadraNet">
+				<img src="images/TEHTRIS.png" class="ms-partner-logo" alt="Tehtris">
+				<img src="images/TPSC.png" class="ms-partner-logo" alt="The PC Security Channel">
+				<img src="images/farsight-logo.svg" class="ms-partner-logo" alt="Farsight Security">
+			</div>
 		</div>
 	</div>
-	</div>
-	</div>
 
-<br />	
-	
 <?php
 include_once('footer.php');
 ?>

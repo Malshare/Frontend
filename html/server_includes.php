@@ -428,7 +428,7 @@ class ServerObject
 
                         $extend = 1;
                     }
-                    $yhits .= '<a href="search.php?query=' . rawurlencode($yh) . '"><span class="label label-info">' . $this->escape_html($yh) . '</span></a>  ';
+                    $yhits .= '<a href="search.php?query=' . rawurlencode($yh) . '"><span class="badge bg-info text-dark">' . $this->escape_html($yh) . '</span></a>  ';
                 }
 
                 if ($counter > 3) {
@@ -438,7 +438,7 @@ class ServerObject
             $output .= '<tr>
                     <td class="hash_font"><div style = "word-wrap: break-word"><a href="sample.php?action=detail&hash=' . $sample_row->sha256 . '">' . $sample_row->sha256 . '</a></div></td>
                     <td>' . $sample_row->ftype . '</td>
-                    <td>' . date("Y-m-d H:i:s", $sample_row->added) . ' UTC</td>';
+                    <td>' . date("Y-m-d H:i:s", $sample_row->added) . ' UTC</td>';;
 
             $output .= '<td class="word-wrap: wrap-word">' . $this->sourceForDisplay($sample_row) . '</td> ';
             $output .= '<td>' . $yhits . '</td></tr>';
@@ -614,8 +614,8 @@ class ServerObject
                     $res = $stmt->get_result();
                 } else {
                     $searchValueLower = strtolower($searchValue);
-                    $like = $searchValueLower . '%';
-                    $stmt = $this->sql->prepare("SELECT id FROM tbl_sample_sources WHERE source LIKE ? LIMIT 100");
+                    $like = '%' . $searchValueLower . '%';
+                    $stmt = $this->sql->prepare("SELECT DISTINCT id FROM tbl_sample_sources WHERE source LIKE ? LIMIT 100");
                     $stmt->bind_param('s', $like);
                     $stmt->execute();
                     $res = $stmt->get_result();
@@ -629,7 +629,7 @@ class ServerObject
 
         // Build header / if not API
         if ($notAnApiQuery) {
-            $output = '<table class="table table-bordered table-striped" style="table-layout: fixed;">
+            $output = '<table id="searchres" class="table table-bordered table-striped" style="table-layout: fixed;">
         <thead>  <tr>
         <th style="width: 17%;">SHA256 Hash</th>
         <th style="width: 5%">File type</th>
@@ -714,14 +714,13 @@ class ServerObject
 
                             $extend = 1;
                         }
-                        $yhits .= '<a href="search.php?query=' . rawurlencode($yh) . '"><span class="label label-info">' . $this->escape_html($yh) . '</span></a>  ';
+                        $yhits .= '<a href="search.php?query=' . rawurlencode($yh) . '"><span class="badge bg-info text-dark">' . $this->escape_html($yh) . '</span></a>  ';
                     }
                     if ($counter > 4) {
                         $yhits .= "</div>";
                     }
                 }
                 $output .= '<td>' . $yhits . '</td></tr>';
-                $output .= '</tr>';
             } else {
                 $t = array(
                     //                    'id' => $sample_row->id,
@@ -900,7 +899,7 @@ class ServerObject
         }
         if ($jhits && isset($jhits->yara) && (is_array($jhits->yara) || is_object($jhits->yara))) {
             foreach ($jhits->yara as $yh) {
-                $output .= '<span class="label label-info">' . $yh . '</span> | ';
+                $output .= '<span class="badge bg-info text-dark">' . $yh . '</span> | ';
             }
         }
 
@@ -1016,7 +1015,7 @@ class ServerObject
 
         }
         if ($f_row->pending == 1) {
-            $output .= "<script>ShowLoading();</script>";
+            $output .= "<script>showPendingOverlay();</script>";
         }
 
         return $output;

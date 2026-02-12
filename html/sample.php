@@ -4,47 +4,6 @@
         <?php include('header.php'); ?>
         <script src="https://www.google.com/recaptcha/api.js" async defer></script>
         <script src="./js/vt-augment.min.js" async defer></script>
-
-    
-    <link href="./css/bootstrap.css" rel="stylesheet">
-    <style type="text/css">
-        body {
-            padding-top: 40px;
-            padding-bottom: 40px;
-            background-color: #f5f5f5;
-        }
-      #push,
-      #footer {
-        height: 60px;
-      }    
-        .form-signin {
-            max-width: 300px;
-            padding: 19px 29px 29px;
-            margin: 0 auto 20px;
-            background-color: #fff;
-            border: 1px solid #e5e5e5;
-                -webkit-border-radius: 5px;
-                -moz-border-radius: 5px;
-            border-radius: 5px;
-                -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
-                -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
-            box-shadow: 0 1px 2px rgba(0,0,0,.05);
-        }
-        .form-signin .form-signin-heading,
-        .form-signin .checkbox {
-            margin-bottom: 10px;
-        }
-        .form-signin input[type="text"],
-        .form-signin input[type="password"] {
-            font-size: 16px;
-            height: auto;
-            margin-bottom: 15px;
-            padding: 7px 9px;
-        }
-    
-    </style>
-    <link href="./css/sticky-footer-navbar.css" rel="stylesheet">
-
     </head>
 
     <body>
@@ -53,28 +12,16 @@
 
 
 <script type="text/javascript">
-    function ShowLoading(e) {
-    setTimeout(function(){
-       window.location.reload(1);
-    }, 20000);
-
-        var div = document.createElement('div');
-        var img = document.createElement('img');
-    
-        div.innerHTML = "<br /> <br /><h1>Pending Analysis...</h1><br />";
-
-        img.src = 'images/ajax-loader.gif';
-        div.style.cssText = 'position: fixed; top: 5%; left: 40%; z-index: 5000; width: 422px; text-align: center;';
-        div.appendChild(img);
-        document.body.appendChild(div);
-        return true;
-        // These 2 lines cancel form submission, so only use if needed.
-        //window.event.cancelBubble = true;
-        //e.stopPropagation();
+    function showPendingOverlay() {
+        var overlay = document.createElement('div');
+        overlay.className = 'ms-loading-overlay';
+        overlay.innerHTML = '<div class="spinner-border" role="status"><span class="visually-hidden">Loading…</span></div><div class="ms-loading-text">Pending Analysis…</div>';
+        document.body.appendChild(overlay);
+        setTimeout(function(){ window.location.reload(1); }, 20000);
     }
 </script>
-        <div class="container">            
-            <div class="jumbotron">
+        <div class="container py-4">            
+            <div class="ms-card">
 <?php
     include("server_includes.php");
     require_once "recaptchalib.php";
@@ -116,19 +63,21 @@
             echo $share->get_details();
         }
         else{
-            echo '<br /> <center><p class="lead">Please enter request with a hash</p></center>';    
+            echo '<div class="text-center py-4"><p class="lead text-body-secondary">Please enter request with a hash</p></div>';    
             die();
         }
     } else {
         echo '
-        <form method=post action=sample.php?' .  $_SERVER['QUERY_STRING'] .' class="form-signin">
-                <h2 class="form-signin-heading">Captcha Check</h2>
-                <center>
-                        <div class="g-recaptcha" data-sitekey="6LfippkUAAAAAG9CeuGbV6Yev1FoCMAQzVyPLfE7"></div>
+        <div class="ms-form-card">
+        <form method="post" action="sample.php?' .  $_SERVER['QUERY_STRING'] .'">
+                <h2><i class="bi bi-shield-check me-2"></i>Captcha Check</h2>
+                <div class="text-center">
+                        <div class="d-inline-block mb-3"><div class="g-recaptcha" data-sitekey="6LfippkUAAAAAG9CeuGbV6Yev1FoCMAQzVyPLfE7"></div></div>
                         <br />
-                        <button class="btn btn-small btn-primary" type="submit">Submit</button>
-                </center>
-        </form>';
+                        <button class="btn btn-primary" type="submit">Submit</button>
+                </div>
+        </form>
+        </div>';
         }
 ?>
 

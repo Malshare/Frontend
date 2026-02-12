@@ -46,13 +46,29 @@ services:
 
 
     # command: "/bin/sh -c 'docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql && exec apache2-foreground'"
-    command: "/bin/sh -c 'docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql && cd /var/www/ && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && apt update && apt install -y zip && composer install && exec apache2-foreground'"
+    command: "/bin/sh -c 'docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql && exec apache2-foreground'"
 
 
 
     ports:
       - "8080:80"
 
+  test_runner:
+    image: python:3.11-slim
+    container_name: malshare_tests
+    depends_on:
+      - webserver
+    volumes:
+      - ../tests:/tests
+      - ../:/app
+    working_dir: /tests
+    environment:
+      MALSHARE_URL: "http://webserver"
+      MALSHARE_API_KEY: "f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2"
+    command: >
+      sh -c 'pip install -q requests pytest pytest-cov &&
+             sleep 5 &&
+             python -m pytest test_malshare_api.py -v --tb=short'
 
 volumes:
   malshare_db_data:

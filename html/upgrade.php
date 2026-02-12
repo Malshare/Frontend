@@ -11,8 +11,8 @@
         <?php
                 include('nav.php')
         ?>
-		<div class="container">
-			<br /> <br />
+		<div class="container py-4">
+			<div class="ms-form-card">
 				<?php
 				require_once "recaptchalib.php";
 				$capt_checked = false;
@@ -41,47 +41,52 @@
 					$share = new ServerObject();
 					$user = new UserObject($share->sql, $api_key_post, true);
 					if ($user->active == 0) {
-                                                echo '<center><h3 class="form-signin-heading">Code Problem</h3>
-	                                                        Invalid API Key <br />
-		                                      </center>';
+                                                echo '<div class="text-center">
+							<h3 class="text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Code Problem</h3>
+	                                                        <p>Invalid API Key</p>
+		                                      </div>';
 					} else {
 
 						$result = $user->do_upgrade($code_post);
 						
 						if ($result[0] == true){
 							echo '
-							<center>
-								<h3 class="form-signin-heading">Code Successful</h3>
-								' . htmlspecialchars($result[1], ENT_QUOTES, 'UTF-8') . ' <br />
-							</center>
+							<div class="text-center">
+								<h3 class="text-success"><i class="bi bi-check-circle me-2"></i>Code Successful</h3>
+								<p>' . htmlspecialchars($result[1], ENT_QUOTES, 'UTF-8') . '</p>
+							</div>
 							';
 						}
 						else {
-								echo '<center><h3 class="form-signin-heading">Code Problem</h3>
-								' . htmlspecialchars($result[1], ENT_QUOTES, 'UTF-8') . ' <br />
-							</center>';
+								echo '<div class="text-center">
+								<h3 class="text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Code Problem</h3>
+								<p>' . htmlspecialchars($result[1], ENT_QUOTES, 'UTF-8') . '</p>
+							</div>';
 						}
 					}					
 				}
 				else
 				{
 					echo '
-					<form method=post action=upgrade.php class="form-signin">
-						<h2 class="form-signin-heading">Upgrade Key</h2>
-						<input type="text" class="input-block-level" name=api_key placeholder="API Key"> <br />
-						<input type="text" class="input-block-level" name=code placeholder="Upgrade Code">
-						<center>
-						      <div class="g-recaptcha" data-sitekey="6LfippkUAAAAAG9CeuGbV6Yev1FoCMAQzVyPLfE7"></div>
-			    				<br />
-							<button class="btn btn-small btn-primary" type="submit">Submit</button>
-						</center>
+					<form method="post" action="upgrade.php">
+						<h2><i class="bi bi-arrow-up-circle me-2"></i>Upgrade Key</h2>
+						<div class="mb-3">
+							<input type="text" class="form-control" name="api_key" placeholder="API Key">
+						</div>
+						<div class="mb-3">
+							<input type="text" class="form-control" name="code" placeholder="Upgrade Code">
+						</div>
+						<div class="text-center">
+							<div class="d-inline-block mb-3"><div class="g-recaptcha" data-sitekey="6LfippkUAAAAAG9CeuGbV6Yev1FoCMAQzVyPLfE7"></div></div>
+							<br />
+							<button class="btn btn-primary" type="submit">Submit</button>
+						</div>
 					</form>
 					';
 				}
 			?>
-		</div> 
-
-      <div id="push"></div>
+			</div>
+		</div>
 	
 <?php
 include_once('footer.php');

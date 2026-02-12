@@ -37,19 +37,21 @@ if ((array_key_exists('fsample', $_FILES) && ($_FILES['fsample']))) {
 
 	<?php include('nav.php'); ?>
 
-	<div class="container">
-		<div class="jumbotron">
+	<div class="container py-4">
+		<div class="ms-form-card">
 			<?php
 				if ($errorMessage){
-					echo '<center><font color="red"><h4 class="form-signin-heading">' . htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8') . '</h2></font></center>';
+					echo '<div class="alert alert-danger text-center" role="alert">' . htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8') . '</div>';
 				}
 			?>
 
-			<form method=post action=upload.php class="form-signin" enctype="multipart/form-data" >
-				<h2 class="form-signin-heading">Upload</h2>
-				<p><i>Uploaded files are publicly shared </i></p>
-				<input type="file" name="fsample" id="fsample" class="fileupload" data-icon="false">
-				<button class="btn btn-small btn-primary" onClick="return validate() && showScroll()" type="submit">Submit</button>
+			<form method="post" action="upload.php" enctype="multipart/form-data">
+				<h2><i class="bi bi-cloud-arrow-up me-2"></i>Upload</h2>
+				<p class="text-body-secondary"><em>Uploaded files are publicly shared</em></p>
+				<div class="mb-3">
+					<input type="file" name="fsample" id="fsample" class="form-control">
+				</div>
+				<button class="btn btn-primary" onClick="return validate()" type="submit">Submit</button>
 			</form>
 		</div>
 	</div>

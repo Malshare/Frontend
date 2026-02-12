@@ -8,14 +8,15 @@
 	<body>
         <?php include('nav.php') ?>
 
-		<div class="container">			
-			<div class="jumbotron">
-				<h2>API Documentation</h2>
-				The API is provided for the registered users to allow for accessing of files and data stored within out dataset.<br />
+		<div class="container py-4">
+			<div class="ms-hero">
+				<h2><i class="bi bi-code-slash me-2"></i>API Documentation</h2>
+				<p class="mb-0">The API is provided for registered users to access files and data stored within our dataset.</p>
 			</div>
 
-			<h3>Tools</h3>
-			<table class="table">
+			<div class="ms-card">
+			<h5 class="ms-section-title"><i class="bi bi-tools me-2"></i>Community Tools</h5>
+			<table class="table table-striped table-hover">
 			  <tr>
 			    <th>Language</th>
 			    <th>Developer</th>
@@ -52,11 +53,13 @@
                             <td><a href="https://github.com/toys0ldier/malware_keywords">https://github.com/toys0ldier/malware_keywords</a></td>
                           </tr>
 			</table>
+			</div>
 
-
-			<h3> API Endpoints </h3>
+			<div class="ms-card">
+			<h5 class="ms-section-title"><i class="bi bi-plug me-2"></i>API Endpoints</h5>
 					
-			<table class="table">
+			<div class="table-responsive">
+			<table class="table table-striped table-hover">
 			  <tr>
 			    <th>Request Type</th>
 			    <th>URL Path</th>
@@ -176,6 +179,8 @@
 			  </tr>
 
 			 </table>
+			 </div>
+			 </div>
 		</div> 
 	
 	<?php include_once('footer.php'); ?>

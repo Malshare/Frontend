@@ -1,8 +1,9 @@
+<?php require_once __DIR__ . '/include/i18n.php'; ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo htmlspecialchars(i18n_lang_value(), ENT_QUOTES, 'UTF-8'); ?>">
 	<head>
 	<meta charset="utf-8">
-	<title>MalShare - Donate</title>
+	<title><?php echo h('donate.title'); ?></title>
 		<script type="text/javascript">
 		  var _gaq = _gaq || [];
 		  _gaq.push(['_setAccount', 'UA-49931431-1']);
@@ -23,5 +24,3 @@
 		</form>
   	</body>
 </html>
-
-

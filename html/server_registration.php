@@ -10,6 +10,9 @@
 /*                                            */
 /* ****************************************** */
 
+// Include i18n for translation support
+require_once __DIR__ . '/include/i18n.php';
+
 error_reporting(E_ALL & ~E_NOTICE);
 
 
@@ -73,7 +76,7 @@ class ServerObject {
 		if(! preg_match("/^[A-Za-z0-9\.\-\_\+]*@[A-Za-z0-9\.\-\_]+$/", $this->email)){
 			echo ('
 			<center>
-				Invalid Email Supplied : ' . $this->email .'
+				' . h('server.invalid_email') . ' : ' . htmlspecialchars($this->email, ENT_QUOTES, 'UTF-8') . '
 			</center>	
 			');
 			$this->valid = false;
@@ -82,7 +85,7 @@ class ServerObject {
 		if (in_array($email_domain, $reject_email_providers)){
 			echo ('
 			<center>
-				<b>Temporary Email Providers not permitted : ' . $this->email .'</b>
+				<b>' . h('server.temp_email_not_allowed') . ' : ' . htmlspecialchars($this->email, ENT_QUOTES, 'UTF-8') . '</b>
 			</center>	
 			');
 			$this->valid = false;
@@ -188,7 +191,7 @@ www.malshare.com
 		$mail = $smtp->send($to, $headers, $body);
 		
 		if (PEAR::isError($mail)) {
-			echo "Problem sending activation email.  Please contact admin@malshare.com";
+			echo h('server.email_problem');
 			return false;
 			
 		} else {

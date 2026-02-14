@@ -1,8 +1,10 @@
 <?php
+require_once __DIR__ . '/include/i18n.php';
+
 $errorMessage = '';
 if ((array_key_exists('fsample', $_FILES) && ($_FILES['fsample']))) {
     if ($_FILES["fsample"]["size"] > 26214400) {
-        $errorMessage = "File too Large: <i> 25MB Max</i>";
+		$errorMessage = t('upload.too_large_error');
     } else {
         include("server_includes.php");
 
@@ -18,7 +20,7 @@ if ((array_key_exists('fsample', $_FILES) && ($_FILES['fsample']))) {
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo htmlspecialchars(i18n_lang_value(), ENT_QUOTES, 'UTF-8'); ?>">
 	<head>
         <?php include('header.php'); ?>
 	</head>
@@ -29,7 +31,8 @@ if ((array_key_exists('fsample', $_FILES) && ($_FILES['fsample']))) {
 			var size=26214400;
 			var file_size=document.getElementById('fsample').files[0].size;
 			if(file_size>=size){
-				alert('File too large');
+				var tooLargeMsg = <?php echo json_encode(t('upload.too_large')); ?>;
+				alert(tooLargeMsg);
 				return false;
 			}
 		}
@@ -46,10 +49,10 @@ if ((array_key_exists('fsample', $_FILES) && ($_FILES['fsample']))) {
 			?>
 
 			<form method=post action=upload.php class="form-signin" enctype="multipart/form-data" >
-				<h2 class="form-signin-heading">Upload</h2>
-				<p><i>Uploaded files are publicly shared </i></p>
+				<h2 class="form-signin-heading"><?php echo h('upload.title'); ?></h2>
+				<p><i><?php echo h('upload.notice'); ?> </i></p>
 				<input type="file" name="fsample" id="fsample" class="fileupload" data-icon="false">
-				<button class="btn btn-small btn-primary" onClick="return validate() && showScroll()" type="submit">Submit</button>
+				<button class="btn btn-small btn-primary" onClick="return validate() && showScroll()" type="submit"><?php echo h('upload.submit'); ?></button>
 			</form>
 		</div>
 	</div>
@@ -58,4 +61,3 @@ if ((array_key_exists('fsample', $_FILES) && ($_FILES['fsample']))) {
 
   </body>
 </html>
-

@@ -1,5 +1,6 @@
+<?php require_once __DIR__ . '/include/i18n.php'; ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo htmlspecialchars(i18n_lang_value(), ENT_QUOTES, 'UTF-8'); ?>">
     <head>
         <?php include('header.php'); ?>
         <script src="https://www.google.com/recaptcha/api.js" async defer></script>
@@ -61,7 +62,8 @@
         var div = document.createElement('div');
         var img = document.createElement('img');
     
-        div.innerHTML = "<br /> <br /><h1>Pending Analysis...</h1><br />";
+        var pendingMsg = <?php echo json_encode(t('sample.pending')); ?>;
+        div.innerHTML = "<br /> <br /><h1>" + pendingMsg + "</h1><br />";
 
         img.src = 'images/ajax-loader.gif';
         div.style.cssText = 'position: fixed; top: 5%; left: 40%; z-index: 5000; width: 422px; text-align: center;';
@@ -116,17 +118,17 @@
             echo $share->get_details();
         }
         else{
-            echo '<br /> <center><p class="lead">Please enter request with a hash</p></center>';    
+            echo '<br /> <center><p class="lead">' . h('sample.missing_hash') . '</p></center>';    
             die();
         }
     } else {
         echo '
         <form method=post action=sample.php?' .  $_SERVER['QUERY_STRING'] .' class="form-signin">
-                <h2 class="form-signin-heading">Captcha Check</h2>
+            <h2 class="form-signin-heading">' . h('sample.captcha_title') . '</h2>
                 <center>
                         <div class="g-recaptcha" data-sitekey="6LfippkUAAAAAG9CeuGbV6Yev1FoCMAQzVyPLfE7"></div>
                         <br />
-                        <button class="btn btn-small btn-primary" type="submit">Submit</button>
+                <button class="btn btn-small btn-primary" type="submit">' . h('sample.submit') . '</button>
                 </center>
         </form>';
         }
@@ -146,4 +148,3 @@ include_once('footer.php');
             
   </body>
 </html>
-

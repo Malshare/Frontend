@@ -1,0 +1,5 @@
+ErrorDocument 500 /50x.php
+ErrorDocument 502 /50x.php
+ErrorDocument 503 /50x.php
+ErrorDocument 504 /50x.php
+ErrorDocument 404 /404.php

@@ -1,7 +1,11 @@
-	
+
+<?php
+require_once __DIR__ . '/include/i18n.php';
+?>
+
 	<meta charset="utf-8">
-	<title>MalShare</title>
-    	<meta name="description" content="The MalShare Project is a community driven public malware repository that works to provide free access to malware samples and tooling to the infomation security community.">
+	<title><?php echo h('site.name'); ?></title>
+    	<meta name="description" content="<?php echo h('meta.description'); ?>">
 
 	<link href="./css/malshare.css" rel="stylesheet">
 	<link href="./css/bootstrap.css" rel="stylesheet">
@@ -17,4 +21,3 @@
 	
 	  gtag('config', 'G-4WK6RGYZEY');
 	</script>
-

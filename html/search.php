@@ -1,5 +1,6 @@
+<?php require_once __DIR__ . '/include/i18n.php'; ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo htmlspecialchars(i18n_lang_value(), ENT_QUOTES, 'UTF-8'); ?>">
 	<head>
         <?php include('header.php'); ?>
 
@@ -37,21 +38,21 @@
 				<div class="container" <?php if ($showDivFlag===false){?>style="display:none"<?php } ?>>
 
 					<form method="get" action="search.php" class="form-signin" id="search_form" onsubmit="ShowLoading()">
-                	<h2 class="form-signin-heading">Search</h2>
+	                	<h2 class="form-signin-heading"><?php echo h('search.title'); ?></h2>
 
 					<div>
-						<input type="text" class="input-block-level" name="query" placeholder="Search hashes, sources and file names..." value="<?php echo $display_query; ?>">
-						<label class="checkbox"><input type="checkbox" name="private" <?php echo $private_checked; ?> > Private Search</label>
-                    	<button class="btn btn-small btn-primary" type="submit">Submit</button>
-					<div class="popup" onclick="myFunction()"> Syntax
+						<input type="text" class="input-block-level" name="query" placeholder="<?php echo h('search.placeholder'); ?>" value="<?php echo $display_query; ?>">
+						<label class="checkbox"><input type="checkbox" name="private" <?php echo $private_checked; ?> > <?php echo h('search.private'); ?></label>
+	                    	<button class="btn btn-small btn-primary" type="submit"><?php echo h('search.submit'); ?></button>
+					<div class="popup" onclick="myFunction()"> <?php echo h('search.syntax'); ?>
 						<span class="popuptext" id="myPopup">
-						Specific Search:<br />>  [md5 | sha1 | sha256 | source]: (query) <br />  Broad:<br />>    (query)
+						<?php echo t('search.syntax_body'); ?>
 						</span>
 					</div>
 				</div>
 				<br />
-				<table class="table table-bordered table-striped">
-				<thead> <tr>  <th><h4>Recent Searches</h4></th>  </tr> </thead>
+					<table class="table table-bordered table-striped">
+					<thead> <tr>  <th><h4><?php echo h('search.recent'); ?></h4></th>  </tr> </thead>
 				<tbody>
 
 					<?php
@@ -82,7 +83,8 @@ function ShowLoading(e) {
      var div = document.createElement('div');
      var img = document.createElement('img');
        
-     div.innerHTML = "<br /> <br /><h1>Searching...</h1><br />";
+	var searchingMsg = <?php echo json_encode(t('search.searching')); ?>;
+	div.innerHTML = "<br /> <br /><h1>" + searchingMsg + "</h1><br />";
 
      img.src = 'images/ajax-loader.gif';
      div.style.cssText = 'position: fixed; top: 5%; left: 40%; z-index: 5000; width: 422px; text-align: center;';
@@ -115,4 +117,3 @@ include_once('footer.php');
 
   </body>
 </html>
-

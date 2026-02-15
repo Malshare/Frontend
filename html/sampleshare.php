@@ -10,6 +10,8 @@
 /*                                            */
 /* ****************************************** */
 
+// Include i18n for translation support
+require_once __DIR__ . '/include/i18n.php';
 
 include("server_includes.php");
 
@@ -28,7 +30,7 @@ $user = new UserObject($share->sql, $share->uri_api_key);
 echo $user->ready;
 
 if( $user->ready==false ) {
-    echo "Not logged in";
+    echo h('auth.not_logged_in');
     die();        
 }
 
@@ -76,4 +78,3 @@ if ($share->uri_action=="type") {
 }
 
 ?>
-

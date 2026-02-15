@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/include/i18n.php';
 
 $hash_post = filter_input(INPUT_POST, 'hash') ?: '';
 $api_post = filter_input(INPUT_POST, 'api_key') ?: '';
@@ -11,7 +12,7 @@ if ($hash_post !== '') {
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo htmlspecialchars(i18n_lang_value(), ENT_QUOTES, 'UTF-8'); ?>">
 	<head>
 	<?php include('header.php'); ?>
 	</head>
@@ -24,17 +25,17 @@ if ($hash_post !== '') {
 <div class="container">		
 
 			<form method=post action=pull.php class="form-signin">
-				<h2 class="form-signin-heading">Pull Request</h2>
+				<h2 class="form-signin-heading"><?php echo h('pull.title'); ?></h2>
 				<?php
 				if (array_key_exists('mapi_key', $_COOKIE) && $_COOKIE['mapi_key'] != "" ){}
 				else{
-					echo '<input type="text" class="input-block-level" name=api_key placeholder="API Key">';
+						echo '<input type="text" class="input-block-level" name=api_key placeholder="' . h('nav.api_key') . '">';
 				}
 				?>
-				<input type="text" class="input-block-level" name=hash placeholder="MD5 / SHA1 / SHA256"> <br />
+					<input type="text" class="input-block-level" name=hash placeholder="<?php echo h('pull.hash_placeholder'); ?>"> <br />
 
 				
-				<button class="btn btn-small btn-primary" type="submit">Submit</button>
+					<button class="btn btn-small btn-primary" type="submit"><?php echo h('pull.submit'); ?></button>
 			</form>
 			
 			
@@ -49,4 +50,3 @@ include_once('footer.php');
 
   </body>
 </html>
-

@@ -1,5 +1,6 @@
+<?php require_once __DIR__ . '/include/i18n.php'; ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo htmlspecialchars(i18n_lang_value(), ENT_QUOTES, 'UTF-8'); ?>">
 	<head>
         <?php include('header.php'); ?>
         <script src="https://www.google.com/recaptcha/api.js" async defer></script>
@@ -45,18 +46,18 @@
 					$result = $h_register->register();
 					
                     			if ($result){
-                    			safe_echo_email:;
-                        		echo '
-                        		<center>
-                        			<h3 class="form-signin-heading">Registration Successful.</h3>
-                        			An API Key has been emailed to ' . htmlspecialchars($email_post, ENT_QUOTES, 'UTF-8') . ' <br />
-                        		</center>
-                        		';
+								safe_echo_email:;
+								echo '
+								<center>
+									<h3 class="form-signin-heading">' . h('register.success_title') . '</h3>
+									' . h('register.success_body', array('email' => $email_post)) . ' <br />
+								</center>
+								';
                     		}
 					else {
-                        	        	echo '<h3 class="form-signin-heading">
-                            		<center>Registration Problem</center></h3>
-                            		<p> Email was either already registered or there was an error.  If registered, your API key will be emailed to ' . htmlspecialchars($email_post, ENT_QUOTES, 'UTF-8') . ' (please check SPAM folder).  If you cannot find your registration, please contact an admin: Error 2587 - admin@malshare.com.</p>'; 
+								echo '<h3 class="form-signin-heading">
+									<center>' . h('register.problem_title') . '</center></h3>
+									<p> ' . h('register.problem_body', array('email' => $email_post)) . '</p>'; 
 					}
 					
 				}
@@ -64,14 +65,14 @@
 				{
 					echo '
 					<form method=post action=register.php class="form-signin">
-						<h2 class="form-signin-heading">Register</h2>
-						<input type="text" class="input-block-level" name=name placeholder="Name"> <br />
-						<input type="text" class="input-block-level" name=email placeholder="Email Address"><center>';
+						<h2 class="form-signin-heading">' . h('register.title') . '</h2>
+						<input type="text" class="input-block-level" name=name placeholder="' . h('register.name') . '"> <br />
+						<input type="text" class="input-block-level" name=email placeholder="' . h('register.email') . '"><center>';
 					if ($secret != "DISABLED"){
 						echo '<div class="g-recaptcha" data-sitekey="6LfippkUAAAAAG9CeuGbV6Yev1FoCMAQzVyPLfE7"></div>';
 			    }
 			    echo '<br />
-							<button class="btn btn-small btn-primary" type="submit">Submit</button>
+							<button class="btn btn-small btn-primary" type="submit">' . h('register.submit') . '</button>
 						</center>
 					</form>
 					';
@@ -88,4 +89,3 @@ include_once('footer.php');
 
   </body>
 </html>
-

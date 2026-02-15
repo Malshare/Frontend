@@ -13,7 +13,7 @@ services:
       - "3306:3306"
 
   webserver:
-    image: php:8.2-apache
+    image: php:8.4-apache
     links:
       - "mysql"
     container_name: malshare_web

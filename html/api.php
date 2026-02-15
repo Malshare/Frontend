@@ -11,23 +11,25 @@ use Aws\S3\S3Client;
 /*					    */
 /* ****************************************** */
 
+// Include i18n for translation support
+require_once __DIR__ . '/include/i18n.php';
 
 include("server_includes.php");
 
 $share = new ServerObject();
 if($share->uri_action=="") {
     http_response_code(400);
-    die("No command specified in `action` GET variable");
+    die(h('api.no_action'));
 }
 
 if ($share->uri_api_key === null) {
     http_response_code(400);
-    die("No key specified in `api_key` GET variable");
+    die(h('api.no_key'));
 }
 $user = new UserObject($share->sql, $share->uri_api_key);
 if ($user->id === null) {
     http_response_code(400);
-    die("User specified in `api_key` GET variable does not exist");
+    die(h('api.invalid_user'));
 }
 
 if($share->uri_action=="terminate" ) {

@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/include/i18n.php';
 // Soft 404 page — returns HTTP 200 but indicates a not-found resource to users
 http_response_code(200);
 header('X-Soft-404: 1');
@@ -15,28 +16,28 @@ if (file_exists(dirname(__FILE__) . '/nav.php')) {
 <!DOCTYPE html>
 <div class="container" style="margin-top: 30px;">
   <div class="page-header">
-    <h1>Page Not Found</h1>
+    <h1><?php echo h('errors.page_not_found'); ?></h1>
   </div>
 
-  <p>Sorry — the page you requested could not be found. Try one of the options below or run a search.</p>
+  <p><?php echo h('errors.not_found_body'); ?></p>
 
   <ul>
-    <li><a href="index.php">Homepage</a></li>
-    <li><a href="search.php">Search samples</a></li>
-    <li><a href="upload.php">Upload a sample</a></li>
-    <li><a href="sampleshare.php">Browse recent samples</a></li>
+    <li><a href="index.php"><?php echo h('errors.home'); ?></a></li>
+    <li><a href="search.php"><?php echo h('errors.search_samples'); ?></a></li>
+    <li><a href="upload.php"><?php echo h('errors.upload_sample'); ?></a></li>
+    <li><a href="sampleshare.php"><?php echo h('errors.browse_samples'); ?></a></li>
   </ul>
 
   <form action="search.php" method="get" class="form-inline" style="margin-top: 15px;">
     <div class="form-group">
-      <label for="query" class="sr-only">Search</label>
-      <input type="text" name="query" id="query" class="form-control" placeholder="Search by hash or term" />
+      <label for="query" class="sr-only"><?php echo h('errors.search_label'); ?></label>
+      <input type="text" name="query" id="query" class="form-control" placeholder="<?php echo h('errors.search_placeholder'); ?>" />
     </div>
-    <button type="submit" class="btn btn-primary">Search</button>
+    <button type="submit" class="btn btn-primary"><?php echo h('errors.search'); ?></button>
   </form>
 
   <hr />
-  <p>If you believe this is an error, please <a href="mailto:admin@malshare.com">contact the site administrator</a>.</p>
+  <p><?php echo t('errors.contact_admin'); ?></p>
 </div>
 
 <?php

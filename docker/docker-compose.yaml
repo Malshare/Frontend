@@ -10,7 +10,7 @@ services:
       - MYSQL_ROOT_PASSWORD=this_is_not_the_prod_password
       - MYSQL_DATABASE=malshare_db
     ports:
-      - "13306:3306"
+      - "3306:3306"
 
   webserver:
     image: php:8.2-apache
@@ -25,7 +25,7 @@ services:
       MALSHARE_SAMPLES_ROOT: "/mw/repository/binaries/"
       MALSHARE_UPLOAD_SAMPLES_ROOT: "/mw/uploads/"
       MALSHARE_DB_HOST: "malshare_db"
-      MALSHARE_DB_PORT: "13306"
+      MALSHARE_DB_PORT: "3306"
       MALSHARE_DB_USER: "root"
       MALSHARE_DB_PASS: "this_is_not_the_prod_password"
       MALSHARE_DB_DATABASE: malshare_db

@@ -379,15 +379,14 @@ class ServerObject
 
         $output = '<table class="table table-bordered table-striped" style="table-layout: fixed;">
         <thead>  <tr>
-        <th style="width: 17%;">SHA256 Hash</th>
-        <th style="width: 5%">File type</th>
-        <th style="width: 13%">Added</th>
-        <th style="width: 25%">Source</th>
-        <th style="width: 40%">Yara Hits</th>
+        <th style="width: 30%;">SHA256 Hash</th>
+        <th style="width: 10%">File type</th>
+        <th style="width: 20%">Added</th>
+        <th style="width: 40%">Source</th>
         </tr>  </thead>  <tbody>';
 
         while ($s_row = $res->fetch_object()) {
-            if ($detail_stmt = $this->sql->prepare("SELECT s.sha256 AS sha256, s.added AS added, s.ftype AS ftype, s.yara AS yara, ts.source AS source, tsp.display_name AS source_display_name FROM {$table} s LEFT JOIN {$table_sources} ts ON s.id = ts.id LEFT JOIN {$table_sample_partners} tsp ON ts.sample_partner_submission = tsp.id WHERE s.id = ?")) {
+            if ($detail_stmt = $this->sql->prepare("SELECT s.sha256 AS sha256, s.added AS added, s.ftype AS ftype, ts.source AS source, tsp.display_name AS source_display_name FROM {$table} s LEFT JOIN {$table_sources} ts ON s.id = ts.id LEFT JOIN {$table_sample_partners} tsp ON ts.sample_partner_submission = tsp.id WHERE s.id = ?")) {
                 $detail_stmt->bind_param('i', $s_row->id);
                 $detail_stmt->execute();
                 $r_res = $detail_stmt->get_result();
@@ -410,38 +409,12 @@ class ServerObject
                 $detail_stmt->close();
             }
 
-            $yhits = "";
-            $jhits = null;
-            $yara_json = $sample_row->yara ?? '';
-            if ($yara_json !== null && $yara_json !== '') {
-                $jhits = json_decode($yara_json);
-            }
-            $counter = 0;
-            $extend = 0;
-            if ($jhits && isset($jhits->yara) && (is_array($jhits->yara) || is_object($jhits->yara))) {
-                foreach ($jhits->yara as $yh) {
-                    $counter += 1;
-                    if ($counter > 3 && $extend == 0) {
-                        $yhits .= '<a id="c_yara_' . $sample_row->sha256 . '" class="none" href="#" onclick="document.getElementById(\'yara_' . $sample_row->sha256 . '\').style= \'block\'; document.getElementById(\'c_yara_' . $sample_row->sha256 . '\').className = \'hidden\';">[+]</a>';
-                        $yhits .= '<div id="yara_' . $sample_row->sha256 . '" style="display: none;">';
-
-
-                        $extend = 1;
-                    }
-                    $yhits .= '<a href="search.php?query=' . rawurlencode($yh) . '"><span class="badge bg-info text-dark">' . $this->escape_html($yh) . '</span></a>  ';
-                }
-
-                if ($counter > 3) {
-                    $yhits .= "</div>";
-                }
-            }
             $output .= '<tr>
                     <td class="hash_font"><div style = "word-wrap: break-word"><a href="sample.php?action=detail&hash=' . $sample_row->sha256 . '">' . $sample_row->sha256 . '</a></div></td>
                     <td>' . $sample_row->ftype . '</td>
-                    <td>' . date("Y-m-d H:i:s", $sample_row->added) . ' UTC</td>';;
+                    <td>' . date("Y-m-d H:i:s", $sample_row->added) . ' UTC</td>';
 
-            $output .= '<td class="word-wrap: wrap-word">' . $this->sourceForDisplay($sample_row) . '</td> ';
-            $output .= '<td>' . $yhits . '</td></tr>';
+            $output .= '<td class="word-wrap: wrap-word">' . $this->sourceForDisplay($sample_row) . '</td></tr>';
 
         }
         $output .= '</tbody></table>';
@@ -493,19 +466,6 @@ class ServerObject
         $stmt->close();
 
         return $output;
-    }
-
-    private function getRuleIdByName($ruleName)
-    {
-        if (! ($stmt = $this->sql->prepare('SELECT id FROM tbl_yara WHERE (lower(rule_name) = lower(?))'))) {
-            return null;
-        }
-        $stmt->bind_param('s', $ruleName);
-        $stmt->execute();
-        $stmt->bind_result($yaraRuleId);
-        $stmt->fetch();
-
-        return $yaraRuleId;
     }
 
     private function getSampleIdFromHash($hash)
@@ -603,23 +563,12 @@ class ServerObject
                 $stmt->execute();
                 $res = $stmt->get_result();
             } else {
-                if (substr($searchValue, 0, 4) == "yrp/") { // startswith
-                    $yaraId = $this->getRuleIdByName(substr($searchValue, 4));
-                    if (! $yaraId) {
-                        return '<p>YARA rule with this name could not be found</p>';
-                    }
-                    $stmt = $this->sql->prepare('SELECT s.id FROM tbl_samples s LEFT JOIN tbl_matches m ON (s.id = m.sample_id) WHERE (m.yara_id = ?) ORDER BY s.added DESC LIMIT 100');
-                    $stmt->bind_param('i', $yaraId);
-                    $stmt->execute();
-                    $res = $stmt->get_result();
-                } else {
                     $searchValueLower = strtolower($searchValue);
                     $like = '%' . $searchValueLower . '%';
                     $stmt = $this->sql->prepare("SELECT DISTINCT id FROM tbl_sample_sources WHERE source LIKE ? LIMIT 100");
                     $stmt->bind_param('s', $like);
                     $stmt->execute();
                     $res = $stmt->get_result();
-                }
             }
         }
 
@@ -631,11 +580,10 @@ class ServerObject
         if ($notAnApiQuery) {
             $output = '<table id="searchres" class="table table-bordered table-striped" style="table-layout: fixed;">
         <thead>  <tr>
-        <th style="width: 17%;">SHA256 Hash</th>
-        <th style="width: 5%">File type</th>
-        <th style="width: 13%">Added</th>
-        <th style="width: 25%">Source</th>
-        <th style="width: 40%">Yara Hits</th>
+        <th style="width: 30%;">SHA256 Hash</th>
+        <th style="width: 10%">File type</th>
+        <th style="width: 20%">Added</th>
+        <th style="width: 40%">Source</th>
         </tr>  </thead>  <tbody>';
         } else {
             header('Content-Type: application/json');
@@ -652,7 +600,6 @@ class ServerObject
                        s.sha256 AS sha256,
                        s.added AS added,
                        s.ftype AS ftype,
-                       s.yara AS yara,
                        ts.source AS source,
                        tsp.display_name AS display_name_source,
                        s.parent_id
@@ -688,39 +635,10 @@ class ServerObject
                     <td>' . date("Y-m-d H:i:s", $sample_row->added) . '</td>';
 
                 if (strlen($source) > 45) {
-                    $output .= '<td>' . substr($source, 0, 45) . '...</td> ';
+                    $output .= '<td>' . substr($source, 0, 45) . '...</td></tr>';
                 } else {
-                    $output .= '<td>' . $source . '</td> ';
+                    $output .= '<td>' . $source . '</td></tr>';
                 }
-
-                $yhits = "";
-                $jhits = null;
-                $yara_json = $sample_row->yara ?? '';
-                $yarahits_decoded = null;
-                if ($yara_json !== null && $yara_json !== '') {
-                    $jhits = json_decode($yara_json);
-                    $yarahits_decoded = $jhits;
-                }
-
-                if ($jhits && isset($jhits->yara) && (is_array($jhits->yara) || is_object($jhits->yara))) {
-                    $extend = 0;
-                    $counter = 0;
-                    foreach ($jhits->yara as $yh) {
-                        $counter += 1;
-                        if ($counter > 4 && $extend == 0) {
-
-                            $yhits .= '<a id="c_yara_' . $sample_row->sha256 . '" class="none" href="#" onclick="document.getElementById(\'yara_' . $sample_row->sha256 . '\').style= \'block\'; document.getElementById(\'c_yara_' . $sample_row->sha256 . '\').className = \'hidden\';">[+]</a>';
-                            $yhits .= '<div id="yara_' . $sample_row->sha256 . '" style="display: none;">';
-
-                            $extend = 1;
-                        }
-                        $yhits .= '<a href="search.php?query=' . rawurlencode($yh) . '"><span class="badge bg-info text-dark">' . $this->escape_html($yh) . '</span></a>  ';
-                    }
-                    if ($counter > 4) {
-                        $yhits .= "</div>";
-                    }
-                }
-                $output .= '<td>' . $yhits . '</td></tr>';
             } else {
                 $t = array(
                     //                    'id' => $sample_row->id,
@@ -731,7 +649,6 @@ class ServerObject
                     'type' => $sample_row->ftype,
                     'added' => intval($sample_row->added),
                     'source' => $source,
-                    'yarahits' => $yarahits_decoded,
                     'parentfiles' => array(),
                     'subfiles' => array(),
                 );
@@ -829,7 +746,7 @@ class ServerObject
 
         $row = (object)['hash' => $id];
 
-        if (! ($stmt = $this->sql->prepare("SELECT md5, sha1, sha256, ssdeep, added, ftype, yara, pending, parent_id FROM $table WHERE id = ?"))) {
+        if (! ($stmt = $this->sql->prepare("SELECT md5, sha1, sha256, ssdeep, added, ftype, pending, parent_id FROM $table WHERE id = ?"))) {
             $this->error_die("Error 23418 (Unable to find child samples  Please contact admin@malshare.com)");
         }
         $stmt->bind_param('i', $row->hash);
@@ -891,21 +808,6 @@ class ServerObject
             $output .= '</tbody></table>';
         }
         $fname_stmt->close();
-        $output .= '<table class="table"><thead><tr><th>Yara Hits</th></tr></thead><tbody><tr><td>';
-        $jhits = null;
-        $yara_json = $f_row->yara ?? '';
-        if ($yara_json !== null && $yara_json !== '') {
-            $jhits = json_decode($yara_json);
-        }
-        if ($jhits && isset($jhits->yara) && (is_array($jhits->yara) || is_object($jhits->yara))) {
-            foreach ($jhits->yara as $yh) {
-                $output .= '<span class="badge bg-info text-dark">' . $yh . '</span> | ';
-            }
-        }
-
-        $output .= " </td></tr>
-        </tbody>
-        </table>";
 
         if ($f_row->parent_id != null and $f_row->parent_id != -1) {
             $output .= '
@@ -1817,47 +1719,6 @@ class ServerObject
         $stmt->close();
 
         return $results;
-    }
-
-    public function stats_get_top_rules()
-    {
-        $results = array();
-
-        $table = $this->vars_table_samples;
-        $stmt = $this->sql->prepare("select yara->'$.yara' as rules from $table WHERE added > (unix_timestamp() - 86400)");
-        if (! $stmt) {
-            return "Error 132621 (Unable to list file types.  Please report to admin@malshare.com)";
-        }
-        $stmt->execute();
-        $res = $stmt->get_result();
-        if (! $res) {
-            $stmt->close();
-            return "Error 132621 (Unable to list file types.  Please report to admin@malshare.com)";
-        }
-        if ($res->num_rows == 0) {
-            $stmt->close();
-            return "Error 132622 (Unable to list file types.  Please report to admin@malshare.com)";
-        }
-
-        while ($row = $res->fetch_object()) {
-            $rules = null;
-            $rules_json = $row->rules ?? '';
-            if ($rules_json !== null && $rules_json !== '') {
-                $rules = json_decode($rules_json);
-            }
-            if ($rules && is_array($rules)) {
-                foreach ($rules as $yhit) {
-                    array_push($results, $yhit);
-                }
-            }
-        }
-        $stmt->close();
-
-        $totals = array_count_values($results);
-        arsort($totals);
-        $totals = array_slice($totals, 0, 10);
-
-        return $totals;
     }
 
     public function get_recent_searches()

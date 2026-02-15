@@ -9,7 +9,7 @@
 
 	<div class="container py-4">
 		<div class="ms-hero">
-			<p class="mb-0">A free malware repository providing researchers access to samples, malicious feeds, and Yara results.</p>
+			<p class="mb-0">A free malware repository providing researchers access to samples and malicious feeds.</p>
 		</div>
 
 		<h5 class="ms-section-title">Sitemap</h5>

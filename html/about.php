@@ -27,25 +27,13 @@
 			</div>
 		</div>
 
-		<div class="row g-4">
-			<!-- Team -->
-			<div class="col-lg-6">
-				<div class="ms-card h-100">
-					<h5 class="ms-section-title"><i class="bi bi-people me-2"></i>Admin Team</h5>
-					<p><strong>Silas Cutler</strong> <span class="text-body-secondary">— Founder / Lead Developer</span><br><a href="https://twitter.com/silascutler?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @silascutler</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
-					<p><strong>Brandon Levene</strong><br><a href="https://twitter.com/SeraphimDomain?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @SeraphimDomain</a></p>
-					<p><strong>Lars A. Wallenborn</strong> <span class="text-body-secondary">— Developer</span><br><a href="https://twitter.com/larsborn?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @larsborn</a></p>
-					<p class="mb-0"><strong>Alexandru Constantin</strong> <span class="text-body-secondary">— Client Developer</span><br><a href="https://twitter.com/AlexBK1996?twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @AlexBK1996</a></p>
-				</div>
-			</div>
-
-			<!-- Yara Feeds -->
-			<div class="col-lg-6">
-				<div class="ms-card h-100">
-					<h5 class="ms-section-title"><i class="bi bi-rss me-2"></i>Yara Feeds</h5>
-					<p><a href="https://github.com/Yara-Rules/rules" class="fs-5">YaraRules Project</a></p>
-				</div>
-			</div>
+		<!-- Team -->
+		<div class="ms-card">
+			<h5 class="ms-section-title"><i class="bi bi-people me-2"></i>Admin Team</h5>
+			<p><strong>Silas Cutler</strong> <span class="text-body-secondary">— Founder / Lead Developer</span><br><a href="https://twitter.com/silascutler?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @silascutler</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
+			<p><strong>Brandon Levene</strong><br><a href="https://twitter.com/SeraphimDomain?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @SeraphimDomain</a></p>
+			<p><strong>Lars A. Wallenborn</strong> <span class="text-body-secondary">— Developer</span><br><a href="https://twitter.com/larsborn?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @larsborn</a></p>
+			<p class="mb-0"><strong>Alexandru Constantin</strong> <span class="text-body-secondary">— Client Developer</span><br><a href="https://twitter.com/AlexBK1996?twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @AlexBK1996</a></p>
 		</div>
 
 		<!-- Partners -->
@@ -56,7 +44,6 @@
 				<a href="https://www.virussamples.com/"><img src="images/malware_virus_samples_logo2.png" class="ms-partner-logo" alt="VirusSamples"></a>
 				<img src="images/ET-PP-Logo.png" class="ms-partner-logo" alt="Emerging Threats / Proofpoint">
 				<img src="images/12-1362_Crowd_Strike_Logo_Red_D0_01.gif" class="ms-partner-logo" alt="CrowdStrike">
-				<img src="images/2uB3xrjd.jpg" class="ms-partner-logo" alt="QuadraNet">
 				<img src="images/TEHTRIS.png" class="ms-partner-logo" alt="Tehtris">
 				<img src="images/TPSC.png" class="ms-partner-logo" alt="The PC Security Channel">
 				<img src="images/farsight-logo.svg" class="ms-partner-logo" alt="Farsight Security">

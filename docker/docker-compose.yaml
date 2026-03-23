@@ -12,7 +12,19 @@ services:
     ports:
       - "3306:3306"
 
-  webserver:
+  reverse-proxy:
+    image: nginx:alpine
+    container_name: reverse-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./proxy/conf.d:/etc/nginx/conf.d:ro
+      - exports:/usr/share/nginx/exports:ro
+    depends_on:
+      - web
+    restart: always
+
+  web:
     image: php:8.4-apache
     links:
       - "mysql"
@@ -46,7 +58,7 @@ services:
     # command: "/bin/sh -c 'docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql && exec apache2-foreground'"
     command: "/bin/sh -c 'docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql && cd /var/www/ && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && apt update && apt install -y zip && composer install && exec apache2-foreground'"
     ports:
-      - "8080:80"
+      - "8080:8080"
 
 volumes:
   malshare_db_data:

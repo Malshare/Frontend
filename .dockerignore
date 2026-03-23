@@ -1,0 +1,9 @@
+.git
+.github
+.gitignore
+.idea
+docker
+vendor
+dev
+malshare_db.sql
+LICENSE

@@ -61,7 +61,7 @@ return array(
         'success_title' => 'Registration Successful.',
         'success_body' => 'An API Key has been emailed to {{email}}',
         'problem_title' => 'Registration Problem',
-        'problem_body' => 'Email was either already registered or there was an error. If registered, your API key will be emailed to {{email}} (please check SPAM folder). If you cannot find your registration, please contact an admin: Error 2587 - admin@malshare.com.',
+        'problem_body' => 'Email was either already registered or there was an error. If registered, your API key will be emailed to {{email}} (please check SPAM folder). If you cannot find your registration, please <a href="https://github.com/Malshare/MalShare/issues/new?title=Registration+Issue+(Error+2587)&body=Cannot+find+registration+for+my+email">report this issue on GitHub</a>.',
     ),
     'upgrade' => array(
         'title' => 'Upgrade Key',
@@ -82,7 +82,7 @@ return array(
     ),
     'about' => array(
         'intro' => 'The MalShare Project is a collaborative effort to create a community driven public malware repository that works to build additional tools to benefit the security community at large.',
-        'api_info' => 'Not all files in our system are malicious and our data feeds are considered as is. We offer free public API keys. Standard keys allow 2000 API calls per day (including downloading samples, details lookup and search). If you require more, contact <a href="mailto:admin@MalShare.com">admin@MalShare.com</a> for further assistance.',
+        'api_info' => 'Not all files in our system are malicious and our data feeds are considered as is. We offer free public API keys. Standard keys allow 2000 API calls per day (including downloading samples, details lookup and search). If you require more, please <a href="https://github.com/Malshare/MalShare/issues/new?title=API+Limit+Increase+Request">open a request on GitHub</a>.',
         'feature_requests' => 'Feature requests, bug reports and any other issues can be reported <a href="https://github.com/Malshare/MalShare/issues">here</a>',
         'blog' => 'Large updates and general information can be found on our <a href="https://malshare.blogspot.com/">blog</a>',
         'thanks' => 'A list of those who have helped secure MalShare through security reports can be found: <a href="{{thanks_url}}">here</a>',
@@ -154,7 +154,7 @@ return array(
         'search_label' => 'Search',
         'search_placeholder' => 'Search by hash or term',
         'search' => 'Search',
-        'contact_admin' => 'If you believe this is an error, please <a href="mailto:admin@malshare.com">contact the site administrator</a>.',
+        'contact_admin' => 'If you believe this is an error, please <a href="https://github.com/Malshare/MalShare/issues/new">report it on GitHub</a>.',
         'temp_unavailable_title' => 'The page is temporarily unavailable',
         'temp_unavailable_body' => 'The page you are looking for is temporarily unavailable.<br />Please try again later.',
     ),
@@ -164,7 +164,7 @@ return array(
     'server' => array(
         'invalid_email' => 'Invalid Email Supplied',
         'temp_email_not_allowed' => 'Temporary Email Providers not permitted',
-        'email_problem' => 'Problem sending activation email. Please contact admin@malshare.com',
+        'email_problem' => 'Problem sending activation email. Please <a href="https://github.com/Malshare/MalShare/issues/new?title=Activation+Email+Problem&body=Did+not+receive+activation+email">report this issue on GitHub</a>',
     ),
     'auth' => array(
         'not_logged_in' => 'Not logged in',

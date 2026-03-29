@@ -61,7 +61,7 @@ class ServerObject {
 
 
 		if(mysqli_connect_errno()) {
-			die("ERROR! => 2809.  Please report to admin@malshare.com\n");
+			die('ERROR! => 2809. Please <a href="https://github.com/Malshare/MalShare/issues/new?title=Error+2809&body=Database+connection+error">report this issue on GitHub</a>' . "\n");
 		}		
 	
 		$email_raw = filter_input(INPUT_POST, 'email') ?: filter_input(INPUT_GET, 'email') ?: '';
@@ -117,7 +117,7 @@ class ServerObject {
 
 				$stmt = $this->sql->prepare("SELECT `name`, `email`, `api_key` from `tbl_users` WHERE `email` = ? LIMIT 1");
 				if (! $stmt) {
-					die("Error: 2191011.  Please contact admin@malshare.com");
+					die('Error: 2191011. Please <a href="https://github.com/Malshare/MalShare/issues/new?title=Error+2191011&body=Registration+database+error">report this issue on GitHub</a>');
 				}
 				$stmt->bind_param('s', $this->email);
 				$stmt->execute();
@@ -160,7 +160,7 @@ Email   : ' . $this->email . '
 API Key : ' . $this->api_key . ' 
 
 
-Your free API key will allow you to pull 2000 samples per day. If you require more or have additional feature requests, please contact Admin@MalShare.com.
+Your free API key will allow you to pull 2000 samples per day. If you require more or have additional feature requests, please open a request at https://github.com/Malshare/MalShare/issues
 
 If you would like to show your support for the MalShare Project, please consider donating via paypal. 
 

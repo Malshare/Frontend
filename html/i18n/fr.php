@@ -54,7 +54,7 @@ return array(
         'success_title' => 'Inscription réussie.',
         'success_body' => 'Une clé API a été envoyée à {{email}}',
         'problem_title' => 'Problème d\'inscription',
-        'problem_body' => 'L\'adresse e-mail est déjà enregistrée ou une erreur est survenue. Si elle est déjà enregistrée, votre clé API sera envoyée à {{email}} (vérifiez le dossier SPAM). Si vous ne trouvez pas votre inscription, contactez un administrateur : Erreur 2587 - admin@malshare.com.',
+        'problem_body' => 'L\'adresse e-mail est déjà enregistrée ou une erreur est survenue. Si elle est déjà enregistrée, votre clé API sera envoyée à {{email}} (vérifiez le dossier SPAM). Si vous ne trouvez pas votre inscription, <a href="https://github.com/Malshare/MalShare/issues/new?title=Registration+Issue+(Error+2587)&body=Cannot+find+registration+for+my+email">signalez le problème sur GitHub</a>.',
     ),
     'upgrade' => array(
         'title' => 'Clé d\'upgrade',
@@ -75,7 +75,7 @@ return array(
     ),
     'about' => array(
         'intro' => 'Le projet MalShare est un effort collaboratif visant à créer un dépôt public de malwares piloté par la communauté afin de créer des outils supplémentaires au bénéfice de la communauté sécurité.',
-        'api_info' => 'Tous les fichiers dans notre système ne sont pas malveillants et nos flux de données sont fournis en l\'état. Nous proposons des clés API publiques gratuites. Les clés standard autorisent 2000 appels API par jour (y compris téléchargement d\'échantillons, consultation de détails et recherche). Si vous avez besoin de plus, contactez <a href="mailto:admin@MalShare.com">admin@MalShare.com</a> pour obtenir de l\'aide.',
+        'api_info' => 'Tous les fichiers dans notre système ne sont pas malveillants et nos flux de données sont fournis en l\'état. Nous proposons des clés API publiques gratuites. Les clés standard autorisent 2000 appels API par jour (y compris téléchargement d\'échantillons, consultation de détails et recherche). Si vous avez besoin de plus, <a href="https://github.com/Malshare/MalShare/issues/new?title=API+Limit+Increase+Request">faites une demande sur GitHub</a>.',
         'feature_requests' => 'Les demandes de fonctionnalités, rapports de bugs et autres problèmes peuvent être signalés <a href="https://github.com/Malshare/MalShare/issues">ici</a>',
         'blog' => 'Les grandes mises à jour et informations générales se trouvent sur notre <a href="https://malshare.blogspot.com/">blog</a>',
         'thanks' => 'La liste des personnes ayant contribué à la sécurité de MalShare est disponible <a href="{{thanks_url}}">ici</a>',
@@ -144,7 +144,7 @@ return array(
         'search_label' => 'Recherche',
         'search_placeholder' => 'Rechercher par hash ou terme',
         'search' => 'Rechercher',
-        'contact_admin' => 'Si vous pensez qu\'il s\'agit d\'une erreur, <a href="mailto:admin@malshare.com">contactez l\'administrateur du site</a>.',
+        'contact_admin' => 'Si vous pensez qu\'il s\'agit d\'une erreur, <a href="https://github.com/Malshare/MalShare/issues/new">signalez-le sur GitHub</a>.',
         'temp_unavailable_title' => 'Page temporairement indisponible',
         'temp_unavailable_body' => 'La page que vous recherchez est temporairement indisponible.<br />Veuillez reessayer plus tard.',
     ),
@@ -154,7 +154,7 @@ return array(
     'server' => array(
         'invalid_email' => 'Email invalide fourni',
         'temp_email_not_allowed' => 'Les fournisseurs d\'email temporaires ne sont pas autorisés',
-        'email_problem' => 'Problème lors de l\'envoi de l\'email d\'activation. Veuillez contacter admin@malshare.com',
+        'email_problem' => 'Problème lors de l\'envoi de l\'email d\'activation. Veuillez <a href="https://github.com/Malshare/MalShare/issues/new?title=Activation+Email+Problem&body=Did+not+receive+activation+email">signaler le problème sur GitHub</a>',
     ),
     'auth' => array(
         'not_logged_in' => 'Non connecté',

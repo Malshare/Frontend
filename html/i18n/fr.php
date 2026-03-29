@@ -70,6 +70,8 @@ return array(
         'submit' => 'Envoyer',
         'pending' => 'Analyse en attente...',
         'missing_hash' => 'Veuillez saisir une requête avec un hash',
+        'observed_file_names' => 'Noms de fichiers observés',
+        'yara_hits' => 'Résultats Yara',
     ),
     'about' => array(
         'intro' => 'Le projet MalShare est un effort collaboratif visant à créer un dépôt public de malwares piloté par la communauté afin de créer des outils supplémentaires au bénéfice de la communauté sécurité.',

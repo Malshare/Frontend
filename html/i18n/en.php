@@ -77,6 +77,8 @@ return array(
         'submit' => 'Submit',
         'pending' => 'Pending Analysis...',
         'missing_hash' => 'Please enter request with a hash',
+        'observed_file_names' => 'Observed File Names',
+        'yara_hits' => 'Yara Hits',
     ),
     'about' => array(
         'intro' => 'The MalShare Project is a collaborative effort to create a community driven public malware repository that works to build additional tools to benefit the security community at large.',

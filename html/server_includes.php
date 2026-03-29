@@ -1,5 +1,6 @@
 <?php
 require dirname(__FILE__) . '/../vendor/autoload.php';
+require_once __DIR__ . '/include/i18n.php';
 
 /* ****************************************** */
 /* Norman SampleShare Server Framework        */
@@ -374,7 +375,7 @@ class ServerObject
         <th style="width: 5%">File type</th>
         <th style="width: 13%">Added</th>
         <th style="width: 25%">Source</th>
-        <th style="width: 40%">Yara Hits</th>
+        <th style="width: 40%">' . h('sample.yara_hits') . '</th>
         </tr>  </thead>  <tbody>';
 
         while ($s_row = $res->fetch_object()) {
@@ -626,7 +627,7 @@ class ServerObject
         <th style="width: 5%">File type</th>
         <th style="width: 13%">Added</th>
         <th style="width: 25%">Source</th>
-        <th style="width: 40%">Yara Hits</th>
+        <th style="width: 40%">' . h('sample.yara_hits') . '</th>
         </tr>  </thead>  <tbody>';
         } else {
             header('Content-Type: application/json');
@@ -875,29 +876,28 @@ class ServerObject
             $fname_stmt->close();
             $this->error_die("Error 23428 (Unable to find file names  Please contact admin@malshare.com)");
         }
-        if ($fname_search->num_rows >= 0) {
-            $output .= '<table class="table"><thead><tr><th>Observed File Names</th></tr></thead><tbody>';
+        if ($fname_search->num_rows > 0) {
+            $output .= '<table class="table"><thead><tr><th>' . h('sample.observed_file_names') . '</th></tr></thead><tbody>';
             while ($trow = $fname_search->fetch_object()) {
                 $output .= '<tr><td>' . $this->escape_html($trow->name) . '</td> </tr>';
             }
             $output .= '</tbody></table>';
         }
         $fname_stmt->close();
-        $output .= '<table class="table"><thead><tr><th>Yara Hits</th></tr></thead><tbody><tr><td>';
         $jhits = null;
         $yara_json = $f_row->yara ?? '';
         if ($yara_json !== null && $yara_json !== '') {
             $jhits = json_decode($yara_json);
         }
-        if ($jhits && isset($jhits->yara) && (is_array($jhits->yara) || is_object($jhits->yara))) {
+        if ($jhits && isset($jhits->yara) && (is_array($jhits->yara) || is_object($jhits->yara)) && count((array)$jhits->yara) > 0) {
+            $output .= '<table class="table"><thead><tr><th>' . h('sample.yara_hits') . '</th></tr></thead><tbody><tr><td>';
             foreach ($jhits->yara as $yh) {
                 $output .= '<span class="label label-info">' . $yh . '</span> | ';
             }
-        }
-
-        $output .= " </td></tr>
+            $output .= " </td></tr>
         </tbody>
         </table>";
+        }
 
         if ($f_row->parent_id != null and $f_row->parent_id != -1) {
             $output .= '

@@ -70,6 +70,8 @@ return array(
         'submit' => 'Senden',
         'pending' => 'Analyse steht aus...',
         'missing_hash' => 'Bitte eine Anfrage mit Hash eingeben',
+        'observed_file_names' => 'Beobachtete Dateinamen',
+        'yara_hits' => 'Yara-Treffer',
     ),
     'about' => array(
         'intro' => 'Das MalShare-Projekt ist eine gemeinschaftliche Initiative zur Erstellung eines community-getriebenen öffentlichen Malware-Repositorys, das zusätzliche Tools zum Nutzen der Sicherheitsgemeinschaft bereitstellt.',

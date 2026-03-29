@@ -14,10 +14,6 @@ require dirname(__FILE__) . '/../vendor/autoload.php';
 
 /* GLOBAL CONFIG VARS */
 
-// Paths
-define("SAMPLES_ROOT", getenv('MALSHARE_SAMPLES_ROOT'));
-define("UPLOAD_SAMPLES_ROOT", getenv('MALSHARE_UPLOAD_SAMPLES_ROOT'));
-
 // Tables
 define("SAMPLES_TABLE", "tbl_samples");
 define("SAMPLE_SOURCES_TABLE", "tbl_sample_sources");
@@ -132,8 +128,6 @@ class ServerObject
     public $uri_path;
 
 
-    public $vars_dirty_root;
-
     // DB Tables
     public $vars_table_samples;
     public $vars_table_users;
@@ -217,9 +211,6 @@ class ServerObject
                 die("No API Key Supplied");
             }
         }
-
-        // Paths
-        $this->vars_dirty_root = UPLOAD_SAMPLES_ROOT;
 
         // Tables
         $this->vars_table_samples = SAMPLES_TABLE;

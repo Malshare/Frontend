@@ -34,8 +34,6 @@ services:
       - ./testing/uploads:/mw/uploads/
       - ../:/var/www/
     environment:
-      MALSHARE_SAMPLES_ROOT: "/mw/repository/binaries/"
-      MALSHARE_UPLOAD_SAMPLES_ROOT: "/mw/uploads/"
       MALSHARE_DB_HOST: "malshare_db"
       MALSHARE_DB_USER: "root"
       MALSHARE_DB_PASS: "this_is_not_the_prod_password"

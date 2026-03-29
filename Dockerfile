@@ -13,6 +13,9 @@ RUN a2enmod rewrite
 RUN echo '<Directory /var/www/html/>\n\tAllowOverride All\n\tRequire all granted\n</Directory>' \
     > /etc/apache2/conf-enabled/override.conf
 
+RUN echo '<Directory /var/www/html/daily/>\n\tOptions +Indexes\n\tAllowOverride None\n\tRequire all granted\n</Directory>' \
+    > /etc/apache2/conf-enabled/daily-listing.conf
+
 RUN echo "upload_max_filesize = 27M\npost_max_size = 28M" \
     > /usr/local/etc/php/conf.d/uploads.ini
 

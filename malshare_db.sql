@@ -92,6 +92,7 @@ CREATE TABLE `tbl_sample_sources` (
   KEY `sample_source` (`source`(128)),
   KEY `idx_tbl_sample_sourced_added` (`added`),
   KEY `sample_partner_submission` (`sample_partner_submission`),
+  FULLTEXT KEY `ft_source` (`source`),
   CONSTRAINT `tbl_sample_sources_ibfk_1` FOREIGN KEY (`id`) REFERENCES `tbl_samples` (`id`),
   CONSTRAINT `tbl_sample_sources_ibfk_2` FOREIGN KEY (`sample_partner_submission`) REFERENCES `tbl_sample_partners` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9364364 DEFAULT CHARSET=latin1;

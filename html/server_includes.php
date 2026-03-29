@@ -615,11 +615,35 @@ class ServerObject
         } else {
             if (substr($searchValue, 0, 7) == "source:") {
                 $rhash = trim(explode(":", $searchValue)[1]);
-                $like = "%" . $rhash . "%";
-                $stmt = $this->sql->prepare("SELECT distinct(id) from $table_sources where source like ? LIMIT 1");
-                $stmt->bind_param('s', $like);
-                $stmt->execute();
-                $res = $stmt->get_result();
+                $tokens = preg_split('/[^a-zA-Z0-9]+/', $rhash, -1, PREG_SPLIT_NO_EMPTY);
+
+                if (!empty($tokens)) {
+                    $ftQuery = '';
+                    foreach ($tokens as $token) {
+                        $ftQuery .= '+' . $token . '* ';
+                    }
+                    $ftQuery = trim($ftQuery);
+
+                    $stmt = $this->sql->prepare("SELECT DISTINCT id FROM $table_sources WHERE MATCH(source) AGAINST(? IN BOOLEAN MODE) LIMIT 100");
+                    $stmt->bind_param('s', $ftQuery);
+                    $stmt->execute();
+                    $res = $stmt->get_result();
+
+                    // Fallback to LIKE if FULLTEXT returns nothing (short tokens, substring patterns)
+                    if ($res && $res->num_rows === 0) {
+                        $like = "%" . $rhash . "%";
+                        $stmt = $this->sql->prepare("SELECT DISTINCT id FROM $table_sources WHERE source LIKE ? LIMIT 100");
+                        $stmt->bind_param('s', $like);
+                        $stmt->execute();
+                        $res = $stmt->get_result();
+                    }
+                } else {
+                    $like = "%" . $rhash . "%";
+                    $stmt = $this->sql->prepare("SELECT DISTINCT id FROM $table_sources WHERE source LIKE ? LIMIT 100");
+                    $stmt->bind_param('s', $like);
+                    $stmt->execute();
+                    $res = $stmt->get_result();
+                }
             } else {
                 if (substr($searchValue, 0, 4) == "yrp/") { // startswith
                     $yaraId = $this->getRuleIdByName(substr($searchValue, 4));

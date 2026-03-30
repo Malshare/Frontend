@@ -929,7 +929,7 @@ class ServerObject
             </tbody>
             </table>
         ';
-        if (! ($fname_stmt = $this->sql->prepare("SELECT name FROM $table_uploads WHERE md5 = ?"))) {
+        if (! ($fname_stmt = $this->sql->prepare("SELECT DISTINCT name FROM $table_uploads WHERE md5 = ?"))) {
             $this->error_die("Error 23428 (Unable to find file names  Please report this issue)");
         }
         $fname_stmt->bind_param('s', $f_row->md5);

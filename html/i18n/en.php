@@ -78,7 +78,6 @@ return array(
         'pending' => 'Pending Analysis...',
         'missing_hash' => 'Please enter request with a hash',
         'observed_file_names' => 'Observed File Names',
-        'yara_hits' => 'Yara Hits',
     ),
     'about' => array(
         'intro' => 'The MalShare Project is a collaborative effort to create a community driven public malware repository that works to build additional tools to benefit the security community at large.',
@@ -87,7 +86,6 @@ return array(
         'blog' => 'Large updates and general information can be found on our <a href="https://malshare.blogspot.com/">blog</a>',
         'thanks' => 'A list of those who have helped secure MalShare through security reports can be found: <a href="{{thanks_url}}">here</a>',
         'admin_team' => 'Admin Team',
-        'yara' => 'Yara Feeds:',
         'partners' => 'Partners',
     ),
     'doc' => array(
@@ -140,7 +138,7 @@ return array(
         'title' => 'MalShare - Donate',
     ),
     'sitemap' => array(
-        'intro' => 'A free Malware repository providing researchers access to samples, malicious feeds, and Yara results.',
+        'intro' => 'A free Malware repository providing researchers access to samples and malicious feeds.',
         'title' => 'Sitemap',
         'recent_samples' => 'Recent Samples',
     ),

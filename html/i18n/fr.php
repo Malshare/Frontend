@@ -71,7 +71,6 @@ return array(
         'pending' => 'Analyse en attente...',
         'missing_hash' => 'Veuillez saisir une requête avec un hash',
         'observed_file_names' => 'Noms de fichiers observés',
-        'yara_hits' => 'Résultats Yara',
     ),
     'about' => array(
         'intro' => 'Le projet MalShare est un effort collaboratif visant à créer un dépôt public de malwares piloté par la communauté afin de créer des outils supplémentaires au bénéfice de la communauté sécurité.',
@@ -80,7 +79,6 @@ return array(
         'blog' => 'Les grandes mises à jour et informations générales se trouvent sur notre <a href="https://malshare.blogspot.com/">blog</a>',
         'thanks' => 'La liste des personnes ayant contribué à la sécurité de MalShare est disponible <a href="{{thanks_url}}">ici</a>',
         'admin_team' => 'Équipe admin',
-        'yara' => 'Flux Yara :',
         'partners' => 'Partenaires',
     ),
     'doc' => array(
@@ -130,7 +128,7 @@ return array(
         'title' => 'MalShare - Don',
     ),
     'sitemap' => array(
-        'intro' => 'Un dépôt gratuit de malwares offrant aux chercheurs un accès aux échantillons, aux flux malveillants et aux résultats Yara.',
+        'intro' => 'Un dépôt gratuit de malwares offrant aux chercheurs un accès aux échantillons et aux flux malveillants.',
         'title' => 'Plan du site',
         'recent_samples' => 'Échantillons récents',
     ),

@@ -28,15 +28,7 @@
 				<p> <b> Lars A. Wallenborn </b>  <i> - Developer</i> <br /> - <a href="https://twitter.com/larsborn?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @larsborn</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
 				<p> <b> Alexandru Constantin </b>  <i> - Client Developer</i> <br /> - <a href="https://twitter.com/AlexBK1996?twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @AlexBK1996</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></p>
 		</div>
-	<div class="row">
-		<div class="span5">
-			<h3> <?php echo h('about.yara'); ?></h3>
-			<h4>
-				<a href="https://github.com/Yara-Rules/rules">YaraRules Project</a> <br />
-			</h4>
-		</div>
-        </div>
-                <div> 
+                <div>
 			<center><h3><?php echo h('about.partners'); ?> </h3>
 			<a href="https://www.zemana.com/"><img src="images/zemana_logo.png" width="182" height="140" alt="Zemana"></a>
             <a href="https://www.virussamples.com/"><img src="images/malware_virus_samples_logo2.png" width="182" height="120" alt="VirusSamples"></a>

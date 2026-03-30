@@ -951,10 +951,17 @@ class ServerObject
             $fname_stmt->close();
             $this->error_die("Error 23428 (Unable to find file names  Please report this issue)");
         }
-        if ($fname_search->num_rows > 0) {
+        $hash_values = array_map('strtolower', [$f_row->md5, $f_row->sha1, $f_row->sha256]);
+        $filtered_names = [];
+        while ($trow = $fname_search->fetch_object()) {
+            if (!in_array(strtolower(trim($trow->name)), $hash_values, true)) {
+                $filtered_names[] = $trow->name;
+            }
+        }
+        if (count($filtered_names) > 0) {
             $output .= '<table class="table"><thead><tr><th>' . h('sample.observed_file_names') . '</th></tr></thead><tbody>';
-            while ($trow = $fname_search->fetch_object()) {
-                $output .= '<tr><td>' . $this->escape_html($trow->name) . '</td> </tr>';
+            foreach ($filtered_names as $fname) {
+                $output .= '<tr><td>' . $this->escape_html($fname) . '</td> </tr>';
             }
             $output .= '</tbody></table>';
         }

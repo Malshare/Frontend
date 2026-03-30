@@ -44,7 +44,7 @@ malshare_db.sql                # Database schema + stored procedures
 
 - All user-facing strings should use `h('section.key')` (HTML-escaped) or `t('section.key')` (raw)
 - Strings live in `html/i18n/{en,de,fr}.php` as nested associative arrays
-- Keys use dot notation: `h('sample.yara_hits')` resolves to `['sample']['yara_hits']`
+- Keys use dot notation: `h('search.title')` resolves to `['search']['title']`
 - `h()` wraps `t()` with `htmlspecialchars()` — use `h()` in HTML output
 - Template variables use `{{var}}` syntax: `t('register.success_body', array('email' => $email))`
 - Always add keys to all three locale files when adding new strings
@@ -61,14 +61,14 @@ malshare_db.sql                # Database schema + stored procedures
 
 ### Search
 
-- `sample_search()` in `server_includes.php` handles all search types: hash (exact match), `source:` prefix (FULLTEXT), `yrp/` prefix (YARA rule), and default (source LIKE prefix match)
+- `sample_search()` in `server_includes.php` handles all search types: hash (exact match), `source:` prefix (FULLTEXT), `type:` prefix (file type), and default (source LIKE prefix match)
 - The `source:` search uses a FULLTEXT index (`ft_source`) on `tbl_sample_sources.source` with `MATCH...AGAINST` in BOOLEAN MODE, with a LIKE fallback for edge cases
 - The FULLTEXT index must exist in the database before `source:` searches work — see `malshare_db.sql` for schema
 
 ### Conditional Sections
 
 - Hide sections (tables, headings) when there's no data rather than showing empty tables
-- Example: "Observed File Names" and "Yara Hits" sections only render when results exist
+- Example: "Observed File Names" section only renders when results exist
 
 ## Environment Variables
 

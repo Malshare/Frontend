@@ -306,6 +306,10 @@ class ServerObject
 
     public function redirect($loc)
     {
+        if (headers_sent()) {
+            echo '<script>window.location.replace(' . json_encode($loc) . ');</script>';
+            die();
+        }
         http_response_code(302);
         header('Location: ' . $loc);
 

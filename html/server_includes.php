@@ -646,7 +646,7 @@ class ServerObject
                 }
             } else if (substr($searchValue, 0, 5) == "type:") {
                 $ftype = strtolower(trim(substr($searchValue, 5)));
-                $stmt = $this->sql->prepare("SELECT id FROM $table WHERE lower(ftype) = ? ORDER BY added DESC LIMIT 100");
+                $stmt = $this->sql->prepare("SELECT id FROM $table WHERE ftype = ? ORDER BY added DESC LIMIT 100");
                 $stmt->bind_param('s', $ftype);
                 $stmt->execute();
                 $res = $stmt->get_result();

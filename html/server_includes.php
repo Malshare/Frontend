@@ -649,11 +649,20 @@ class ServerObject
                     $res = $stmt->get_result();
                 }
             } else if (substr($searchValue, 0, 5) == "type:") {
-                $ftype = strtolower(trim(substr($searchValue, 5)));
+                $ftype = strtoupper(trim(substr($searchValue, 5)));
                 $stmt = $this->sql->prepare("SELECT id FROM $table WHERE ftype = ? ORDER BY added DESC LIMIT 100");
                 $stmt->bind_param('s', $ftype);
                 $stmt->execute();
                 $res = $stmt->get_result();
+
+                // Fallback: case-insensitive scan for mixed-case file types
+                if ($res && $res->num_rows === 0) {
+                    $ftype_lower = strtolower($ftype);
+                    $stmt = $this->sql->prepare("SELECT id FROM $table WHERE LOWER(ftype) = ? ORDER BY added DESC LIMIT 100");
+                    $stmt->bind_param('s', $ftype_lower);
+                    $stmt->execute();
+                    $res = $stmt->get_result();
+                }
             } else {
                 if (substr($searchValue, 0, 4) == "yrp/") { // startswith
                     $yaraId = $this->getRuleIdByName(substr($searchValue, 4));

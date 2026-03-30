@@ -935,6 +935,9 @@ class ServerObject
               <tr>
                 <td class="hash_font"><b>File Type</b>:   ' . $this->escape_html($f_row->ftype) . '</td>
               </tr>
+              <tr>
+                <td class="hash_font"><b>Added</b>:   ' . date("Y-m-d H:i:s", $f_row->added) . '</td>
+              </tr>
             </tbody>
             </table>
         ';

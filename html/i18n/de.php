@@ -37,7 +37,7 @@ return array(
         'private' => 'Private Suche',
         'submit' => 'Senden',
         'syntax' => 'Syntax',
-        'syntax_body' => 'Spezifische Suche:<br />>  [md5 | sha1 | sha256 | source]: (query) <br />  Breit:<br />>    (query)',
+        'syntax_body' => 'Spezifische Suche:<br />>  [md5 | sha1 | sha256 | source | type]: (query) <br />  Breit:<br />>    (query)',
         'recent' => 'Letzte Suchen',
         'searching' => 'Suche läuft...',
     ),

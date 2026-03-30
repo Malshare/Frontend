@@ -134,7 +134,7 @@ class ServerObject
     public $vars_table_users;
     public $vars_table_sources;
     public $vars_table_searches;
-    public $vars_table_pub_searches;
+    public $vars_table_public_searches;
     public $vars_table_uploads;
     public $vars_table_url_download_tasks;
     public $vars_table_sample_partners;
@@ -218,7 +218,7 @@ class ServerObject
         $this->vars_table_users = USERS_TABLE;
         $this->vars_table_sources = SAMPLE_SOURCES_TABLE;
         $this->vars_table_searches = SEARCHES_TABLE;
-        $this->vars_table_pub_searches = PUBSEARCHES_TABLE;
+        $this->vars_table_public_searches = PUBSEARCHES_TABLE;
         $this->vars_table_uploads = UPLOADS_TABLE;
         $this->vars_table_url_download_tasks = URLDLTASKS_TABLE;
         $this->vars_table_sample_partners = SAMPLE_PARTNER_TABLE;
@@ -531,7 +531,7 @@ class ServerObject
         $table_samples = $this->vars_table_samples;
         $table_sources = $this->vars_table_sources;
         $table_searches = $this->vars_table_searches;
-        $table_pub_searches = $this->vars_table_pub_searches;
+        $table_pub_searches = $this->vars_table_public_searches;
         $table_sample_partners = $this->vars_table_sample_partners;
 
         $searchValue = $this->secure($this->uri_query);
@@ -1803,7 +1803,7 @@ class ServerObject
     {
         $results = array();
 
-        $table = $this->vars_table_pub_searches;
+        $table = $this->vars_table_public_searches;
         $stmt = $this->sql->prepare("SELECT query from $table  ORDER BY ts DESC limit 10");
         if (! $stmt) {
             return $results;

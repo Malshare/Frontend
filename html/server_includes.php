@@ -952,9 +952,11 @@ class ServerObject
             $this->error_die("Error 23428 (Unable to find file names  Please report this issue)");
         }
         $hash_values = array_map('strtolower', [$f_row->md5, $f_row->sha1, $f_row->sha256]);
+        $filename_blocklist = ['upload'];
         $filtered_names = [];
         while ($trow = $fname_search->fetch_object()) {
-            if (!in_array(strtolower(trim($trow->name)), $hash_values, true)) {
+            $normalized = strtolower(trim($trow->name));
+            if (!in_array($normalized, $hash_values, true) && !in_array($normalized, $filename_blocklist, true)) {
                 $filtered_names[] = $trow->name;
             }
         }

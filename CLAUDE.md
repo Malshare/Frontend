@@ -57,6 +57,13 @@ malshare_db.sql                # Database schema + stored procedures
 - HTML output is built as string concatenation in PHP methods (not templates)
 - `$this->escape_html()` for user data in HTML output
 - `$this->secure()` for sanitizing input
+- Error messages with numeric codes use `error_die()` / `error_die_with_code()` which auto-generate pre-filled GitHub issue links via `github_issue_url()` and `error_message_html()`
+
+### Search
+
+- `sample_search()` in `server_includes.php` handles all search types: hash (exact match), `source:` prefix (FULLTEXT), `yrp/` prefix (YARA rule), and default (source LIKE prefix match)
+- The `source:` search uses a FULLTEXT index (`ft_source`) on `tbl_sample_sources.source` with `MATCH...AGAINST` in BOOLEAN MODE, with a LIKE fallback for edge cases
+- The FULLTEXT index must exist in the database before `source:` searches work — see `malshare_db.sql` for schema
 
 ### Conditional Sections
 

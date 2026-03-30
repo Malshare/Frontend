@@ -923,6 +923,9 @@ class ServerObject
               <tr>
                 <td class="hash_font"><b>SSDEEP</b>:   ' . $f_row->ssdeep . '</td>
               </tr>
+              <tr>
+                <td class="hash_font"><b>File Type</b>:   ' . $this->escape_html($f_row->ftype) . '</td>
+              </tr>
             </tbody>
             </table>
         ';

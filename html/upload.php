@@ -80,8 +80,7 @@ if ((array_key_exists('fsample', $_FILES) && ($_FILES['fsample']))) {
 					if (data.error) {
 						document.getElementById('url-result').innerHTML = '<font color="red"><h4>' + data.error + '</h4></font>';
 					} else {
-						document.getElementById('url-result').innerHTML = '<font color="green"><h4><?php echo h('upload.url_submitted'); ?> ' + data.guid + '</h4></font>';
-						document.getElementById('url_input').value = '';
+						window.location.href = 'url_status.php?guid=' + encodeURIComponent(data.guid) + '&url=' + encodeURIComponent(url);
 					}
 				})
 				.catch(function(e) {

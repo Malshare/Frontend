@@ -36,6 +36,12 @@ return array(
         'url_submit' => 'Soumettre l\'URL',
         'url_login_required' => 'Vous devez être connecté pour soumettre des URLs',
         'url_submitted' => 'URL soumise — identifiant de suivi :',
+        'url_status_title' => 'Statut du téléchargement',
+        'url_status_pending' => 'En attente...',
+        'url_status_processing' => 'Téléchargement en cours...',
+        'url_status_finished' => 'Téléchargement terminé. Redirection...',
+        'url_status_missing' => 'Tâche introuvable',
+        'url_status_error' => 'Erreur lors de la vérification',
     ),
     'search' => array(
         'title' => 'Recherche',

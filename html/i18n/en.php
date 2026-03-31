@@ -43,6 +43,12 @@ return array(
         'url_submit' => 'Submit URL',
         'url_login_required' => 'You must be logged in to submit URLs',
         'url_submitted' => 'URL submitted — tracking ID:',
+        'url_status_title' => 'URL Download Status',
+        'url_status_pending' => 'Waiting to start...',
+        'url_status_processing' => 'Downloading...',
+        'url_status_finished' => 'Download complete. Redirecting...',
+        'url_status_missing' => 'Task not found',
+        'url_status_error' => 'Error checking status',
     ),
     'search' => array(
         'title' => 'Search',

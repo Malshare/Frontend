@@ -36,6 +36,12 @@ return array(
         'url_submit' => 'URL senden',
         'url_login_required' => 'Sie müssen angemeldet sein, um URLs einzureichen',
         'url_submitted' => 'URL eingereicht — Tracking-ID:',
+        'url_status_title' => 'URL-Download-Status',
+        'url_status_pending' => 'Warten auf Start...',
+        'url_status_processing' => 'Download läuft...',
+        'url_status_finished' => 'Download abgeschlossen. Weiterleitung...',
+        'url_status_missing' => 'Aufgabe nicht gefunden',
+        'url_status_error' => 'Fehler bei der Statusabfrage',
     ),
     'search' => array(
         'title' => 'Suche',

@@ -29,7 +29,7 @@
 						$reCaptcha = new ReCaptcha($secret);
 
 						$response = $reCaptcha->verifyResponse(
-							$_SERVER["REMOTE_ADDR"],
+							ServerObject::client_ip(),
 							$g_recaptcha
 						);
 						if  ($response != null && $response->success) {

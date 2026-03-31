@@ -11,8 +11,9 @@
 			$uuser = new UserObject($tshare->sql, $c_login, true);
 			if ($uuser->ready == True) {
 				setcookie('mapi_key', $c_login, time() + (86400 * 30), "/");
-				$stmt = $tshare->sql->prepare('UPDATE tbl_users SET login_count = login_count + 1, last_login = UNIX_TIMESTAMP() WHERE id = ?');
-				$stmt->bind_param('i', $uuser->id);
+				$login_ip = ServerObject::client_ip();
+				$stmt = $tshare->sql->prepare('UPDATE tbl_users SET login_count = login_count + 1, last_login = UNIX_TIMESTAMP(), last_login_ip_address = ? WHERE id = ?');
+				$stmt->bind_param('si', $login_ip, $uuser->id);
 				$stmt->execute();
 				$stmt->close();
 			}

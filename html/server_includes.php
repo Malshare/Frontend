@@ -113,6 +113,11 @@ class UserObject
 
 class ServerObject
 {
+    public static function client_ip(): string
+    {
+        return $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
+    }
+
     public $host_ip;
 
     public $sample;
@@ -155,7 +160,7 @@ class ServerObject
             'version' => 'latest',
             'use_path_style_endpoint' => true,
         ]);
-        $this->host_ip = $_SERVER['REMOTE_ADDR'];
+        $this->host_ip = self::client_ip();
 
         if (defined('DB_CA_PATH')) {
             $this->sql = mysqli_init();
@@ -536,7 +541,7 @@ class ServerObject
 
         $searchValue = $this->secure($this->uri_query);
         $searchPrivate = 0;
-        $source_ip = $this->secure($_SERVER['REMOTE_ADDR']);
+        $source_ip = $this->secure(self::client_ip());
         if ($this->secure($this->uri_private) == "on") {
             $searchPrivate = 1;
         }
@@ -1879,7 +1884,7 @@ class ServerObject
         $sha156 = strtolower(hash_file("sha256", "$tmpPath"));
         $s3Key = $this->sample_key($sha156);
 
-        $remoteAddress = $this->secure($_SERVER['REMOTE_ADDR']);
+        $remoteAddress = $this->secure(self::client_ip());
         $clientFileName = $this->secure($uploadedSample['name']);
 
         try {

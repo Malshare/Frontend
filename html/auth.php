@@ -11,6 +11,10 @@
 			$uuser = new UserObject($tshare->sql, $c_login, true);
 			if ($uuser->ready == True) {
 				setcookie('mapi_key', $c_login, time() + (86400 * 30), "/");
+				$stmt = $tshare->sql->prepare('UPDATE tbl_users SET login_count = login_count + 1 WHERE id = ?');
+				$stmt->bind_param('i', $uuser->id);
+				$stmt->execute();
+				$stmt->close();
 			}
 			unset($ushare);
 			unset($uuser);

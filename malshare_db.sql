@@ -166,6 +166,7 @@ CREATE TABLE `tbl_users` (
   `query_base` int DEFAULT '2000',
   `last_query` int DEFAULT NULL,
   `login_count` mediumint DEFAULT '0',
+  `last_login` int DEFAULT NULL,
   `api_key` varchar(255) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `approved` tinyint DEFAULT '0',
   `recursive_url_download_allowed` tinyint(1) DEFAULT NULL,

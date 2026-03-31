@@ -149,7 +149,7 @@ elseif ($share->uri_action == 'download_url') {
         http_response_code(400);
         die(json_encode(array('error' => 'invalid method, only POST allowed on this endpoint')));
     }
-    $url = filter_input(INPUT_POST, 'url', FILTER_SANITIZE_URL) ?: '';
+    $url = filter_input(INPUT_POST, 'url') ?: '';
     if ($url === '') {
         http_response_code(400);
         die(json_encode(array('error' => 'missing POST field "url"')));

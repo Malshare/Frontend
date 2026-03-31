@@ -27,8 +27,6 @@ if($share->uri_action=="details") {
 
 $user = new UserObject($share->sql, $share->uri_api_key);
 
-echo $user->ready;
-
 if( $user->ready==false ) {
     echo h('auth.not_logged_in');
     die();        

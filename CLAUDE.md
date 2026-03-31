@@ -57,6 +57,7 @@ malshare_db.sql                # Database schema + stored procedures
 - HTML output is built as string concatenation in PHP methods (not templates)
 - `$this->escape_html()` for user data in HTML output
 - `$this->secure()` for sanitizing input
+- `ServerObject::client_ip()` for the client's real IP address — uses `CF-Connecting-IP` (set by Cloudflare) with `REMOTE_ADDR` fallback. Never use `$_SERVER['REMOTE_ADDR']` directly.
 - Error messages with numeric codes use `error_die()` / `error_die_with_code()` which auto-generate pre-filled GitHub issue links via `github_issue_url()` and `error_message_html()`
 
 ### Search

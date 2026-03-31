@@ -30,6 +30,12 @@ return array(
         'submit' => 'Senden',
         'too_large' => 'Datei zu groß',
         'too_large_error' => 'Datei zu groß: <i> Max. 25 MB</i>',
+        'url_title' => 'URL einreichen',
+        'url_notice' => 'Eine URL einreichen, die heruntergeladen und zur Sammlung hinzugefügt wird',
+        'url_placeholder' => 'https://example.com/sample.bin',
+        'url_submit' => 'URL senden',
+        'url_login_required' => 'Sie müssen angemeldet sein, um URLs einzureichen',
+        'url_submitted' => 'URL eingereicht — Tracking-ID:',
     ),
     'search' => array(
         'title' => 'Suche',

@@ -30,6 +30,12 @@ return array(
         'submit' => 'Envoyer',
         'too_large' => 'Fichier trop volumineux',
         'too_large_error' => 'Fichier trop volumineux : <i> 25 Mo max</i>',
+        'url_title' => 'Soumettre une URL',
+        'url_notice' => 'Soumettre une URL à télécharger et ajouter à la collection',
+        'url_placeholder' => 'https://example.com/sample.bin',
+        'url_submit' => 'Soumettre l\'URL',
+        'url_login_required' => 'Vous devez être connecté pour soumettre des URLs',
+        'url_submitted' => 'URL soumise — identifiant de suivi :',
     ),
     'search' => array(
         'title' => 'Recherche',

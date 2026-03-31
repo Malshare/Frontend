@@ -37,6 +37,12 @@ return array(
         'submit' => 'Submit',
         'too_large' => 'File too large',
         'too_large_error' => 'File too Large: <i> 25MB Max</i>',
+        'url_title' => 'Submit URL',
+        'url_notice' => 'Submit a URL to be downloaded and added to the sample collection',
+        'url_placeholder' => 'https://example.com/sample.bin',
+        'url_submit' => 'Submit URL',
+        'url_login_required' => 'You must be logged in to submit URLs',
+        'url_submitted' => 'URL submitted — tracking ID:',
     ),
     'search' => array(
         'title' => 'Search',

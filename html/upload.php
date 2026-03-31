@@ -55,6 +55,45 @@ if ((array_key_exists('fsample', $_FILES) && ($_FILES['fsample']))) {
 				<button class="btn btn-small btn-primary" onClick="return validate() && showScroll()" type="submit"><?php echo h('upload.submit'); ?></button>
 			</form>
 		</div>
+
+		<div class="jumbotron">
+			<h2 class="form-signin-heading"><?php echo h('upload.url_title'); ?></h2>
+			<?php if (isset($_COOKIE['mapi_key']) && $_COOKIE['mapi_key'] !== ''): ?>
+			<p><i><?php echo h('upload.url_notice'); ?></i></p>
+			<div id="url-result"></div>
+			<form id="url-form" class="form-signin" onsubmit="return submitUrl()">
+				<input type="url" id="url_input" class="input-block-level" placeholder="<?php echo h('upload.url_placeholder'); ?>" required>
+				<button class="btn btn-small btn-primary" type="submit"><?php echo h('upload.url_submit'); ?></button>
+			</form>
+			<script>
+			function submitUrl() {
+				var url = document.getElementById('url_input').value;
+				var apiKey = '<?php echo htmlspecialchars($_COOKIE['mapi_key'], ENT_QUOTES, 'UTF-8'); ?>';
+				var formData = new FormData();
+				formData.append('url', url);
+				fetch('api.php?api_key=' + encodeURIComponent(apiKey) + '&action=download_url', {
+					method: 'POST',
+					body: formData
+				})
+				.then(function(r) { return r.json(); })
+				.then(function(data) {
+					if (data.error) {
+						document.getElementById('url-result').innerHTML = '<font color="red"><h4>' + data.error + '</h4></font>';
+					} else {
+						document.getElementById('url-result').innerHTML = '<font color="green"><h4><?php echo h('upload.url_submitted'); ?> ' + data.guid + '</h4></font>';
+						document.getElementById('url_input').value = '';
+					}
+				})
+				.catch(function(e) {
+					document.getElementById('url-result').innerHTML = '<font color="red"><h4>Error: ' + e + '</h4></font>';
+				});
+				return false;
+			}
+			</script>
+			<?php else: ?>
+			<p><i><?php echo h('upload.url_login_required'); ?></i></p>
+			<?php endif; ?>
+		</div>
 	</div>
 
 	<?php include_once('footer.php'); ?>

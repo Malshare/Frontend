@@ -3,6 +3,7 @@ require_once __DIR__ . '/include/i18n.php';
 
 $guid = filter_input(INPUT_GET, 'guid') ?: '';
 $url = filter_input(INPUT_GET, 'url') ?: '';
+$defanged_url = str_replace(array('http://', 'https://', '.'), array('hxxp://', 'hxxps://', '[.]'), $url);
 ?>
 
 <!DOCTYPE html>
@@ -16,9 +17,7 @@ $url = filter_input(INPUT_GET, 'url') ?: '';
 
 	<div class="container">
 		<div class="jumbotron">
-			<h2 class="form-signin-heading"><?php echo h('upload.url_status_title'); ?></h2>
-			<p>URL: <span class="hash_font"><?php echo htmlspecialchars($url, ENT_QUOTES, 'UTF-8'); ?></span></p>
-			<p>GUID: <span class="hash_font"><?php echo htmlspecialchars($guid, ENT_QUOTES, 'UTF-8'); ?></span></p>
+			<h2 class="form-signin-heading"><?php echo htmlspecialchars($defanged_url, ENT_QUOTES, 'UTF-8'); ?></h2>
 			<h4 id="status-msg"><?php echo h('upload.url_status_pending'); ?></h4>
 			<div id="status-spinner" class="progress progress-striped active" style="max-width:300px">
 				<div class="bar" style="width:100%"></div>

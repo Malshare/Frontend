@@ -1923,7 +1923,7 @@ class ServerObject
         # https://stackoverflow.com/questions/21671179/how-to-generate-a-new-guid
         $guid = vsprintf(
             '%s%s-%s-4000-8%.3s-%s%s%s0',
-            str_split(dechex(microtime(true) * 1000) . bin2hex(random_bytes(8)), 4)
+            str_split(dechex((int)(microtime(true) * 1000)) . bin2hex(random_bytes(8)), 4)
         );
 
         if ($recursive != 1) {

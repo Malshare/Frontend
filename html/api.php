@@ -191,6 +191,7 @@ elseif ($share->uri_action == 'download_url_check') {
         die(json_encode(array('error' => 'invalid value in field "guid"')));
     }
     $guid = $_GET['guid'];
-    echo json_encode(array('guid' => $guid, 'status' => $share->get_download_status($user->id, $guid)));
+    $result = $share->get_download_status($user->id, $guid);
+    echo json_encode(array('guid' => $guid, 'status' => $result['status'], 'url' => $result['url']));
     exit();
 }

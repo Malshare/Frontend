@@ -80,7 +80,7 @@ if ((array_key_exists('fsample', $_FILES) && ($_FILES['fsample']))) {
 					if (data.error) {
 						document.getElementById('url-result').innerHTML = '<font color="red"><h4>' + data.error + '</h4></font>';
 					} else {
-						window.location.href = 'url_status.php?guid=' + encodeURIComponent(data.guid) + '&url=' + encodeURIComponent(url);
+						window.location.href = 'url_status.php?guid=' + encodeURIComponent(data.guid);
 					}
 				})
 				.catch(function(e) {

@@ -17,7 +17,8 @@ $defanged_url = str_replace(array('http://', 'https://', '.'), array('hxxp://', 
 
 	<div class="container">
 		<div class="jumbotron">
-			<h2 class="form-signin-heading"><?php echo htmlspecialchars($defanged_url, ENT_QUOTES, 'UTF-8'); ?></h2>
+			<h2 class="form-signin-heading"><?php echo h('upload.url_status_title'); ?></h2>
+			<p title="<?php echo htmlspecialchars($defanged_url, ENT_QUOTES, 'UTF-8'); ?>" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%">URL: <span class="hash_font"><?php echo htmlspecialchars($defanged_url, ENT_QUOTES, 'UTF-8'); ?></span></p>
 			<h4 id="status-msg"><?php echo h('upload.url_status_pending'); ?></h4>
 			<div id="status-spinner" class="progress progress-striped active" style="max-width:300px">
 				<div class="bar" style="width:100%"></div>

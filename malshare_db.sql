@@ -305,6 +305,26 @@ INSERT INTO `tbl_searches`(query,source,ts,private) VALUES ('test2','8.8.8.8',15
 UNLOCK TABLES;
 
 
+--
+-- Table structure for table `tbl_url_download_tasks`
+--
+
+DROP TABLE IF EXISTS `tbl_url_download_tasks`;
+CREATE TABLE `tbl_url_download_tasks` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `guid` char(36) NOT NULL,
+  `user_id` int NOT NULL,
+  `url` varchar(610) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `fetchall` tinyint(1) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `started_at` timestamp NOT NULL DEFAULT '1970-01-01 00:00:01',
+  `finished_at` timestamp NOT NULL DEFAULT '1970-01-01 00:00:01',
+  PRIMARY KEY (`id`),
+  KEY `tbl_url_download_task_ibfk_1` (`user_id`),
+  KEY `idx_started_at` (`started_at`),
+  CONSTRAINT `tbl_url_download_task_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `tbl_users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

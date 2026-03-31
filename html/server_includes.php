@@ -1957,7 +1957,7 @@ class ServerObject
     public function get_download_status($userId, $guid)
     {
         $table = $this->vars_table_url_download_tasks;
-        $sql = 'SELECT url, started_at, finished_at FROM ' . $table . ' WHERE (guid = ?) AND (user_id = ?)';
+        $sql = 'SELECT id, url, started_at, finished_at FROM ' . $table . ' WHERE (guid = ?) AND (user_id = ?)';
         if (! ($stmt = $this->sql->prepare($sql))) {
             $this->error_die(
                 "Error 149992 (Problem fetching URL Download task status.  Please report this issue)"
@@ -1965,18 +1965,30 @@ class ServerObject
         }
         $stmt->bind_param('si', $guid, $userId);
         $stmt->execute();
-        $stmt->bind_result($url, $startedAt, $finishedAt);
+        $stmt->bind_result($taskId, $url, $startedAt, $finishedAt);
         if (! $stmt->fetch()) {
             return array('status' => 'missing', 'url' => '');
         }
+        $stmt->close();
+
+        $result = array('url' => $url);
         if ($this->empty_date_str($startedAt)) {
-            $status = 'pending';
+            $result['status'] = 'pending';
+            $sql = 'SELECT COUNT(*) FROM ' . $table . ' WHERE id < ? AND started_at = \'1970-01-01 00:00:01\'';
+            if (($stmt = $this->sql->prepare($sql))) {
+                $stmt->bind_param('i', $taskId);
+                $stmt->execute();
+                $stmt->bind_result($ahead);
+                $stmt->fetch();
+                $stmt->close();
+                $result['queue_position'] = $ahead;
+            }
         } elseif ($this->empty_date_str($finishedAt)) {
-            $status = 'processing';
+            $result['status'] = 'processing';
         } else {
-            $status = 'finished';
+            $result['status'] = 'finished';
         }
-        return array('status' => $status, 'url' => $url);
+        return $result;
     }
 
     private function empty_date_str($str)

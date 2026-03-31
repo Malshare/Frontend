@@ -192,6 +192,10 @@ elseif ($share->uri_action == 'download_url_check') {
     }
     $guid = $_GET['guid'];
     $result = $share->get_download_status($user->id, $guid);
-    echo json_encode(array('guid' => $guid, 'status' => $result['status'], 'url' => $result['url']));
+    $response = array('guid' => $guid, 'status' => $result['status'], 'url' => $result['url']);
+    if (isset($result['queue_position'])) {
+        $response['queue_position'] = $result['queue_position'];
+    }
+    echo json_encode($response);
     exit();
 }

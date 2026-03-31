@@ -18,6 +18,7 @@ $guid = filter_input(INPUT_GET, 'guid') ?: '';
 			<h2 class="form-signin-heading"><?php echo h('upload.url_status_title'); ?></h2>
 			<p id="url-display" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%"></p>
 			<h4 id="status-msg"><?php echo h('upload.url_status_pending'); ?></h4>
+			<p id="queue-info" style="display:none"></p>
 			<div id="status-spinner" class="progress progress-striped active" style="max-width:300px">
 				<div class="bar" style="width:100%"></div>
 			</div>
@@ -61,6 +62,16 @@ $guid = filter_input(INPUT_GET, 'guid') ?: '';
 				}
 
 				document.getElementById('status-msg').textContent = messages[data.status] || data.status;
+
+				var queueEl = document.getElementById('queue-info');
+				if (data.status === 'pending' && data.queue_position !== undefined) {
+					queueEl.style.display = '';
+					queueEl.textContent = data.queue_position === 0
+						? 'Next in queue'
+						: data.queue_position + ' job' + (data.queue_position === 1 ? '' : 's') + ' ahead in queue';
+				} else {
+					queueEl.style.display = 'none';
+				}
 
 				if (data.status === 'finished') {
 					document.getElementById('status-spinner').style.display = 'none';

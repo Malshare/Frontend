@@ -15,6 +15,7 @@
 				<?php
 
 				require_once "recaptchalib.php";
+				require_once "server_registration.php";
 				$capt_checked = false;
 				$secret = getenv('MALSHARE_RECAPTCHA_SECRET');
 				$g_recaptcha = filter_input(INPUT_POST, 'g-recaptcha-response') ?: '';
@@ -40,8 +41,6 @@
 
 				if ($name_post !== '' && $email_post !== '' && $capt_checked == true)  {
 
-					include("server_registration.php");
-				
 					$h_register = new ServerObject();
 					$result = $h_register->register();
 					

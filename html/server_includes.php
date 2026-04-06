@@ -1601,6 +1601,160 @@ class ServerObject
         $stmt->close();
     }
 
+    /**
+     * Lazy-loaded, memoized list of disposable-email domains used to
+     * reject obviously throwaway addresses during registration.
+     */
+    private function disposable_email_domains(): array
+    {
+        static $domains = null;
+        if ($domains === null) {
+            $domains = require __DIR__ . '/include/disposable_email_domains.php';
+        }
+        return $domains;
+    }
+
+    /**
+     * Generate a fresh API key. 64 hex chars (sha256 of random bytes).
+     */
+    public function generate_api_key(): string
+    {
+        $pre_rand = base64_encode(openssl_random_pseudo_bytes(32));
+        return hash('sha256', $pre_rand);
+    }
+
+    /**
+     * Send the registration confirmation email via Mailgun SMTP.
+     * Returns true on success, false on Mailgun/PEAR failure.
+     */
+    public function send_register_email(string $name, string $email, string $api_key): bool
+    {
+        require_once 'Mail.php';
+
+        $to = $email;
+        $subject = 'Malshare API Key';
+        $body = '
+Thank you for your interest in the MalShare research project. Below, you\'ll find your registrant name, email, and API key.
+
+Name    : ' . $name . '
+Email   : ' . $email . '
+API Key : ' . $api_key . '
+
+
+Your free API key will allow you to pull 2000 samples per day. If you require more or have additional feature requests, please open a request at https://github.com/Malshare/MalShare/issues
+
+If you would like to show your support for the MalShare Project, please consider donating via paypal.
+
+Donate    : www.malshare.com/donate.php
+Resources : https://github.com/malshare
+
+The MalShare Project Team
+www.malshare.com
+';
+
+        $host     = getenv('MALSHARE_MAILGUN_SMTP');
+        $port     = intval(getenv('MALSHARE_MAILGUN_PORT'));
+        $from     = getenv('MALSHARE_MAILGUN_FROM');
+        $username = getenv('MALSHARE_MAILGUN_USERNAME');
+        $password = getenv('MALSHARE_MAILGUN_PASSWORD');
+
+        $headers = [
+            'From'    => $from,
+            'To'      => $to,
+            'Subject' => $subject,
+        ];
+        $smtp = Mail::factory('smtp', [
+            'host'     => $host,
+            'port'     => $port,
+            'auth'     => true,
+            'username' => $username,
+            'password' => $password,
+        ]);
+
+        $mail = $smtp->send($to, $headers, $body);
+
+        if (PEAR::isError($mail)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Register a new user. Validates the email, rejects disposable
+     * domains, and either inserts a new tbl_users row + sends the API
+     * key by email, or (if the email already exists) resends the
+     * existing key. Returns a structured result so the caller can
+     * render the appropriate UI.
+     *
+     * Result shape:
+     *   ['ok' => bool,
+     *    'error' => null|'invalid_email'|'disposable_email'|'already_registered'|'db_error',
+     *    'email' => string,        // sanitized email, safe to display
+     *    'email_sent' => bool]     // whether Mailgun accepted the message
+     */
+    public function register_user(string $name, string $email): array
+    {
+        // 1. Sanitize.
+        $email = preg_replace('/\s+/', '',
+            filter_var(strip_tags($this->secure($email)), FILTER_SANITIZE_EMAIL));
+        $name  = filter_var(strip_tags($this->secure($name)), FILTER_SANITIZE_STRING);
+
+        // 2. Validate format.
+        if (! preg_match('/^[A-Za-z0-9\.\-\_\+]*@[A-Za-z0-9\.\-\_]+$/', $email)) {
+            return ['ok' => false, 'error' => 'invalid_email',
+                    'email' => $email, 'email_sent' => false];
+        }
+
+        // 3. Reject disposable-email domains.
+        $parts = explode('@', $email);
+        $domain = strtolower(array_pop($parts));
+        if (in_array($domain, $this->disposable_email_domains(), true)) {
+            return ['ok' => false, 'error' => 'disposable_email',
+                    'email' => $email, 'email_sent' => false];
+        }
+
+        // 4. Already registered? Resend the existing key, surface as success.
+        $stmt = $this->sql->prepare(
+            'SELECT `name`, `email`, `api_key` FROM `tbl_users` WHERE `email` = ? LIMIT 1');
+        if (! $stmt) {
+            return ['ok' => false, 'error' => 'db_error',
+                    'email' => $email, 'email_sent' => false];
+        }
+        $stmt->bind_param('s', $email);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        if ($res && $res->num_rows === 1) {
+            $row = $res->fetch_object();
+            $stmt->close();
+            $sent = $this->send_register_email($row->name, $row->email, $row->api_key);
+            return ['ok' => true, 'error' => 'already_registered',
+                    'email' => $row->email, 'email_sent' => $sent];
+        }
+        $stmt->close();
+
+        // 5. Insert new user.
+        $api_key = $this->generate_api_key();
+        $ins = $this->sql->prepare(
+            'INSERT INTO `tbl_users`(`name`, `email`, `api_key`, `approved`, `active`, `r_ip_address`)
+             VALUES (?, ?, ?, 1, 1, ?)');
+        if (! $ins) {
+            return ['ok' => false, 'error' => 'db_error',
+                    'email' => $email, 'email_sent' => false];
+        }
+        $ins->bind_param('ssss', $name, $email, $api_key, $this->host_ip);
+        if (! $ins->execute()) {
+            $ins->close();
+            return ['ok' => false, 'error' => 'db_error',
+                    'email' => $email, 'email_sent' => false];
+        }
+        $ins->close();
+
+        // 6. Send welcome email.
+        $sent = $this->send_register_email($name, $email, $api_key);
+        return ['ok' => true, 'error' => null,
+                'email' => $email, 'email_sent' => $sent];
+    }
+
     public function terminate_api_key()
     {
         header('Content-Type: application/json');

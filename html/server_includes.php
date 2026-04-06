@@ -1694,10 +1694,12 @@ www.malshare.com
      */
     public function register_user(string $name, string $email): array
     {
-        // 1. Sanitize.
+        // 1. Sanitize. strip_tags removes any HTML; ServerObject::secure()
+        // strips non-ASCII and applies real_escape_string. HTML escaping
+        // for display happens at output time via h()/escape_html().
         $email = preg_replace('/\s+/', '',
             filter_var(strip_tags($this->secure($email)), FILTER_SANITIZE_EMAIL));
-        $name  = filter_var(strip_tags($this->secure($name)), FILTER_SANITIZE_STRING);
+        $name  = strip_tags($this->secure($name));
 
         // 2. Validate format.
         if (! preg_match('/^[A-Za-z0-9\.\-\_\+]*@[A-Za-z0-9\.\-\_]+$/', $email)) {

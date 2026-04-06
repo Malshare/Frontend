@@ -17,14 +17,14 @@ PHP web application powering malshare.com — a community-driven public malware 
 
 ```
 html/                          # Web root (Apache document root is /var/www/html)
-  server_includes.php          # Core framework: ServerObject class, DB, S3, queries (~2000 lines)
-  server_registration.php      # User registration, email via Mailgun
+  server_includes.php          # Core framework: ServerObject class, DB, S3, queries, registration (~2150 lines)
   api.php                      # REST API endpoints
   sample.php                   # Sample detail view
   search.php                   # Search page
   upload.php                   # File upload (max 26MB)
   index.php                    # Homepage with recent samples
   include/i18n.php             # Translation system using t() and h() helpers
+  include/disposable_email_domains.php  # Throwaway-email blocklist for register_user()
   i18n/en.php                  # English strings (canonical)
   i18n/de.php                  # German translations
   i18n/fr.php                  # French translations
@@ -73,7 +73,7 @@ malshare_db.sql                # Database schema + stored procedures
 
 ## Environment Variables
 
-All read via `getenv()` in `server_includes.php` and `server_registration.php`.
+All read via `getenv()` in `server_includes.php`.
 
 ### Database
 - `MALSHARE_DB_HOST`, `MALSHARE_DB_USER`, `MALSHARE_DB_PASS`, `MALSHARE_DB_DATABASE`

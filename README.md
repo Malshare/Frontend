@@ -1,7 +1,7 @@
 # Malshare Frontend
 
-The main site data is stored under `public_html`. All core operational functions are contained within 
-`server_includes.php`. Setup of users is handled by `server_registration.php`
+The main site data is stored under `public_html`. All core operational functions, including
+user registration, are contained within `server_includes.php`.
 
 ## Setting Up Development Environment
 

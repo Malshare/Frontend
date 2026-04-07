@@ -2148,8 +2148,52 @@ www.malshare.com
             $result['status'] = 'processing';
         } else {
             $result['status'] = 'finished';
+            $sha256 = $this->resolve_download_result_sha256($url, $startedAt);
+            if ($sha256 !== null) {
+                $result['sha256'] = $sha256;
+            }
         }
         return $result;
+    }
+
+    /**
+     * Look up the SHA256 of the sample produced by a finished URL-download task.
+     *
+     * The downloader writes results into tbl_sample_sources (source = the URL),
+     * so we can resolve the resulting hash without storing it on the task row.
+     * The added >= started_at filter avoids matching pre-existing rows for the
+     * same URL from earlier submissions. Returns null if zero or more than one
+     * sample matches, so the caller can fall back to a source: search.
+     */
+    private function resolve_download_result_sha256($url, $startedAt)
+    {
+        $startedTs = strtotime($startedAt);
+        if ($startedTs === false) {
+            return null;
+        }
+        $sources = $this->vars_table_sources;
+        $samples = $this->vars_table_samples;
+        $sql = "SELECT s.sha256 FROM $sources ss JOIN $samples s ON s.id = ss.id"
+             . " WHERE ss.source = ? AND ss.added >= ? LIMIT 2";
+        if (! ($stmt = $this->sql->prepare($sql))) {
+            return null;
+        }
+        $stmt->bind_param('si', $url, $startedTs);
+        if (! $stmt->execute()) {
+            $stmt->close();
+            return null;
+        }
+        $stmt->bind_result($sha256);
+        $found = null;
+        $count = 0;
+        while ($stmt->fetch()) {
+            $count++;
+            if ($count === 1) {
+                $found = $sha256;
+            }
+        }
+        $stmt->close();
+        return $count === 1 ? $found : null;
     }
 
     private function empty_date_str($str)

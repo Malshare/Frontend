@@ -75,7 +75,11 @@ $guid = filter_input(INPUT_GET, 'guid') ?: '';
 
 				if (data.status === 'finished') {
 					document.getElementById('status-spinner').style.display = 'none';
-					window.location.href = 'search.php?query=' + encodeURIComponent('source:' + data.url);
+					if (data.sha256) {
+						window.location.href = 'sample.php?action=detail&hash=' + encodeURIComponent(data.sha256);
+					} else {
+						window.location.href = 'search.php?query=' + encodeURIComponent('source:' + data.url);
+					}
 				} else if (data.status === 'missing') {
 					document.getElementById('status-spinner').style.display = 'none';
 				} else {

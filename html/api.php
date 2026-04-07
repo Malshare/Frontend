@@ -196,6 +196,9 @@ elseif ($share->uri_action == 'download_url_check') {
     if (isset($result['queue_position'])) {
         $response['queue_position'] = $result['queue_position'];
     }
+    if (isset($result['sha256'])) {
+        $response['sha256'] = $result['sha256'];
+    }
     echo json_encode($response);
     exit();
 }

@@ -49,7 +49,7 @@ return array(
         'private' => 'Recherche privée',
         'submit' => 'Envoyer',
         'syntax' => 'Syntaxe',
-        'syntax_body' => 'Recherche spécifique :<br />>  [md5 | sha1 | sha256 | source | type] : (requête) <br />  Large :<br />>    (requête)',
+        'syntax_body' => 'Recherche spécifique :<br />>  [md5 | sha1 | sha256 | source | type] : (requête) <br />  Large :<br />>    (requête)<br /><br />Exemples :<br />>  source:pastebin.com<br />>  type:ELF<br />>  type:PE32',
         'recent' => 'Recherches récentes',
         'searching' => 'Recherche en cours...',
     ),

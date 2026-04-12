@@ -56,7 +56,7 @@ return array(
         'private' => 'Private Search',
         'submit' => 'Submit',
         'syntax' => 'Syntax',
-        'syntax_body' => 'Specific Search:<br />>  [md5 | sha1 | sha256 | source | type]: (query) <br />  Broad:<br />>    (query)',
+        'syntax_body' => 'Specific Search:<br />>  [md5 | sha1 | sha256 | source | type]: (query) <br />  Broad:<br />>    (query)<br /><br />Examples:<br />>  source:pastebin.com<br />>  type:ELF<br />>  type:PE32',
         'recent' => 'Recent Searches',
         'searching' => 'Searching...',
     ),

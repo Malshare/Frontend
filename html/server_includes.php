@@ -1953,7 +1953,7 @@ www.malshare.com
         $results = array();
 
         $table = $this->vars_table_public_searches;
-        $stmt = $this->sql->prepare("SELECT query from $table  ORDER BY ts DESC limit 10");
+        $stmt = $this->sql->prepare("SELECT query, MAX(ts) AS ts FROM $table GROUP BY query ORDER BY ts DESC LIMIT 10");
         if (! $stmt) {
             return $results;
         }

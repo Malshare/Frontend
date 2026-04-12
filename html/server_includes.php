@@ -1860,7 +1860,7 @@ www.malshare.com
         $results = array();
 
         $table = $this->vars_table_public_searches;
-        $stmt = $this->sql->prepare("SELECT query, MAX(ts) AS ts FROM $table GROUP BY query ORDER BY ts DESC LIMIT 10");
+        $stmt = $this->sql->prepare("SELECT query FROM $table ORDER BY ts DESC LIMIT 50");
         if (!$stmt) {
             return $results;
         }
@@ -1870,13 +1870,14 @@ www.malshare.com
             $stmt->close();
             return $results;
         }
-        if ($res->num_rows == 0) {
-            $stmt->close();
-            return $results;
-        }
 
+        $seen = [];
         while ($row = $res->fetch_object()) {
-            array_push($results, $row->query);
+            if (!isset($seen[$row->query])) {
+                $seen[$row->query] = true;
+                $results[] = $row->query;
+                if (count($results) >= 10) break;
+            }
         }
         $stmt->close();
 

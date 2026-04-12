@@ -397,7 +397,7 @@ class ServerObject
             $output .= '<tr>
                     <td class="hash_font"><div style = "word-wrap: break-word"><a href="sample.php?action=detail&hash=' . $sample_row->sha256 . '">' . $sample_row->sha256 . '</a></div></td>
                     <td>' . $sample_row->ftype . '</td>
-                    <td>' . date("Y-m-d H:i:s", $sample_row->added) . ' UTC</td>';
+                    <td>' . gmdate("Y-m-d H:i:s", $sample_row->added) . ' UTC</td>';
 
             $output .= '<td class="word-wrap: wrap-word">' . $this->sourceForDisplay($sample_row) . '</td></tr>';
 
@@ -722,7 +722,7 @@ class ServerObject
                     $output .= '<tr>
                     <td class="hash_font"><div style = "word-wrap: break-word"><a href="sample.php?action=detail&hash=' . $sample_row->sha256 . '">' . $sample_row->sha256 . '</a></div></td>
                     <td>' . $sample_row->ftype . '</td>
-                    <td>' . date("Y-m-d H:i:s", $sample_row->added) . '</td>';
+                    <td>' . gmdate("Y-m-d H:i:s", $sample_row->added) . '</td>';
 
                     if (strlen($source) > 45) {
                         $output .= '<td>' . substr($source, 0, 45) . '...</td> ';
@@ -847,7 +847,7 @@ class ServerObject
                 <td class="hash_font"><b>File Type</b>:   ' . $this->escape_html($f_row->ftype) . '</td>
               </tr>
               <tr>
-                <td class="hash_font"><b>Added</b>:   ' . date("Y-m-d H:i:s", $f_row->added) . '</td>
+                <td class="hash_font"><b>Added</b>:   ' . gmdate("Y-m-d H:i:s", $f_row->added) . '</td>
               </tr>
             </tbody>
             </table>

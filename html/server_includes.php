@@ -372,16 +372,16 @@ class ServerObject
 
         $table = $this->vars_table_samples;
         $table_sources = $this->vars_table_sources;
-        $table_sample_partners = $this->vars_table_sample_partners;;
+        $table_sample_partners = $this->vars_table_sample_partners;
 
-        $main_stmt = $this->sql->prepare("SELECT id from $table WHERE ( ( pending != 1 or pending is NULL ) AND ftype != 'html' ) ORDER by added DESC limit 10");
-        if (! $main_stmt) {
+        $stmt = $this->sql->prepare("SELECT s.sha256 AS sha256, s.added AS added, s.ftype AS ftype, ts.source AS source, tsp.display_name AS source_display_name FROM $table s LEFT JOIN $table_sources ts ON s.id = ts.id LEFT JOIN $table_sample_partners tsp ON ts.sample_partner_submission = tsp.id WHERE ( ( s.pending != 1 OR s.pending IS NULL ) AND s.ftype != 'html' ) ORDER BY s.added DESC LIMIT 10");
+        if (! $stmt) {
             $this->error_die("Error 13513 (Unable to get recent samples. Please report this issue)");
         }
-        $main_stmt->execute();
-        $res = $main_stmt->get_result();
+        $stmt->execute();
+        $res = $stmt->get_result();
         if (! $res) {
-            $main_stmt->close();
+            $stmt->close();
             $this->error_die("Error 13513 (Unable to get recent samples. Please report this issue)");
         }
 
@@ -393,30 +393,7 @@ class ServerObject
         <th style="width: 25%">Source</th>
         </tr>  </thead>  <tbody>';
 
-        while ($s_row = $res->fetch_object()) {
-            if ($detail_stmt = $this->sql->prepare("SELECT s.sha256 AS sha256, s.added AS added, s.ftype AS ftype, ts.source AS source, tsp.display_name AS source_display_name FROM {$table} s LEFT JOIN {$table_sources} ts ON s.id = ts.id LEFT JOIN {$table_sample_partners} tsp ON ts.sample_partner_submission = tsp.id WHERE s.id = ?")) {
-                $detail_stmt->bind_param('i', $s_row->id);
-                $detail_stmt->execute();
-                $r_res = $detail_stmt->get_result();
-            } else {
-                $r_res = false;
-            }
-
-
-            if (! $r_res) {
-                $this->error_die(
-                    "Error 13512 (Problem getting recent sample details.  Please report this issue)"
-                );
-            }
-            if ($r_res->num_rows == 0) {
-                next();
-            }
-
-            $sample_row = $r_res->fetch_object();
-            if (isset($detail_stmt) && $detail_stmt) {
-                $detail_stmt->close();
-            }
-
+        while ($sample_row = $res->fetch_object()) {
             $output .= '<tr>
                     <td class="hash_font"><div style = "word-wrap: break-word"><a href="sample.php?action=detail&hash=' . $sample_row->sha256 . '">' . $sample_row->sha256 . '</a></div></td>
                     <td>' . $sample_row->ftype . '</td>
@@ -426,7 +403,7 @@ class ServerObject
 
         }
         $output .= '</tbody></table>';
-        $main_stmt->close();
+        $stmt->close();
 
         return $output;
     }

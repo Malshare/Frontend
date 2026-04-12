@@ -374,7 +374,7 @@ class ServerObject
         $table_sources = $this->vars_table_sources;
         $table_sample_partners = $this->vars_table_sample_partners;
 
-        $stmt = $this->sql->prepare("SELECT s.sha256 AS sha256, s.added AS added, s.ftype AS ftype, ts.source AS source, tsp.display_name AS source_display_name FROM $table s LEFT JOIN $table_sources ts ON s.id = ts.id LEFT JOIN $table_sample_partners tsp ON ts.sample_partner_submission = tsp.id WHERE ( ( s.pending != 1 OR s.pending IS NULL ) AND s.ftype != 'html' ) ORDER BY s.added DESC LIMIT 10");
+        $stmt = $this->sql->prepare("SELECT s.sha256, s.added, s.ftype, ts.source, tsp.display_name AS source_display_name FROM (SELECT id, sha256, added, ftype FROM $table WHERE (pending != 1 OR pending IS NULL) AND ftype != 'html' ORDER BY added DESC LIMIT 10) s LEFT JOIN $table_sources ts ON s.id = ts.id LEFT JOIN $table_sample_partners tsp ON ts.sample_partner_submission = tsp.id ORDER BY s.added DESC");
         if (! $stmt) {
             $this->error_die("Error 13513 (Unable to get recent samples. Please report this issue)");
         }

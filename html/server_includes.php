@@ -1494,7 +1494,7 @@ class ServerObject
 
         $output = array();
         $table = $this->vars_table_uploads;
-        $stmt = $this->sql->prepare("SELECT distinct name as name FROM $table WHERE ( ts > ( UNIX_TIMESTAMP()-86400) and ts is not NULL )");
+        $stmt = $this->sql->prepare("SELECT distinct name as name FROM $table WHERE ( ts > ( UNIX_TIMESTAMP()-86400) and ts is not NULL ) LIMIT 1000");
         if (! $stmt) {
             http_response_code(500);
             $output['ERROR'] = array();
@@ -1529,7 +1529,7 @@ class ServerObject
 
         $output = array();
         $table = $this->vars_table_sources;
-        $stmt = $this->sql->prepare("SELECT distinct source as source FROM $table WHERE ( added > ( UNIX_TIMESTAMP()-86400) and added is not NULL )");
+        $stmt = $this->sql->prepare("SELECT distinct source as source FROM $table WHERE ( added > ( UNIX_TIMESTAMP()-86400) and added is not NULL ) LIMIT 1000");
         if (! $stmt) {
             http_response_code(500);
             $output['ERROR'] = array();
@@ -1561,7 +1561,7 @@ class ServerObject
     public function get_sources_raw()
     {
         $table = $this->vars_table_sources;
-        $stmt = $this->sql->prepare("SELECT distinct source as source FROM $table WHERE ( added > ( UNIX_TIMESTAMP()-86400) and added is not NULL )");
+        $stmt = $this->sql->prepare("SELECT distinct source as source FROM $table WHERE ( added > ( UNIX_TIMESTAMP()-86400) and added is not NULL ) LIMIT 1000");
         if (! $stmt) {
             $this->error_die(
                 "Error 138024. (Problem pulling raw source list for the past day. Please report this issue)"

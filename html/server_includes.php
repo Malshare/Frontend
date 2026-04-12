@@ -613,9 +613,18 @@ class ServerObject
             header('Content-Type: application/json');
             $output = array();
         }
-        // Fetch data
-        $totalHits = 0;
+        // Collect IDs from initial search
+        $ids = [];
         while ($s_row = $res->fetch_object()) {
+            $ids[] = $s_row->id;
+        }
+
+        $totalHits = 0;
+
+        if (!empty($ids)) {
+            // Batch detail query
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $types = str_repeat('i', count($ids));
             if (! ($stmt = $this->sql->prepare(
                 "SELECT
                        s.id AS id,
@@ -630,107 +639,128 @@ class ServerObject
                 FROM {$table} s
                     LEFT JOIN {$table_sources} ts ON s.id = ts.id
                     LEFT JOIN {$table_sample_partners} tsp ON ts.sample_partner_submission = tsp.id
-                WHERE s.id = ?"
+                WHERE s.id IN ($placeholders)"
             ))) {
                 $this->error_die("Error 13842 (Problem fetching search results.  Please report this issue)");
             }
-            $stmt->bind_param('i', $s_row->id);
+            $stmt->bind_param($types, ...$ids);
             $stmt->execute();
-            $r_res = $stmt->get_result();
-            if (! $r_res) {
+            $detail_res = $stmt->get_result();
+            if (! $detail_res) {
                 $stmt->close();
                 $this->error_die("Error 13842 (Problem fetching search results.  Please report this issue)");
             }
-            if ($r_res->num_rows == 0) {
-                $stmt->close();
-                next();
+            $details = [];
+            while ($row = $detail_res->fetch_object()) {
+                if (!isset($details[$row->id])) {
+                    $details[$row->id] = $row;
+                }
             }
-
-            $sample_row = $r_res->fetch_object();
             $stmt->close();
-            $totalHits += 1;
-            $source = $this->sourceForDisplay($sample_row, '<br/>');
 
-            // if not an API query, build HTML
-            if ($notAnApiQuery) {
-                $output .= '<tr>
-                    <td class="hash_font"><div style = "word-wrap: break-word"><a href="sample.php?action=detail&hash=' . $sample_row->sha256 . '">' . $sample_row->sha256 . '</a></div></td>
-                    <td>' . $sample_row->ftype . '</td>
-                    <td>' . date("Y-m-d H:i:s", $sample_row->added) . '</td>';
-
-                if (strlen($source) > 45) {
-                    $output .= '<td>' . substr($source, 0, 45) . '...</td> ';
-                } else {
-                    $output .= '<td>' . $source . '</td> ';
+            // For API queries, batch parent and child lookups
+            $parent_details = [];
+            $children_by_parent = [];
+            if (!$notAnApiQuery) {
+                // Collect all unique parent IDs
+                $all_parent_ids = [];
+                foreach ($ids as $id) {
+                    if (!isset($details[$id])) continue;
+                    $sr = $details[$id];
+                    if ($sr->parent_id != null) {
+                        $pids = (strpos($sr->parent_id, ',') !== false)
+                            ? explode(",", $sr->parent_id)
+                            : array($sr->parent_id);
+                        foreach ($pids as $pid) {
+                            $all_parent_ids[intval($pid)] = true;
+                        }
+                    }
                 }
 
-                $output .= '</tr>';
-            } else {
-                $t = array(
-                    //                    'id' => $sample_row->id,
-                    //                    'parentid' => $sample_row->parent_id,
-                    'md5' => $sample_row->md5,
-                    'sha1' => $sample_row->sha1,
-                    'sha256' => $sample_row->sha256,
-                    'type' => $sample_row->ftype,
-                    'added' => intval($sample_row->added),
-                    'source' => $source,
-                    'parentfiles' => array(),
-                    'subfiles' => array(),
-                );
-
-                if (($sample_row->parent_id != null)) {
-                    if (strpos($sample_row->parent_id, ',') !== false) {
-                        $parent_ids = explode(",", $sample_row->parent_id);
-                    } else {
-                        $parent_ids = array($sample_row->parent_id);
-                    }
-
-                    foreach ($parent_ids as $pid) {
-                        if (! ($pstmt = $this->sql->prepare("SELECT md5, sha1, sha256 FROM $table WHERE id = ?"))) {
-                            $this->error_die("Error 138413 (Problem getting sample parents. Please report this issue)");
-                        }
-                        $pstmt->bind_param('i', $pid);
+                // Batch fetch parent samples
+                if (!empty($all_parent_ids)) {
+                    $parent_id_list = array_keys($all_parent_ids);
+                    $p_ph = implode(',', array_fill(0, count($parent_id_list), '?'));
+                    $p_types = str_repeat('i', count($parent_id_list));
+                    if ($pstmt = $this->sql->prepare("SELECT id, md5, sha1, sha256 FROM $table WHERE id IN ($p_ph)")) {
+                        $pstmt->bind_param($p_types, ...$parent_id_list);
                         $pstmt->execute();
-                        $full_res = $pstmt->get_result();
-                        if (! $full_res) {
-                            $pstmt->close();
-                            $this->error_die("Error 138413 (Problem getting sample parents. Please report this issue)");
-                        }
-                        if ($full_res->num_rows > 0) {
-                            while ($s_row = $full_res->fetch_object()) {
-                                array_push(
-                                    $t['parentfiles'],
-                                    array('md5' => $s_row->md5, 'sha1' => $s_row->sha1, 'sha256' => $s_row->sha256)
-                                );
+                        $p_res = $pstmt->get_result();
+                        if ($p_res) {
+                            while ($p_row = $p_res->fetch_object()) {
+                                $parent_details[$p_row->id] = array('md5' => $p_row->md5, 'sha1' => $p_row->sha1, 'sha256' => $p_row->sha256);
                             }
                         }
                         $pstmt->close();
                     }
                 }
 
-                if (! ($cstmt = $this->sql->prepare("SELECT md5, sha1, sha256 FROM $table WHERE parent_id = ?"))) {
-                    $this->error_die("Error 13849 (Problem getting child files. Please report this issue)");
-                }
-                $cstmt->bind_param('i', $sample_row->id);
-                $cstmt->execute();
-                $full_res = $cstmt->get_result();
-                if (! $full_res) {
-                    $cstmt->close();
-                    $this->error_die("Error 13849 (Problem getting child files. Please report this issue)");
-                }
-                if ($full_res->num_rows > 0) {
-                    while ($s_row = $full_res->fetch_object()) {
-                        array_push(
-                            $t['subfiles'],
-                            array('md5' => $s_row->md5, 'sha1' => $s_row->sha1, 'sha256' => $s_row->sha256)
-                        );
+                // Batch fetch child samples
+                $c_ph = implode(',', array_fill(0, count($ids), '?'));
+                $c_types = str_repeat('i', count($ids));
+                if ($cstmt = $this->sql->prepare("SELECT parent_id, md5, sha1, sha256 FROM $table WHERE parent_id IN ($c_ph)")) {
+                    $cstmt->bind_param($c_types, ...$ids);
+                    $cstmt->execute();
+                    $c_res = $cstmt->get_result();
+                    if ($c_res) {
+                        while ($c_row = $c_res->fetch_object()) {
+                            $children_by_parent[$c_row->parent_id][] = array('md5' => $c_row->md5, 'sha1' => $c_row->sha1, 'sha256' => $c_row->sha256);
+                        }
                     }
+                    $cstmt->close();
                 }
-                $cstmt->close();
+            }
 
-                #$output .= json_encode($t, JSON_UNESCAPED_SLASHES);
-                array_push($output, $t);
+            // Build output in original ID order
+            foreach ($ids as $id) {
+                if (!isset($details[$id])) continue;
+                $sample_row = $details[$id];
+                $totalHits += 1;
+                $source = $this->sourceForDisplay($sample_row, '<br/>');
+
+                if ($notAnApiQuery) {
+                    $output .= '<tr>
+                    <td class="hash_font"><div style = "word-wrap: break-word"><a href="sample.php?action=detail&hash=' . $sample_row->sha256 . '">' . $sample_row->sha256 . '</a></div></td>
+                    <td>' . $sample_row->ftype . '</td>
+                    <td>' . date("Y-m-d H:i:s", $sample_row->added) . '</td>';
+
+                    if (strlen($source) > 45) {
+                        $output .= '<td>' . substr($source, 0, 45) . '...</td> ';
+                    } else {
+                        $output .= '<td>' . $source . '</td> ';
+                    }
+
+                    $output .= '</tr>';
+                } else {
+                    $t = array(
+                        'md5' => $sample_row->md5,
+                        'sha1' => $sample_row->sha1,
+                        'sha256' => $sample_row->sha256,
+                        'type' => $sample_row->ftype,
+                        'added' => intval($sample_row->added),
+                        'source' => $source,
+                        'parentfiles' => array(),
+                        'subfiles' => array(),
+                    );
+
+                    if ($sample_row->parent_id != null) {
+                        $pids = (strpos($sample_row->parent_id, ',') !== false)
+                            ? explode(",", $sample_row->parent_id)
+                            : array($sample_row->parent_id);
+                        foreach ($pids as $pid) {
+                            $pid = intval($pid);
+                            if (isset($parent_details[$pid])) {
+                                $t['parentfiles'][] = $parent_details[$pid];
+                            }
+                        }
+                    }
+
+                    if (isset($children_by_parent[$id])) {
+                        $t['subfiles'] = $children_by_parent[$id];
+                    }
+
+                    array_push($output, $t);
+                }
             }
         }
 

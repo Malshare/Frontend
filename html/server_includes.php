@@ -367,25 +367,6 @@ class ServerObject
     }
 
 
-    public function get_total()
-    {
-        $table = $this->vars_table_samples;
-        if (! ($stmt = $this->sql->prepare("SELECT count(id) as rcount from $table"))) {
-            $this->error_die("Unable to get total sample count ");
-        }
-        $stmt->execute();
-        $res = $stmt->get_result();
-        if (! $res) {
-            $stmt->close();
-            $this->error_die("Unable to get total sample count ");
-        }
-
-        $row = $res->fetch_object();
-        $stmt->close();
-
-        return $row->rcount;
-    }
-
     public function get_recent()
     {
 

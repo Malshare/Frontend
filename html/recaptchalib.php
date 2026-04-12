@@ -75,7 +75,7 @@ class ReCaptcha
         }
 
         // Cut the last '&'
-        $req=substr($req, 0, strlen($req)-1);
+        $req = substr($req, 0, strlen($req) - 1);
         return $req;
     }
 
@@ -83,7 +83,7 @@ class ReCaptcha
      * Submits an HTTP GET to a reCAPTCHA server.
      *
      * @param string $path url path to recaptcha server.
-     * @param array  $data array of parameters to be sent.
+     * @param array $data array of parameters to be sent.
      *
      * @return array response
      */
@@ -98,8 +98,8 @@ class ReCaptcha
      * Calls the reCAPTCHA siteverify API to verify whether the user passes
      * CAPTCHA test.
      *
-     * @param string $remoteIp   IP address of end user.
-     * @param string $response   response string from recaptcha verification.
+     * @param string $remoteIp IP address of end user.
+     * @param string $response response string from recaptcha verification.
      *
      * @return ReCaptchaResponse
      */
@@ -115,7 +115,7 @@ class ReCaptcha
 
         $getResponse = $this->_submitHttpGet(
             self::$_siteVerifyUrl,
-            array (
+            array(
                 'secret' => getenv('MALSHARE_RECAPTCHA_SECRET'),
                 'remoteip' => $remoteIp,
                 'v' => self::$_version,

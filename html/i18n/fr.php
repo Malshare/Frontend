@@ -198,5 +198,5 @@ return array(
         'section_7_body' => 'MalShare peut réviser les présentes conditions d\'utilisation du site à tout moment sans préavis. En utilisant ce site, vous acceptez d\'être lié par la version actuelle de ces conditions d\'utilisation.',
         'section_8_title' => '8. Problèmes de sécurité',
         'section_8_body' => 'Les problèmes de sécurité identifiés doivent être signalés à security@malshare.com par email crypté PGP et restés confidentiels entre la source et Malshare pendant au moins 90 jours. Toute compensation sera perdue si divulguée publiquement sans reconnaissance (par email ou par écrit) par un administrateur du site. La politique de MalShare est de fournir jusqu\'à 50 USD USD de compensation, un montant décidé par l\'équipe d\'administration, pour les vulnérabilités identifiées qui sont divulguées en suivant les directives précédemment énoncées.',
-	)
+    )
 );

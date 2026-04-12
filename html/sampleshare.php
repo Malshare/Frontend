@@ -16,9 +16,9 @@ require_once __DIR__ . '/include/i18n.php';
 include("server_includes.php");
 
 $share = new ServerObject();
-if($share->uri_action=="") die();
+if ($share->uri_action == "") die();
 
-if($share->uri_action=="details") {
+if ($share->uri_action == "details") {
     $hash = $share->uri_hash;
     $sample = $share->get_details_json($hash);
     echo $sample;
@@ -27,39 +27,39 @@ if($share->uri_action=="details") {
 
 $user = new UserObject($share->sql, $share->uri_api_key);
 
-if( $user->ready==false ) {
+if ($user->ready == false) {
     echo h('auth.not_logged_in');
-    die();        
+    die();
 }
 
-if ($share->uri_action=="getlist" ) {        
+if ($share->uri_action == "getlist") {
     $contents = $share->get_list();
     die();
 }
 
-if ($share->uri_action=="getlistraw" ) {
+if ($share->uri_action == "getlistraw") {
     $contents = $share->get_list_raw();
     die();
 }
 
-if ($share->uri_action=="getsources" ) {
+if ($share->uri_action == "getsources") {
     $contents = $share->get_sources();
     die();
 }
 
-if($share->uri_action=="getsourcesraw" ) {
+if ($share->uri_action == "getsourcesraw") {
     $contents = $share->get_sources_raw();
     die();
 }
 
-if ($share->uri_action=="dailysum" ) {
+if ($share->uri_action == "dailysum") {
     $contents = $share->get_sum();
     echo $contents;
     die();
 }
 
 
-if ($share->uri_action=="getfile") {
+if ($share->uri_action == "getfile") {
     $hash = $share->uri_hash;
     $sample = $share->get_sample_url($hash);
     $share->update_query_limit();
@@ -69,7 +69,7 @@ if ($share->uri_action=="getfile") {
 }
 
 
-if ($share->uri_action=="type") {
+if ($share->uri_action == "type") {
     $sample = $share->search_type_day();
     echo $sample;
     die();

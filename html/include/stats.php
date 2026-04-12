@@ -18,23 +18,23 @@ class Stats
     {
         if ($submittedFrom === null) {
             if ($submittedUntil === null) {
-                if (! ($stmt = $this->db->prepare('SELECT COUNT(*) FROM tbl_samples'))) {
+                if (!($stmt = $this->db->prepare('SELECT COUNT(*) FROM tbl_samples'))) {
                     return 0;
                 }
             } else {
-                if (! ($stmt = $this->db->prepare('SELECT COUNT(*) FROM tbl_samples WHERE (added < ?)'))) {
+                if (!($stmt = $this->db->prepare('SELECT COUNT(*) FROM tbl_samples WHERE (added < ?)'))) {
                     return 0;
                 }
                 $stmt->bind_param('i', $submittedUntil->getTimestamp());
             }
         } else {
             if ($submittedUntil === null) {
-                if (! ($stmt = $this->db->prepare('SELECT COUNT(*) FROM tbl_samples WHERE (added >= ?)'))) {
+                if (!($stmt = $this->db->prepare('SELECT COUNT(*) FROM tbl_samples WHERE (added >= ?)'))) {
                     return 0;
                 }
                 $stmt->bind_param('i', $submittedFrom->getTimestamp());
             } else {
-                if (! ($stmt = $this->db->prepare(
+                if (!($stmt = $this->db->prepare(
                     'SELECT COUNT(*) FROM tbl_samples WHERE (added >= ?) AND (added < ?) '
                 ))) {
                     return 0;
@@ -72,7 +72,7 @@ class Stats
      */
     function earliestUpload()
     {
-        if (! ($stmt = $this->db->prepare('SELECT MIN(added) FROM tbl_samples'))) {
+        if (!($stmt = $this->db->prepare('SELECT MIN(added) FROM tbl_samples'))) {
             return null;
         }
         $stmt->execute();
@@ -87,7 +87,7 @@ class Stats
      */
     function latestUpload()
     {
-        if (! ($stmt = $this->db->prepare('SELECT MAX(added) FROM tbl_samples'))) {
+        if (!($stmt = $this->db->prepare('SELECT MAX(added) FROM tbl_samples'))) {
             return null;
         }
         $stmt->execute();
@@ -105,7 +105,7 @@ class Stats
         }
         $earliestYear = intval($earliestTimestamp->format('Y'));
         $thisYear = intval(date('Y'));
-        if (! $earliestYear or ! $thisYear) {
+        if (!$earliestYear or !$thisYear) {
             return [];
         }
 
@@ -133,7 +133,7 @@ class Stats
 
     function uploadsByDay(DateTime $submittedFrom = null, DateTime $submittedUntil = null)
     {
-        if (! ($stmt = $this->db->prepare(
+        if (!($stmt = $this->db->prepare(
             'SELECT COUNT(*) FROM tbl_samples WHERE (added >= ?) AND (added < ?) '
         ))) {
             return 0;
@@ -162,7 +162,7 @@ FROM `tbl_uploads`
 WHERE (ts >= ?) AND (ts < ?)
 GROUP BY order_date
 SQL;
-        if (! ($stmt = $this->db->prepare($sql))) {
+        if (!($stmt = $this->db->prepare($sql))) {
             return [];
         }
         $stmt->bind_param('ii', $since, $midnight);
@@ -193,7 +193,7 @@ SQL;
             $sql .= ' WHERE (added > ?)';
         }
         $sql .= ' GROUP BY ftype ORDER BY cnt DESC LIMIT ' . $numberOfTypes;
-        if (! ($stmt = $this->db->prepare($sql))) {
+        if (!($stmt = $this->db->prepare($sql))) {
             return [];
         }
         if ($since !== null) {

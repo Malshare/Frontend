@@ -11,6 +11,7 @@ return array(
         'about' => 'À propos',
         'login' => 'Connexion',
         'logout' => 'Déconnexion',
+        'account' => 'Compte',
         'api_key' => 'Clé API',
     ),
     'footer' => array(
@@ -165,6 +166,11 @@ return array(
         'invalid_email' => 'Email invalide fourni',
         'temp_email_not_allowed' => 'Les fournisseurs d\'email temporaires ne sont pas autorisés',
         'email_problem' => 'Problème lors de l\'envoi de l\'email d\'activation. Veuillez <a href="https://github.com/Malshare/MalShare/issues/new?title=Activation+Email+Problem&body=Did+not+receive+activation+email">signaler le problème sur GitHub</a>',
+    ),
+    'account' => array(
+        'title' => 'Compte',
+        'daily_limit' => 'Limite journalière',
+        'remaining' => 'Restant',
     ),
     'auth' => array(
         'not_logged_in' => 'Non connecté',

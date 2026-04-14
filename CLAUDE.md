@@ -19,11 +19,13 @@ PHP web application powering malshare.com — a community-driven public malware 
 html/                          # Web root (Apache document root is /var/www/html)
   server_includes.php          # Core framework: ServerObject class, DB, S3, queries, registration (~2150 lines)
   api.php                      # REST API endpoints
+  account.php                  # Logged-in user account page (quota/usage)
   sample.php                   # Sample detail view
   search.php                   # Search page
   upload.php                   # File upload (max 26MB)
   index.php                    # Homepage with recent samples
   include/i18n.php             # Translation system using t() and h() helpers
+  include/stats.php             # Stats class (not yet wired up — prep for stats page)
   include/disposable_email_domains.php  # Throwaway-email blocklist for register_user()
   i18n/en.php                  # English strings (canonical)
   i18n/de.php                  # German translations
@@ -59,6 +61,23 @@ malshare_db.sql                # Database schema + stored procedures
 - `$this->secure()` for sanitizing input
 - `ServerObject::client_ip()` for the client's real IP address — uses `CF-Connecting-IP` (set by Cloudflare) with `REMOTE_ADDR` fallback. Never use `$_SERVER['REMOTE_ADDR']` directly.
 - Error messages with numeric codes use `error_die()` / `error_die_with_code()` which auto-generate pre-filled GitHub issue links via `github_issue_url()` and `error_message_html()`
+- Keep SQL queries inside `ServerObject` methods, not in page files. Expose data via methods that return arrays (e.g., `get_user_quota()` returns `['limit' => int, 'remaining' => int]`).
+
+### Authentication
+
+- Web login uses a persistent cookie `mapi_key` (30-day expiry) containing the API key
+- `auth.php` handles login (sets cookie) and logout (clears cookie)
+- Check login state with `isset($_COOKIE['mapi_key']) && $_COOKIE['mapi_key'] !== ''`
+- Validate the key with `new UserObject($share->sql, $api_key, true)` — check `$user->ready`
+- No PHP sessions are used; the cookie is the sole auth mechanism
+- `UserObject` properties: `id`, `api_key`, `active`, `approved`, `recursiveUrlDownloadAllowed`, `ready`
+
+### API Rate Limiting
+
+- All API endpoints that return data must call `$share->update_query_limit()` before executing
+- Exempt endpoints: `getlimit` (quota check), `download_url_check` (status poll), `upload` (incentivizes contributions), `terminate` (self-service)
+- `get_user_quota($api_key)` returns `['limit' => int, 'remaining' => int]` for web UI use
+- `get_user_limit()` is the JSON API wrapper (sets headers, returns JSON)
 
 ### Search
 

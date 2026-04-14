@@ -80,7 +80,8 @@ $current_locale = i18n_lang_value();
 				";
                 } else {
                     echo " <div class=\"nav pull-right\">
-                                  <form class=\"navbar-form navbar-right\" method=post action=\"auth.php\" >
+                                  <a class=\"btn btn-small btn-success navbar-btn\" href=\"" . htmlspecialchars(i18n_url_with_lang('account.php', $current_locale), ENT_QUOTES, 'UTF-8') . "\">" . h('nav.account') . "</a>
+                                  <form class=\"navbar-form navbar-right\" style=\"display:inline\" method=post action=\"auth.php\" >
 					    <input type=\"hidden\" name=\"logout\" value=\"logout\">
 	                                            <button class=\"btn btn-small btn-success \" type=\"submit\">" . h('nav.logout') . "</button>
                                   </form>

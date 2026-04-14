@@ -208,7 +208,7 @@ class ServerObject
         $this->filename = $filename_hash !== null ? $this->secure(strtolower($filename_hash)) : null;
 
         if ($this->uri_api_key !== null) {
-            if (!preg_match('/^[A-Za-z0-9]+$/', $this->uri_api_key)) {
+            if (!preg_match('/^[A-Za-z0-9]{1,100}$/', $this->uri_api_key)) {
                 http_response_code(400);
                 die("No API Key Supplied");
             }
@@ -1740,20 +1740,11 @@ www.malshare.com
         return json_encode($output, JSON_UNESCAPED_SLASHES);
     }
 
-    public function get_user_limit()
+    public function get_user_quota($api_key)
     {
-        header('Content-Type: application/json');
-        $output = array();
         $table = $this->vars_table_users;
-        $api_key = $this->uri_api_key;
         if (!($stmt = $this->sql->prepare("SELECT query_limit, query_base FROM $table WHERE api_key = ?"))) {
-            http_response_code(500);
-            $eoutput = array();
-            $eoutput['ERROR'] = array();
-            $eoutput['ERROR']["CODE"] = 439021;
-            $eoutput['ERROR']["MESSAGE"] = "Unable to fetch limits.  Please report this issue";
-
-            return json_encode($eoutput, JSON_UNESCAPED_SLASHES);
+            return null;
         }
         $stmt->bind_param('s', $api_key);
         $stmt->execute();
@@ -1763,20 +1754,25 @@ www.malshare.com
             return null;
         }
 
-        try {
-            $output["LIMIT"] = $row->query_base;
-            $output["REMAINING"] = $row->query_limit;
-        } catch (Exception $user_limit_exception) {
-            http_response_code(500);
-            $eoutput = array();
-            $eoutput['ERROR'] = array();
-            $eoutput['ERROR']["CODE"] = 439022;
-            $eoutput['ERROR']["MESSAGE"] = "Problem pulling sources for the past day.  Please report this issue";
+        return array('limit' => (int) $row->query_base, 'remaining' => (int) $row->query_limit);
+    }
 
-            return json_encode($eoutput, JSON_UNESCAPED_SLASHES);
+    public function get_user_limit()
+    {
+        header('Content-Type: application/json');
+        $quota = $this->get_user_quota($this->uri_api_key);
+        if ($quota === null) {
+            http_response_code(500);
+            return json_encode(array('ERROR' => array(
+                'CODE' => 439021,
+                'MESSAGE' => 'Unable to fetch limits.  Please report this issue',
+            )), JSON_UNESCAPED_SLASHES);
         }
 
-        return json_encode($output, JSON_UNESCAPED_SLASHES);
+        return json_encode(array(
+            'LIMIT' => $quota['limit'],
+            'REMAINING' => $quota['remaining'],
+        ), JSON_UNESCAPED_SLASHES);
     }
 
     public function update_query_limit()

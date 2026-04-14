@@ -37,7 +37,7 @@ include('nav.php')
 
     if ($api_key_post !== '' && $code_post !== '' && $capt_checked == true) {
 
-        include("server_includes.php");
+        require_once __DIR__ . '/server_includes.php';
 
         $share = new ServerObject();
         $user = new UserObject($share->sql, $api_key_post, true);

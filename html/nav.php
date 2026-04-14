@@ -82,7 +82,8 @@ $current_locale = i18n_lang_value();
                     $_nav_is_admin = false;
                     if (isset($user) && isset($user->is_admin)) {
                         $_nav_is_admin = $user->is_admin;
-                    } elseif (class_exists('UserObject', false)) {
+                    } else {
+                        require_once __DIR__ . '/server_includes.php';
                         if (isset($share)) {
                             $_nav_user = new UserObject($share->sql, $_COOKIE['mapi_key'], true);
                         } else {

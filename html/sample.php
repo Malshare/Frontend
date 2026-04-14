@@ -82,7 +82,7 @@
 <div class="container">
     <div class="jumbotron">
         <?php
-        include("server_includes.php");
+        require_once __DIR__ . '/server_includes.php';
         require_once "recaptchalib.php";
 
 

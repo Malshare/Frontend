@@ -19,7 +19,7 @@
     <p class="h4"><?php echo h('sitemap.recent_samples'); ?></p>
     <p class="hash_font">
         <?php
-        include("server_includes.php");
+        require_once __DIR__ . '/server_includes.php';
         $share = new ServerObject();
         echo $share->get_sitemap();
         ?>

@@ -5,7 +5,7 @@ if ($c_REFER != "") {
     # Handle Login requests
     $c_login = filter_input(INPUT_POST, 'api_key') ?: '';
     if ($c_login !== '') {
-        include("server_includes.php");
+        require_once __DIR__ . '/server_includes.php';
         $tshare = new ServerObject();
         // replace uri_api_key with provided login key for login attempt
         $uuser = new UserObject($tshare->sql, $c_login, true);

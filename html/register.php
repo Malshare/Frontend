@@ -15,7 +15,7 @@ include('nav.php')
     <?php
 
     require_once "recaptchalib.php";
-    include("server_includes.php");
+    require_once __DIR__ . '/server_includes.php';
     $capt_checked = false;
     $secret = getenv('MALSHARE_RECAPTCHA_SECRET');
     $g_recaptcha = filter_input(INPUT_POST, 'g-recaptcha-response') ?: '';

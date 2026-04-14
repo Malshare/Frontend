@@ -1,5 +1,5 @@
 <?php require_once __DIR__ . '/include/i18n.php'; ?>
-<?php include("server_includes.php"); ?>
+<?php require_once __DIR__ . '/server_includes.php'; ?>
 <?php
 $share = new ServerObject();
 if (!isset($_COOKIE['mapi_key']) || $_COOKIE['mapi_key'] === '') {

@@ -6,7 +6,7 @@ if ((array_key_exists('fsample', $_FILES) && ($_FILES['fsample']))) {
     if ($_FILES["fsample"]["size"] > 26214400) {
         $errorMessage = t('upload.too_large_error');
     } else {
-        include("server_includes.php");
+        require_once __DIR__ . '/server_includes.php';
 
         $res = (new ServerObject())->upload_sample($_FILES['fsample']);
         if ($res['type'] === 'error') {

@@ -16,7 +16,7 @@
 <div class="container" style="width:90%">
     <div class="jumbotron">
         <?php
-        include("server_includes.php");
+        require_once __DIR__ . '/server_includes.php';
         $post_query = filter_input(INPUT_POST, 'query') ?: '';
         $get_query = filter_input(INPUT_GET, 'query') ?: '';
         if (($post_query !== '') || ($get_query !== '')) {

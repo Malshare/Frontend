@@ -13,7 +13,7 @@
 // Include i18n for translation support
 require_once __DIR__ . '/include/i18n.php';
 
-include("server_includes.php");
+require_once __DIR__ . '/server_includes.php';
 
 $share = new ServerObject();
 if ($share->uri_action == "") die();

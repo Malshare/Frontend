@@ -1899,7 +1899,7 @@ www.malshare.com
         $calls_table = $this->vars_table_api_calls;
         $users_table = $this->vars_table_users;
         $since = time() - ($days * 86400);
-        if (!($stmt = $this->sql->prepare("SELECT u.id, u.name, u.email, COUNT(*) AS cnt FROM $calls_table c JOIN $users_table u ON c.user_id = u.id WHERE c.ts >= ? GROUP BY c.user_id ORDER BY cnt DESC LIMIT ?"))) {
+        if (!($stmt = $this->sql->prepare("SELECT u.id, u.name, u.email, COUNT(*) AS cnt FROM $calls_table c JOIN $users_table u ON c.user_id = u.id WHERE c.ts >= ? GROUP BY c.user_id, u.name, u.email ORDER BY cnt DESC LIMIT ?"))) {
             return [];
         }
         $stmt->bind_param('ii', $since, $limit);

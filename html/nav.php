@@ -79,10 +79,21 @@ $current_locale = i18n_lang_value();
                                 </div>
 				";
                 } else {
+                    $_nav_is_admin = false;
+                    if (isset($user) && isset($user->is_admin)) {
+                        $_nav_is_admin = $user->is_admin;
+                    } elseif (isset($share)) {
+                        $_nav_user = new UserObject($share->sql, $_COOKIE['mapi_key'], true);
+                        $_nav_is_admin = $_nav_user->ready && $_nav_user->is_admin;
+                    }
+                    $admin_btn = '';
+                    if ($_nav_is_admin) {
+                        $admin_btn = "<a class=\"btn btn-small btn-warning\" href=\"" . htmlspecialchars(i18n_url_with_lang('admin.php', $current_locale), ENT_QUOTES, 'UTF-8') . "\">" . h('nav.admin') . "</a> ";
+                    }
                     echo " <div class=\"nav pull-right\">
                                   <form class=\"navbar-form navbar-right\" method=post action=\"auth.php\" >
 					    <input type=\"hidden\" name=\"logout\" value=\"logout\">
-					    <a class=\"btn btn-small btn-success\" href=\"" . htmlspecialchars(i18n_url_with_lang('account.php', $current_locale), ENT_QUOTES, 'UTF-8') . "\">" . h('nav.account') . "</a>
+					    " . $admin_btn . "<a class=\"btn btn-small btn-success\" href=\"" . htmlspecialchars(i18n_url_with_lang('account.php', $current_locale), ENT_QUOTES, 'UTF-8') . "\">" . h('nav.account') . "</a>
 	                                            <button class=\"btn btn-small btn-success \" type=\"submit\">" . h('nav.logout') . "</button>
                                   </form>
                                 </div>

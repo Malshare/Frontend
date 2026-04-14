@@ -24,6 +24,7 @@ define("SEARCHES_TABLE", "tbl_searches");
 define("PUBSEARCHES_TABLE", "tbl_public_searches");
 define("URLDLTASKS_TABLE", "tbl_url_download_tasks");
 define("SAMPLE_PARTNER_TABLE", "tbl_sample_partners");
+define("API_CALLS_TABLE", "tbl_api_calls");
 
 // External API Connections
 define("VT_CONTEXT_KEY", getenv("VT_CONTEXT_KEY"));
@@ -57,12 +58,13 @@ class UserObject
     public $active;
     public $approved;
     public $recursiveUrlDownloadAllowed;
+    public $is_admin;
     public $ready;
 
     function __construct($sql, $submitted_api_key, $web = false)
     {
         $this->ready = false;
-        if (!($stmt = $sql->prepare('SELECT id as id, api_key as api_key, active as active, approved as approved, recursive_url_download_allowed FROM tbl_users WHERE api_key = ? LIMIT 1'))) {
+        if (!($stmt = $sql->prepare('SELECT id as id, api_key as api_key, active as active, approved as approved, recursive_url_download_allowed, is_admin FROM tbl_users WHERE api_key = ? LIMIT 1'))) {
             $row = null;
         } else {
             $stmt->bind_param('s', $submitted_api_key);
@@ -77,12 +79,14 @@ class UserObject
             $this->active = false;
             $this->approved = null;
             $this->recursiveUrlDownloadAllowed = null;
+            $this->is_admin = false;
         } else {
             $this->id = $row->id;
             $this->api_key = $row->api_key;
             $this->active = $row->active;
             $this->approved = $row->approved;
             $this->recursiveUrlDownloadAllowed = $row->recursive_url_download_allowed;
+            $this->is_admin = (bool) $row->is_admin;
             $res->free_result();
 
             if ($web) {
@@ -142,6 +146,7 @@ class ServerObject
     public $vars_table_uploads;
     public $vars_table_url_download_tasks;
     public $vars_table_sample_partners;
+    public $vars_table_api_calls;
 
     public $vt_context_key;
     public $vt_context_url;
@@ -223,6 +228,7 @@ class ServerObject
         $this->vars_table_uploads = UPLOADS_TABLE;
         $this->vars_table_url_download_tasks = URLDLTASKS_TABLE;
         $this->vars_table_sample_partners = SAMPLE_PARTNER_TABLE;
+        $this->vars_table_api_calls = API_CALLS_TABLE;
 
         $this->vt_context_key = VT_CONTEXT_KEY;
         $this->vt_context_url = VT_CONTEXT_URL;
@@ -1818,6 +1824,114 @@ www.malshare.com
             }
             $u->close();
         }
+    }
+
+    public function log_api_call($user_id, $endpoint)
+    {
+        $table = $this->vars_table_api_calls;
+        $ts = time();
+        if (!($stmt = $this->sql->prepare("INSERT INTO $table (user_id, endpoint, ts) VALUES (?, ?, ?)"))) {
+            return;
+        }
+        $stmt->bind_param('isi', $user_id, $endpoint, $ts);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    public function get_api_calls_per_day($days = 30)
+    {
+        $table = $this->vars_table_api_calls;
+        $midnight = strtotime('today');
+        $since = $midnight - ($days * 86400);
+        $now = time();
+        if (!($stmt = $this->sql->prepare("SELECT FLOOR(ts / 86400) AS day_bucket, COUNT(*) AS cnt FROM $table WHERE ts >= ? AND ts <= ? GROUP BY day_bucket ORDER BY day_bucket"))) {
+            return [];
+        }
+        $stmt->bind_param('ii', $since, $now);
+        $stmt->execute();
+        $stmt->bind_result($dayBucket, $count);
+        $ret = [];
+        while ($stmt->fetch()) {
+            $ret[] = ['date' => gmdate('Y-m-d', $dayBucket * 86400), 'count' => (int) $count];
+        }
+        $stmt->close();
+        return $ret;
+    }
+
+    public function get_api_calls_per_month($months = 12)
+    {
+        $table = $this->vars_table_api_calls;
+        $since = strtotime("-$months months midnight");
+        if (!($stmt = $this->sql->prepare("SELECT DATE_FORMAT(FROM_UNIXTIME(ts), '%Y-%m') AS month_label, COUNT(*) AS cnt FROM $table WHERE ts >= ? GROUP BY month_label ORDER BY month_label"))) {
+            return [];
+        }
+        $stmt->bind_param('i', $since);
+        $stmt->execute();
+        $stmt->bind_result($month, $count);
+        $ret = [];
+        while ($stmt->fetch()) {
+            $ret[] = ['month' => $month, 'count' => (int) $count];
+        }
+        $stmt->close();
+        return $ret;
+    }
+
+    public function get_api_calls_by_endpoint($days = 30)
+    {
+        $table = $this->vars_table_api_calls;
+        $since = time() - ($days * 86400);
+        if (!($stmt = $this->sql->prepare("SELECT endpoint, COUNT(*) AS cnt FROM $table WHERE ts >= ? GROUP BY endpoint ORDER BY cnt DESC"))) {
+            return [];
+        }
+        $stmt->bind_param('i', $since);
+        $stmt->execute();
+        $stmt->bind_result($endpoint, $count);
+        $ret = [];
+        while ($stmt->fetch()) {
+            $ret[] = ['endpoint' => $endpoint, 'count' => (int) $count];
+        }
+        $stmt->close();
+        return $ret;
+    }
+
+    public function get_api_top_users($days = 30, $limit = 20)
+    {
+        $calls_table = $this->vars_table_api_calls;
+        $users_table = $this->vars_table_users;
+        $since = time() - ($days * 86400);
+        if (!($stmt = $this->sql->prepare("SELECT u.id, u.name, u.email, COUNT(*) AS cnt FROM $calls_table c JOIN $users_table u ON c.user_id = u.id WHERE c.ts >= ? GROUP BY c.user_id ORDER BY cnt DESC LIMIT ?"))) {
+            return [];
+        }
+        $stmt->bind_param('ii', $since, $limit);
+        $stmt->execute();
+        $stmt->bind_result($id, $name, $email, $count);
+        $ret = [];
+        while ($stmt->fetch()) {
+            $ret[] = ['id' => (int) $id, 'name' => $name, 'email' => $email, 'count' => (int) $count];
+        }
+        $stmt->close();
+        return $ret;
+    }
+
+    public function get_api_calls_total($days = null)
+    {
+        $table = $this->vars_table_api_calls;
+        if ($days === null) {
+            if (!($stmt = $this->sql->prepare("SELECT COUNT(*) FROM $table"))) {
+                return 0;
+            }
+        } else {
+            $since = time() - ($days * 86400);
+            if (!($stmt = $this->sql->prepare("SELECT COUNT(*) FROM $table WHERE ts >= ?"))) {
+                return 0;
+            }
+            $stmt->bind_param('i', $since);
+        }
+        $stmt->execute();
+        $stmt->bind_result($count);
+        $stmt->fetch();
+        $stmt->close();
+        return (int) $count;
     }
 
     public function increment_query_limit()

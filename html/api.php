@@ -31,6 +31,10 @@ if ($user->id === null) {
     die(h('api.invalid_user'));
 }
 
+if ($share->uri_action !== null) {
+    $share->log_api_call($user->id, $share->uri_action);
+}
+
 if ($share->uri_action == "terminate") {
     $contents = $share->terminate_api_key();
     echo $contents;

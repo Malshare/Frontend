@@ -173,6 +173,7 @@ CREATE TABLE `tbl_users` (
   `recursive_url_download_allowed` tinyint(1) DEFAULT NULL,
   `r_ip_address` varchar(45) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `active` tinyint DEFAULT '0',
+  `is_admin` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`,`email`),
   UNIQUE KEY `api_key` (`api_key`),
   UNIQUE KEY `email` (`email`)
@@ -231,6 +232,25 @@ CREATE TABLE `tbl_yara` (
   UNIQUE KEY `rule_name_UNIQUE` (`rule_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=12416 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+--
+-- Table structure for table `tbl_api_calls`
+--
+
+DROP TABLE IF EXISTS `tbl_api_calls`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tbl_api_calls` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `endpoint` varchar(30) NOT NULL,
+  `ts` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_api_calls_ts` (`ts`),
+  KEY `idx_api_calls_endpoint` (`endpoint`),
+  KEY `idx_api_calls_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=ascii;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
 SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

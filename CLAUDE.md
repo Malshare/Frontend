@@ -20,6 +20,7 @@ html/                          # Web root (Apache document root is /var/www/html
   server_includes.php          # Core framework: ServerObject class, DB, S3, queries, registration (~2150 lines)
   api.php                      # REST API endpoints
   account.php                  # Logged-in user account page (quota/usage)
+  admin.php                    # Admin-only API analytics dashboard (D3.js charts, top users)
   sample.php                   # Sample detail view
   search.php                   # Search page
   upload.php                   # File upload (max 26MB)
@@ -70,7 +71,15 @@ malshare_db.sql                # Database schema + stored procedures
 - Check login state with `isset($_COOKIE['mapi_key']) && $_COOKIE['mapi_key'] !== ''`
 - Validate the key with `new UserObject($share->sql, $api_key, true)` — check `$user->ready`
 - No PHP sessions are used; the cookie is the sole auth mechanism
-- `UserObject` properties: `id`, `api_key`, `active`, `approved`, `recursiveUrlDownloadAllowed`, `ready`
+- `UserObject` properties: `id`, `api_key`, `active`, `approved`, `recursiveUrlDownloadAllowed`, `is_admin`, `ready`
+
+### Admin Access
+
+- Admin users have `is_admin = 1` in `tbl_users` (set directly in the database)
+- Check admin status via `$user->is_admin` (boolean)
+- Admin-only pages must check `!$user->ready || !$user->is_admin` and redirect non-admins to `index.php` silently (no error message revealing the page exists)
+- The nav bar shows an "Admin" button (yellow `btn-warning`) only for admin users
+- `nav.php` checks for an existing `$user` variable in scope, falling back to instantiating a `UserObject` if only `$share` is available
 
 ### API Rate Limiting
 
@@ -78,6 +87,14 @@ malshare_db.sql                # Database schema + stored procedures
 - Exempt endpoints: `getlimit` (quota check), `download_url_check` (status poll), `upload` (incentivizes contributions), `terminate` (self-service)
 - `get_user_quota($api_key)` returns `['limit' => int, 'remaining' => int]` for web UI use
 - `get_user_limit()` is the JSON API wrapper (sets headers, returns JSON)
+
+### API Call Logging
+
+- Every valid API call is logged to `tbl_api_calls` (user_id, endpoint, unix timestamp) via `$share->log_api_call()` in `api.php`
+- Logging is fail-silent — INSERT failures never break the API response
+- All endpoints are logged, including rate-limit-exempt ones, for complete volume tracking
+- Analytics query methods in `ServerObject`: `get_api_calls_per_day()`, `get_api_calls_per_month()`, `get_api_calls_by_endpoint()`, `get_api_top_users()`, `get_api_calls_total()`
+- Production MySQL uses `sql_mode=only_full_group_by` — all non-aggregated SELECT columns must appear in GROUP BY
 
 ### Search
 

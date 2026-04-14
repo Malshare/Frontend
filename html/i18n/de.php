@@ -189,6 +189,8 @@ return array(
         'rank' => 'Rang',
         'user_name' => 'Name',
         'user_email' => 'E-Mail',
+        'last_rollup' => 'Letzter Rollup',
+        'no_rollup' => 'Noch kein Rollup',
     ),
     'auth' => array(
         'not_logged_in' => 'Nicht angemeldet',

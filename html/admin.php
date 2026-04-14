@@ -19,6 +19,7 @@ $top_users     = $share->get_api_top_users(30, 20);
 $total_today   = $share->get_api_calls_total(1);
 $total_30d     = $share->get_api_calls_total(30);
 $total_all     = $share->get_api_calls_total();
+$last_rollup   = $share->get_last_rollup_date();
 
 $endpoint_total = 0;
 foreach ($by_endpoint as $ep) {
@@ -57,6 +58,10 @@ foreach ($by_endpoint as $ep) {
             <tr>
                 <td><b><?php echo h('admin.all_time'); ?></b></td>
                 <td><?php echo number_format($total_all); ?></td>
+            </tr>
+            <tr>
+                <td><b><?php echo h('admin.last_rollup'); ?></b></td>
+                <td><?php echo $last_rollup ? htmlspecialchars($last_rollup, ENT_QUOTES, 'UTF-8') : h('admin.no_rollup'); ?></td>
             </tr>
         </table>
 

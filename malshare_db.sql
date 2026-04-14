@@ -251,6 +251,25 @@ CREATE TABLE `tbl_api_calls` (
 ) ENGINE=InnoDB DEFAULT CHARSET=ascii;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Table structure for table `tbl_api_calls_daily`
+--
+
+DROP TABLE IF EXISTS `tbl_api_calls_daily`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tbl_api_calls_daily` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `day` date NOT NULL,
+  `endpoint` varchar(30) NOT NULL,
+  `user_id` int DEFAULT NULL,
+  `call_count` int NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_day_endpoint_user` (`day`,`endpoint`,`user_id`),
+  KEY `idx_api_calls_daily_day` (`day`)
+) ENGINE=InnoDB DEFAULT CHARSET=ascii;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
 SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

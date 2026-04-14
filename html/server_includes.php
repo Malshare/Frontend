@@ -25,6 +25,7 @@ define("PUBSEARCHES_TABLE", "tbl_public_searches");
 define("URLDLTASKS_TABLE", "tbl_url_download_tasks");
 define("SAMPLE_PARTNER_TABLE", "tbl_sample_partners");
 define("API_CALLS_TABLE", "tbl_api_calls");
+define("API_CALLS_DAILY_TABLE", "tbl_api_calls_daily");
 
 // External API Connections
 define("VT_CONTEXT_KEY", getenv("VT_CONTEXT_KEY"));
@@ -147,6 +148,7 @@ class ServerObject
     public $vars_table_url_download_tasks;
     public $vars_table_sample_partners;
     public $vars_table_api_calls;
+    public $vars_table_api_calls_daily;
 
     public $vt_context_key;
     public $vt_context_url;
@@ -229,6 +231,7 @@ class ServerObject
         $this->vars_table_url_download_tasks = URLDLTASKS_TABLE;
         $this->vars_table_sample_partners = SAMPLE_PARTNER_TABLE;
         $this->vars_table_api_calls = API_CALLS_TABLE;
+        $this->vars_table_api_calls_daily = API_CALLS_DAILY_TABLE;
 
         $this->vt_context_key = VT_CONTEXT_KEY;
         $this->vt_context_url = VT_CONTEXT_URL;
@@ -1840,14 +1843,21 @@ www.malshare.com
 
     public function get_api_calls_per_day($days = 30)
     {
-        $table = $this->vars_table_api_calls;
+        $t = $this->vars_table_api_calls;
+        $td = $this->vars_table_api_calls_daily;
         $midnight = strtotime('today');
         $since = $midnight - ($days * 86400);
+        $since_date = gmdate('Y-m-d', $since);
         $now = time();
-        if (!($stmt = $this->sql->prepare("SELECT FLOOR(ts / 86400) AS day_bucket, COUNT(*) AS cnt FROM $table WHERE ts >= ? AND ts <= ? GROUP BY day_bucket ORDER BY day_bucket"))) {
+        $sql = "SELECT day_label, SUM(cnt) AS total FROM ("
+             . "SELECT FLOOR(ts / 86400) AS day_label, COUNT(*) AS cnt FROM $t WHERE ts >= ? AND ts <= ? GROUP BY day_label "
+             . "UNION ALL "
+             . "SELECT TO_DAYS(day) AS day_label, call_count AS cnt FROM $td WHERE day >= ?"
+             . ") combined GROUP BY day_label ORDER BY day_label";
+        if (!($stmt = $this->sql->prepare($sql))) {
             return [];
         }
-        $stmt->bind_param('ii', $since, $now);
+        $stmt->bind_param('iis', $since, $now, $since_date);
         $stmt->execute();
         $stmt->bind_result($dayBucket, $count);
         $ret = [];
@@ -1860,12 +1870,19 @@ www.malshare.com
 
     public function get_api_calls_per_month($months = 12)
     {
-        $table = $this->vars_table_api_calls;
+        $t = $this->vars_table_api_calls;
+        $td = $this->vars_table_api_calls_daily;
         $since = strtotime("-$months months midnight");
-        if (!($stmt = $this->sql->prepare("SELECT DATE_FORMAT(FROM_UNIXTIME(ts), '%Y-%m') AS month_label, COUNT(*) AS cnt FROM $table WHERE ts >= ? GROUP BY month_label ORDER BY month_label"))) {
+        $since_date = gmdate('Y-m-d', $since);
+        $sql = "SELECT month_label, SUM(cnt) AS total FROM ("
+             . "SELECT DATE_FORMAT(FROM_UNIXTIME(ts), '%Y-%m') AS month_label, COUNT(*) AS cnt FROM $t WHERE ts >= ? GROUP BY month_label "
+             . "UNION ALL "
+             . "SELECT DATE_FORMAT(day, '%Y-%m') AS month_label, call_count AS cnt FROM $td WHERE day >= ?"
+             . ") combined GROUP BY month_label ORDER BY month_label";
+        if (!($stmt = $this->sql->prepare($sql))) {
             return [];
         }
-        $stmt->bind_param('i', $since);
+        $stmt->bind_param('is', $since, $since_date);
         $stmt->execute();
         $stmt->bind_result($month, $count);
         $ret = [];
@@ -1878,12 +1895,19 @@ www.malshare.com
 
     public function get_api_calls_by_endpoint($days = 30)
     {
-        $table = $this->vars_table_api_calls;
+        $t = $this->vars_table_api_calls;
+        $td = $this->vars_table_api_calls_daily;
         $since = time() - ($days * 86400);
-        if (!($stmt = $this->sql->prepare("SELECT endpoint, COUNT(*) AS cnt FROM $table WHERE ts >= ? GROUP BY endpoint ORDER BY cnt DESC"))) {
+        $since_date = gmdate('Y-m-d', $since);
+        $sql = "SELECT endpoint, SUM(cnt) AS total FROM ("
+             . "SELECT endpoint, COUNT(*) AS cnt FROM $t WHERE ts >= ? GROUP BY endpoint "
+             . "UNION ALL "
+             . "SELECT endpoint, call_count AS cnt FROM $td WHERE day >= ?"
+             . ") combined GROUP BY endpoint ORDER BY total DESC";
+        if (!($stmt = $this->sql->prepare($sql))) {
             return [];
         }
-        $stmt->bind_param('i', $since);
+        $stmt->bind_param('is', $since, $since_date);
         $stmt->execute();
         $stmt->bind_result($endpoint, $count);
         $ret = [];
@@ -1896,13 +1920,20 @@ www.malshare.com
 
     public function get_api_top_users($days = 30, $limit = 20)
     {
-        $calls_table = $this->vars_table_api_calls;
+        $t = $this->vars_table_api_calls;
+        $td = $this->vars_table_api_calls_daily;
         $users_table = $this->vars_table_users;
         $since = time() - ($days * 86400);
-        if (!($stmt = $this->sql->prepare("SELECT u.id, u.name, u.email, COUNT(*) AS cnt FROM $calls_table c JOIN $users_table u ON c.user_id = u.id WHERE c.ts >= ? GROUP BY c.user_id, u.name, u.email ORDER BY cnt DESC LIMIT ?"))) {
+        $since_date = gmdate('Y-m-d', $since);
+        $sql = "SELECT u.id, u.name, u.email, SUM(c.cnt) AS total FROM ("
+             . "SELECT user_id, COUNT(*) AS cnt FROM $t WHERE ts >= ? GROUP BY user_id "
+             . "UNION ALL "
+             . "SELECT user_id, call_count AS cnt FROM $td WHERE day >= ? AND user_id IS NOT NULL GROUP BY user_id, call_count"
+             . ") c JOIN $users_table u ON c.user_id = u.id GROUP BY u.id, u.name, u.email ORDER BY total DESC LIMIT ?";
+        if (!($stmt = $this->sql->prepare($sql))) {
             return [];
         }
-        $stmt->bind_param('ii', $since, $limit);
+        $stmt->bind_param('isi', $since, $since_date, $limit);
         $stmt->execute();
         $stmt->bind_result($id, $name, $email, $count);
         $ret = [];
@@ -1915,23 +1946,40 @@ www.malshare.com
 
     public function get_api_calls_total($days = null)
     {
-        $table = $this->vars_table_api_calls;
+        $t = $this->vars_table_api_calls;
+        $td = $this->vars_table_api_calls_daily;
         if ($days === null) {
-            if (!($stmt = $this->sql->prepare("SELECT COUNT(*) FROM $table"))) {
+            $sql = "SELECT (SELECT COUNT(*) FROM $t) + (SELECT COALESCE(SUM(call_count), 0) FROM $td)";
+            if (!($stmt = $this->sql->prepare($sql))) {
                 return 0;
             }
         } else {
             $since = time() - ($days * 86400);
-            if (!($stmt = $this->sql->prepare("SELECT COUNT(*) FROM $table WHERE ts >= ?"))) {
+            $since_date = gmdate('Y-m-d', $since);
+            $sql = "SELECT (SELECT COUNT(*) FROM $t WHERE ts >= ?) + (SELECT COALESCE(SUM(call_count), 0) FROM $td WHERE day >= ?)";
+            if (!($stmt = $this->sql->prepare($sql))) {
                 return 0;
             }
-            $stmt->bind_param('i', $since);
+            $stmt->bind_param('is', $since, $since_date);
         }
         $stmt->execute();
         $stmt->bind_result($count);
         $stmt->fetch();
         $stmt->close();
         return (int) $count;
+    }
+
+    public function get_last_rollup_date()
+    {
+        $td = $this->vars_table_api_calls_daily;
+        if (!($stmt = $this->sql->prepare("SELECT MAX(day) FROM $td"))) {
+            return null;
+        }
+        $stmt->execute();
+        $stmt->bind_result($maxDay);
+        $stmt->fetch();
+        $stmt->close();
+        return $maxDay;
     }
 
     public function increment_query_limit()

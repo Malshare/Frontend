@@ -86,6 +86,7 @@ if ($share->uri_action == "getlist") {
     echo(json_encode($share->get_hashes(explode("\n", file_get_contents('php://input')))));
     die();
 } elseif ($share->uri_action == "type") {
+    $share->update_query_limit();
     $sample = $share->search_type_day();
     echo $sample;
     die();
@@ -156,6 +157,7 @@ if ($share->uri_action == "getlist") {
         http_response_code(403);
         die(json_encode(array('error' => 'not allowed to perform recursive URL downloads')));
     }
+    $share->update_query_limit();
     $guid = $share->task_url_download($user->id, $url, $recursive);
 
     echo json_encode(array('guid' => $guid));

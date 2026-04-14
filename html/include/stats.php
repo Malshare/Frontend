@@ -99,34 +99,21 @@ class Stats
 
     function uploadsByYear()
     {
-        $earliestTimestamp = $this->earliestUpload();
-        if ($earliestTimestamp === null) {
+        $sql = <<<SQL
+SELECT YEAR(FROM_UNIXTIME(added)) AS yr, COUNT(*) AS cnt
+FROM tbl_samples
+GROUP BY yr
+ORDER BY yr
+SQL;
+        if (!($stmt = $this->db->prepare($sql))) {
             return [];
         }
-        $earliestYear = intval($earliestTimestamp->format('Y'));
-        $thisYear = intval(date('Y'));
-        if (!$earliestYear or !$thisYear) {
-            return [];
-        }
-
+        $stmt->execute();
+        $stmt->bind_result($year, $count);
         $ret = [];
-        for ($i = $earliestYear; $i < $thisYear; $i++) {
-            try {
-                $startOfYear = new DateTime($i . '-01-01');
-                $startOfNextYear = new DateTime(($i + 1) . '-01-01');
-            } catch (Exception $e) {
-                continue;
-            }
-            $ret[$i] = $this->countSamples($startOfYear, $startOfNextYear);
+        while ($stmt->fetch()) {
+            $ret[(int) $year] = (int) $count;
         }
-
-        try {
-            $startOfYear = new DateTime($thisYear . '-01-01');
-            $startOfNextYear = new DateTime(($thisYear + 1) . '-01-01');
-        } catch (Exception $e) {
-            return $ret;
-        }
-        $ret[$thisYear] = $this->countSamples($startOfYear, $startOfNextYear);
 
         return $ret;
     }
@@ -156,20 +143,22 @@ class Stats
 
         $sql = <<<SQL
 SELECT
-    DATE_FORMAT(FROM_UNIXTIME(ts), "%Y-%m-%d") as order_date,
-    COUNT(*) as count_at_day
+    FLOOR(ts / 86400) AS day_bucket,
+    COUNT(*) AS count_at_day
 FROM `tbl_uploads`
 WHERE (ts >= ?) AND (ts < ?)
-GROUP BY order_date
+GROUP BY day_bucket
+ORDER BY day_bucket
 SQL;
         if (!($stmt = $this->db->prepare($sql))) {
             return [];
         }
         $stmt->bind_param('ii', $since, $midnight);
         $stmt->execute();
-        $stmt->bind_result($date, $count);
+        $stmt->bind_result($dayBucket, $count);
         $ret = [];
         while ($stmt->fetch()) {
+            $date = gmdate('Y-m-d', $dayBucket * 86400);
             $ret[$date] = $count;
         }
 

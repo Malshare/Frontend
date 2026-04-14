@@ -82,8 +82,14 @@ $current_locale = i18n_lang_value();
                     $_nav_is_admin = false;
                     if (isset($user) && isset($user->is_admin)) {
                         $_nav_is_admin = $user->is_admin;
-                    } elseif (isset($share)) {
-                        $_nav_user = new UserObject($share->sql, $_COOKIE['mapi_key'], true);
+                    } else {
+                        include_once(__DIR__ . '/server_includes.php');
+                        if (isset($share)) {
+                            $_nav_user = new UserObject($share->sql, $_COOKIE['mapi_key'], true);
+                        } else {
+                            $_nav_share = new ServerObject();
+                            $_nav_user = new UserObject($_nav_share->sql, $_COOKIE['mapi_key'], true);
+                        }
                         $_nav_is_admin = $_nav_user->ready && $_nav_user->is_admin;
                     }
                     $admin_btn = '';

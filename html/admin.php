@@ -18,7 +18,8 @@ $by_endpoint   = $share->get_api_calls_by_endpoint(30);
 $top_users     = $share->get_api_top_users(30, 20);
 $total_today   = $share->get_api_calls_total(1);
 $total_30d     = $share->get_api_calls_total(30);
-$total_all     = $share->get_api_calls_total();
+$stats_cache   = $share->get_stats_cache();
+$total_all     = isset($stats_cache['api_calls_all_time']) ? (int) $stats_cache['api_calls_all_time'] : $share->get_api_calls_total();
 $last_rollup   = $share->get_last_rollup_date();
 
 $endpoint_total = 0;

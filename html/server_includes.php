@@ -1910,29 +1910,37 @@ www.malshare.com
 
     public function get_yara_rule_count()
     {
-        if (!($stmt = $this->sql->prepare("SELECT COUNT(*) FROM tbl_yara"))) {
+        try {
+            if (!($stmt = $this->sql->prepare("SELECT COUNT(*) FROM tbl_yara"))) {
+                return 0;
+            }
+            $stmt->execute();
+            $stmt->bind_result($count);
+            $stmt->fetch();
+            $stmt->close();
+            return (int) $count;
+        } catch (\mysqli_sql_exception $e) {
             return 0;
         }
-        $stmt->execute();
-        $stmt->bind_result($count);
-        $stmt->fetch();
-        $stmt->close();
-        return (int) $count;
     }
 
     public function get_stats_cache()
     {
-        if (!($stmt = $this->sql->prepare("SELECT name, value FROM tbl_stats_cache"))) {
+        try {
+            if (!($stmt = $this->sql->prepare("SELECT name, value FROM tbl_stats_cache"))) {
+                return [];
+            }
+            $stmt->execute();
+            $stmt->bind_result($name, $value);
+            $cache = [];
+            while ($stmt->fetch()) {
+                $cache[$name] = $value;
+            }
+            $stmt->close();
+            return $cache;
+        } catch (\mysqli_sql_exception $e) {
             return [];
         }
-        $stmt->execute();
-        $stmt->bind_result($name, $value);
-        $cache = [];
-        while ($stmt->fetch()) {
-            $cache[$name] = $value;
-        }
-        $stmt->close();
-        return $cache;
     }
 
     public function increment_query_limit()

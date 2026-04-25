@@ -15,18 +15,6 @@ require_once __DIR__ . '/include/i18n.php';
 
 /* GLOBAL CONFIG VARS */
 
-// Tables
-define("SAMPLES_TABLE", "tbl_samples");
-define("SAMPLE_SOURCES_TABLE", "tbl_sample_sources");
-define("USERS_TABLE", "tbl_users");
-define("UPLOADS_TABLE", "tbl_uploads");
-define("SEARCHES_TABLE", "tbl_searches");
-define("PUBSEARCHES_TABLE", "tbl_public_searches");
-define("URLDLTASKS_TABLE", "tbl_url_download_tasks");
-define("SAMPLE_PARTNER_TABLE", "tbl_sample_partners");
-define("API_CALLS_TABLE", "tbl_api_calls");
-define("API_CALLS_DAILY_TABLE", "tbl_api_calls_daily");
-
 // External API Connections
 define("VT_CONTEXT_KEY", getenv("VT_CONTEXT_KEY"));
 define("VT_CONTEXT_URL", getenv("VT_CONTEXT_URL"));
@@ -138,18 +126,6 @@ class ServerObject
     public $uri_private;
     public $uri_path;
 
-    // DB Tables
-    public $vars_table_samples;
-    public $vars_table_users;
-    public $vars_table_sources;
-    public $vars_table_searches;
-    public $vars_table_public_searches;
-    public $vars_table_uploads;
-    public $vars_table_url_download_tasks;
-    public $vars_table_sample_partners;
-    public $vars_table_api_calls;
-    public $vars_table_api_calls_daily;
-
     public $vt_context_key;
     public $vt_context_url;
 
@@ -220,18 +196,6 @@ class ServerObject
                 die("No API Key Supplied");
             }
         }
-
-        // Tables
-        $this->vars_table_samples = SAMPLES_TABLE;
-        $this->vars_table_users = USERS_TABLE;
-        $this->vars_table_sources = SAMPLE_SOURCES_TABLE;
-        $this->vars_table_searches = SEARCHES_TABLE;
-        $this->vars_table_public_searches = PUBSEARCHES_TABLE;
-        $this->vars_table_uploads = UPLOADS_TABLE;
-        $this->vars_table_url_download_tasks = URLDLTASKS_TABLE;
-        $this->vars_table_sample_partners = SAMPLE_PARTNER_TABLE;
-        $this->vars_table_api_calls = API_CALLS_TABLE;
-        $this->vars_table_api_calls_daily = API_CALLS_DAILY_TABLE;
 
         $this->vt_context_key = VT_CONTEXT_KEY;
         $this->vt_context_url = VT_CONTEXT_URL;
@@ -367,11 +331,7 @@ class ServerObject
 
     public function get_recent(): string
     {
-        $table = $this->vars_table_samples;
-        $table_sources = $this->vars_table_sources;
-        $table_sample_partners = $this->vars_table_sample_partners;
-
-        $stmt = $this->sql->prepare("SELECT s.sha256, s.added, s.ftype, ts.source, tsp.display_name AS source_display_name FROM (SELECT id, sha256, added, ftype FROM $table WHERE (pending != 1 OR pending IS NULL) AND ftype != 'html' ORDER BY added DESC LIMIT 10) s LEFT JOIN $table_sources ts ON s.id = ts.id LEFT JOIN $table_sample_partners tsp ON ts.sample_partner_submission = tsp.id ORDER BY s.added DESC");
+        $stmt = $this->sql->prepare("SELECT s.sha256, s.added, s.ftype, ts.source, tsp.display_name AS source_display_name FROM (SELECT id, sha256, added, ftype FROM tbl_samples WHERE (pending != 1 OR pending IS NULL) AND ftype != 'html' ORDER BY added DESC LIMIT 10) s LEFT JOIN tbl_sample_sources ts ON s.id = ts.id LEFT JOIN tbl_sample_partners tsp ON ts.sample_partner_submission = tsp.id ORDER BY s.added DESC");
         if (!$stmt) {
             $this->error_die("Error 13513 (Unable to get recent samples. Please report this issue)");
         }
@@ -428,8 +388,7 @@ class ServerObject
     public function get_sitemap(): string
     {
         $output = "";
-        $table = $this->vars_table_samples;
-        $sql = "SELECT md5, sha1, sha256 FROM $table WHERE ( pending != 1 or pending is NULL ) ORDER by added DESC limit 1000";
+        $sql = "SELECT md5, sha1, sha256 FROM tbl_samples WHERE ( pending != 1 or pending is NULL ) ORDER by added DESC limit 1000";
         if (!($stmt = $this->sql->prepare($sql))) {
             $this->error_die("Error 23214 (Problem building sitemap.  Please report this issue)");
         }
@@ -467,7 +426,7 @@ class ServerObject
                 return null;
         }
 
-        $sql = "SELECT id as hash FROM {$this->vars_table_samples} WHERE $field = lower(?) LIMIT 1";
+        $sql = "SELECT id as hash FROM tbl_samples WHERE $field = lower(?) LIMIT 1";
         if (!($stmt = $this->sql->prepare($sql))) {
             return null;
         }
@@ -484,12 +443,6 @@ class ServerObject
 
     public function sample_search($api_query = false)
     {
-        $table = $this->vars_table_samples;
-        $table_sources = $this->vars_table_sources;
-        $table_searches = $this->vars_table_searches;
-        $table_pub_searches = $this->vars_table_public_searches;
-        $table_sample_partners = $this->vars_table_sample_partners;
-
         $searchValue = $this->secure($this->uri_query);
         $searchPrivate = 0;
         $source_ip = $this->secure(self::client_ip());
@@ -501,7 +454,7 @@ class ServerObject
             $this->error_die("Query must by longer then 3 characters");
         }
 
-        if ($stmt = $this->sql->prepare("INSERT INTO $table_searches (query, source, ts, private) VALUES (?, ?, UNIX_TIMESTAMP(), ?)")) {
+        if ($stmt = $this->sql->prepare("INSERT INTO tbl_searches (query, source, ts, private) VALUES (?, ?, UNIX_TIMESTAMP(), ?)")) {
             $stmt->bind_param('ssi', $searchValue, $source_ip, $searchPrivate);
             $stmt->execute();
             $stmt->close();
@@ -544,7 +497,7 @@ class ServerObject
                     }
                     $ftQuery = trim($ftQuery);
 
-                    $stmt = $this->sql->prepare("SELECT DISTINCT id FROM $table_sources WHERE MATCH(source) AGAINST(? IN BOOLEAN MODE) LIMIT 100");
+                    $stmt = $this->sql->prepare("SELECT DISTINCT id FROM tbl_sample_sources WHERE MATCH(source) AGAINST(? IN BOOLEAN MODE) LIMIT 100");
                     $stmt->bind_param('s', $ftQuery);
                     $stmt->execute();
                     $res = $stmt->get_result();
@@ -552,21 +505,21 @@ class ServerObject
                     // Fallback to LIKE if FULLTEXT returns nothing (short tokens, substring patterns)
                     if ($res && $res->num_rows === 0) {
                         $like = "%" . $rhash . "%";
-                        $stmt = $this->sql->prepare("SELECT DISTINCT id FROM $table_sources WHERE source LIKE ? LIMIT 100");
+                        $stmt = $this->sql->prepare("SELECT DISTINCT id FROM tbl_sample_sources WHERE source LIKE ? LIMIT 100");
                         $stmt->bind_param('s', $like);
                         $stmt->execute();
                         $res = $stmt->get_result();
                     }
                 } else {
                     $like = "%" . $rhash . "%";
-                    $stmt = $this->sql->prepare("SELECT DISTINCT id FROM $table_sources WHERE source LIKE ? LIMIT 100");
+                    $stmt = $this->sql->prepare("SELECT DISTINCT id FROM tbl_sample_sources WHERE source LIKE ? LIMIT 100");
                     $stmt->bind_param('s', $like);
                     $stmt->execute();
                     $res = $stmt->get_result();
                 }
             } else if (substr($searchValue, 0, 5) == "type:") {
                 $ftype = strtoupper(trim(substr($searchValue, 5)));
-                $stmt = $this->sql->prepare("SELECT id FROM $table WHERE ftype = ? ORDER BY added DESC LIMIT 100");
+                $stmt = $this->sql->prepare("SELECT id FROM tbl_samples WHERE ftype = ? ORDER BY added DESC LIMIT 100");
                 $stmt->bind_param('s', $ftype);
                 $stmt->execute();
                 $res = $stmt->get_result();
@@ -574,7 +527,7 @@ class ServerObject
                 // Fallback: case-insensitive scan for mixed-case file types
                 if ($res && $res->num_rows === 0) {
                     $ftype_lower = strtolower($ftype);
-                    $stmt = $this->sql->prepare("SELECT id FROM $table WHERE LOWER(ftype) = ? ORDER BY added DESC LIMIT 100");
+                    $stmt = $this->sql->prepare("SELECT id FROM tbl_samples WHERE LOWER(ftype) = ? ORDER BY added DESC LIMIT 100");
                     $stmt->bind_param('s', $ftype_lower);
                     $stmt->execute();
                     $res = $stmt->get_result();
@@ -629,9 +582,9 @@ class ServerObject
                        ts.source AS source,
                        tsp.display_name AS display_name_source,
                        s.parent_id
-                FROM {$table} s
-                    LEFT JOIN {$table_sources} ts ON s.id = ts.id
-                    LEFT JOIN {$table_sample_partners} tsp ON ts.sample_partner_submission = tsp.id
+                FROM tbl_samples s
+                    LEFT JOIN tbl_sample_sources ts ON s.id = ts.id
+                    LEFT JOIN tbl_sample_partners tsp ON ts.sample_partner_submission = tsp.id
                 WHERE s.id IN ($placeholders)"
             ))) {
                 $this->error_die("Error 13842 (Problem fetching search results.  Please report this issue)");
@@ -675,7 +628,7 @@ class ServerObject
                     $parent_id_list = array_keys($all_parent_ids);
                     $p_ph = implode(',', array_fill(0, count($parent_id_list), '?'));
                     $p_types = str_repeat('i', count($parent_id_list));
-                    if ($pstmt = $this->sql->prepare("SELECT id, md5, sha1, sha256 FROM $table WHERE id IN ($p_ph)")) {
+                    if ($pstmt = $this->sql->prepare("SELECT id, md5, sha1, sha256 FROM tbl_samples WHERE id IN ($p_ph)")) {
                         $pstmt->bind_param($p_types, ...$parent_id_list);
                         $pstmt->execute();
                         $p_res = $pstmt->get_result();
@@ -691,7 +644,7 @@ class ServerObject
                 // Batch fetch child samples
                 $c_ph = implode(',', array_fill(0, count($ids), '?'));
                 $c_types = str_repeat('i', count($ids));
-                if ($cstmt = $this->sql->prepare("SELECT parent_id, md5, sha1, sha256 FROM $table WHERE parent_id IN ($c_ph)")) {
+                if ($cstmt = $this->sql->prepare("SELECT parent_id, md5, sha1, sha256 FROM tbl_samples WHERE parent_id IN ($c_ph)")) {
                     $cstmt->bind_param($c_types, ...$ids);
                     $cstmt->execute();
                     $c_res = $cstmt->get_result();
@@ -758,7 +711,7 @@ class ServerObject
         }
 
         if (!$api_query && ($totalHits > 0) && ($searchPrivate == 0)) {
-            if ($stmt = $this->sql->prepare("INSERT INTO $table_pub_searches (query, ts) VALUES (?, UNIX_TIMESTAMP())")) {
+            if ($stmt = $this->sql->prepare("INSERT INTO tbl_public_searches (query, ts) VALUES (?, UNIX_TIMESTAMP())")) {
                 $stmt->bind_param('s', $searchValue);
                 $stmt->execute();
                 $stmt->close();
@@ -780,12 +733,6 @@ class ServerObject
         $r_hash = $this->uri_hash;
         $hash = preg_replace("/[^a-zA-Z0-9]+/", "", $r_hash);
 
-        $table = $this->vars_table_samples;
-        $table_sources = $this->vars_table_sources;
-        $table_sample_partners = $this->vars_table_sample_partners;
-        $table_uploads = $this->vars_table_uploads;
-
-
         $id = $this->getSampleIdFromHash($hash);
         if ($id === null) {
             return '<br /> <center><p class="lead">Sample not found with hash ( ' . $this->escape_html($hash) . ' )</p></center>';
@@ -793,7 +740,7 @@ class ServerObject
 
         $row = (object)['hash' => $id];
 
-        if (!($stmt = $this->sql->prepare("SELECT md5, sha1, sha256, ssdeep, added, ftype, pending, parent_id FROM $table WHERE id = ?"))) {
+        if (!($stmt = $this->sql->prepare("SELECT md5, sha1, sha256, ssdeep, added, ftype, pending, parent_id FROM tbl_samples WHERE id = ?"))) {
             $this->error_die("Error 23418 (Unable to find child samples  Please report this issue)");
         }
         $stmt->bind_param('i', $row->hash);
@@ -843,7 +790,7 @@ class ServerObject
             </tbody>
             </table>
         ';
-        if (!($fname_stmt = $this->sql->prepare("SELECT DISTINCT name FROM $table_uploads WHERE md5 = ?"))) {
+        if (!($fname_stmt = $this->sql->prepare("SELECT DISTINCT name FROM tbl_uploads WHERE md5 = ?"))) {
             $this->error_die("Error 23428 (Unable to find file names  Please report this issue)");
         }
         $fname_stmt->bind_param('s', $f_row->md5);
@@ -889,7 +836,7 @@ class ServerObject
             }
 
             foreach ($parent_ids as $pid) {
-                if (!($pstmt = $this->sql->prepare("SELECT sha256 FROM $table WHERE id = ?"))) {
+                if (!($pstmt = $this->sql->prepare("SELECT sha256 FROM tbl_samples WHERE id = ?"))) {
                     $this->error_die("Error 23732 (Problem finding parent details for hash.  Please report this issue)");
                 }
                 $pstmt->bind_param('i', $pid);
@@ -911,7 +858,7 @@ class ServerObject
                 $pstmt->close();
             }
         }
-        if (!($cstmt = $this->sql->prepare("SELECT sha256 FROM $table WHERE parent_id = ?"))) {
+        if (!($cstmt = $this->sql->prepare("SELECT sha256 FROM tbl_samples WHERE parent_id = ?"))) {
             $this->error_die("Error 23734 (Problem finding child samples.  Please report this issue)");
         }
         $cstmt->bind_param('i', $row->hash);
@@ -942,7 +889,7 @@ class ServerObject
         $cstmt->close();
 
         if (!($stmt = $this->sql->prepare(
-            "SELECT ts.source AS source, tsp.display_name AS source_display_name FROM $table_sources ts LEFT JOIN $table_sample_partners tsp ON ts.sample_partner_submission = tsp.id WHERE ts.id = ?"
+            "SELECT ts.source AS source, tsp.display_name AS source_display_name FROM tbl_sample_sources ts LEFT JOIN tbl_sample_partners tsp ON ts.sample_partner_submission = tsp.id WHERE ts.id = ?"
         ))) {
             $this->error_die("Error 23735 (Problem finding sources for sample.  Please report this issue)");
         }
@@ -994,10 +941,6 @@ class ServerObject
         $r_hash = $this->uri_hash;
         $hash = preg_replace("/[^a-zA-Z0-9]+/", "", $r_hash);
 
-        $table = $this->vars_table_samples;
-        $table_sources = $this->vars_table_sources;
-        $table_uploads = $this->vars_table_uploads;
-
         $id = $this->getSampleIdFromHash($hash);
         if ($id === null) {
             http_response_code(404);
@@ -1009,7 +952,7 @@ class ServerObject
         }
         $row = (object)['hash' => $id];
 
-        if (!($stmt = $this->sql->prepare("SELECT md5, sha1, sha256, ssdeep, added, ftype FROM $table WHERE id = ?"))) {
+        if (!($stmt = $this->sql->prepare("SELECT md5, sha1, sha256, ssdeep, added, ftype FROM tbl_samples WHERE id = ?"))) {
             http_response_code(500);
             $output['ERROR'] = array();
             $output['ERROR']["CODE"] = 724341;
@@ -1038,7 +981,7 @@ class ServerObject
         $output['SSDEEP'] = $f_row->ssdeep;
         $output['F_TYPE'] = $f_row->ftype;
 
-        if (!($stmt = $this->sql->prepare("SELECT source FROM $table_sources WHERE id = ?"))) {
+        if (!($stmt = $this->sql->prepare("SELECT source FROM tbl_sample_sources WHERE id = ?"))) {
             http_response_code(500);
             $output['ERROR'] = array();
             $output['ERROR']["CODE"] = 724323;
@@ -1064,7 +1007,7 @@ class ServerObject
         }
         $stmt->close();
 
-        if (!($nstmt = $this->sql->prepare("SELECT name FROM $table_uploads WHERE md5 = ?"))) {
+        if (!($nstmt = $this->sql->prepare("SELECT name FROM tbl_uploads WHERE md5 = ?"))) {
             http_response_code(500);
             $output['ERROR'] = array();
             $output['ERROR']["CODE"] = 724323;
@@ -1156,7 +1099,7 @@ class ServerObject
             return [];
         }
 
-        $sql = 'SELECT sha256, md5, sha1 FROM ' . $this->vars_table_samples . ' WHERE (' . implode(' OR ', $clauses) . ')';
+        $sql = 'SELECT sha256, md5, sha1 FROM tbl_samples WHERE (' . implode(' OR ', $clauses) . ')';
         if (!($stmt = $this->sql->prepare($sql))) {
             return [];
         }
@@ -1217,7 +1160,7 @@ class ServerObject
                 die("Invalid Hash...");
         }
         $clean = preg_replace('/[^a-f0-9]/', '', strtolower($hash));
-        if (!($stmt = $this->sql->prepare("SELECT sha256 AS hash, md5 AS md5 FROM {$this->vars_table_samples} WHERE $searchFieldName = lower(?)"))) {
+        if (!($stmt = $this->sql->prepare("SELECT sha256 AS hash, md5 AS md5 FROM tbl_samples WHERE $searchFieldName = lower(?)"))) {
             $this->error_die("Error 13940 (Problem finding sample. Please report this issue)");
         }
         $stmt->bind_param('s', $clean);
@@ -1258,8 +1201,7 @@ class ServerObject
         header('Content-Type: application/json');
         $output = array();
 
-        $table = $this->vars_table_samples;
-        $stmt = $this->sql->prepare("SELECT md5 as md5, sha1 as sha1, sha256 as sha256 FROM $table WHERE ( added > ( UNIX_TIMESTAMP() - 86400) )");
+        $stmt = $this->sql->prepare("SELECT md5 as md5, sha1 as sha1, sha256 as sha256 FROM tbl_samples WHERE ( added > ( UNIX_TIMESTAMP() - 86400) )");
         if (!$stmt) {
             http_response_code(500);
             $output['ERROR'] = array();
@@ -1290,8 +1232,7 @@ class ServerObject
 
     public function get_list_raw()
     {
-        $table = $this->vars_table_samples;
-        $stmt = $this->sql->prepare("SELECT md5 as md5, sha1 as sha1, sha256 as sha256 FROM $table WHERE ( added > ( UNIX_TIMESTAMP() - 86400) )");
+        $stmt = $this->sql->prepare("SELECT md5 as md5, sha1 as sha1, sha256 as sha256 FROM tbl_samples WHERE ( added > ( UNIX_TIMESTAMP() - 86400) )");
         if (!$stmt) {
             $this->error_die("Error 131311 (Please report this issue)");
         }
@@ -1312,9 +1253,6 @@ class ServerObject
     {
         $output = array();
 
-        $table = $this->vars_table_samples;
-        $table_sources = $this->vars_table_sources;
-
         $id = $this->getSampleIdFromHash($hash);
         if ($id === null) {
             http_response_code(404);
@@ -1323,7 +1261,7 @@ class ServerObject
         $row = (object)['hash' => $id];
 
 
-        if (!($stmt = $this->sql->prepare("SELECT md5, sha1, sha256, ssdeep, added, ftype FROM $table WHERE id = ?"))) {
+        if (!($stmt = $this->sql->prepare("SELECT md5, sha1, sha256, ssdeep, added, ftype FROM tbl_samples WHERE id = ?"))) {
             $this->error_die("Error 139432 (Problem getting sample details. Please report this issue)");
         }
         $stmt->bind_param('i', $row->hash);
@@ -1344,7 +1282,7 @@ class ServerObject
         $output['F_TYPE'] = $f_row->ftype;
         $output['ADDED'] = $f_row->added;
 
-        if (!($stmt = $this->sql->prepare("SELECT source FROM $table_sources WHERE id = ?"))) {
+        if (!($stmt = $this->sql->prepare("SELECT source FROM tbl_sample_sources WHERE id = ?"))) {
             $this->error_die("Error 139312 (Problem sample sources. Please report this issue)");
         }
         $stmt->bind_param('i', $row->hash);
@@ -1371,8 +1309,7 @@ class ServerObject
         header('Content-Type: application/json');
 
         $output = array();
-        $table = $this->vars_table_samples;
-        $stmt = $this->sql->prepare("SELECT sha256 as sha256 FROM $table WHERE ( added > ( UNIX_TIMESTAMP() - 86400) )");
+        $stmt = $this->sql->prepare("SELECT sha256 as sha256 FROM tbl_samples WHERE ( added > ( UNIX_TIMESTAMP() - 86400) )");
         if (!$stmt) {
             http_response_code(500);
             $output['ERROR'] = array();
@@ -1406,11 +1343,10 @@ class ServerObject
         header('Content-Type: application/json');
 
         $results = array();
-        $table = $this->vars_table_samples;
         $r_type = $this->uri_type;
         $type = preg_replace("/[^a-zA-Z0-9]+/", "", $r_type);
 
-        $stmt = $this->sql->prepare("SELECT md5 as md5, sha1 as sha1, sha256 as sha256 FROM $table WHERE ( added > ( UNIX_TIMESTAMP() - 86400) and lower(ftype) = ? )");
+        $stmt = $this->sql->prepare("SELECT md5 as md5, sha1 as sha1, sha256 as sha256 FROM tbl_samples WHERE ( added > ( UNIX_TIMESTAMP() - 86400) and lower(ftype) = ? )");
         if (!$stmt) {
             http_response_code(500);
             $output['ERROR'] = array();
@@ -1444,8 +1380,7 @@ class ServerObject
         header('Content-Type: application/json');
 
         $output = array();
-        $table = $this->vars_table_samples;
-        $stmt = $this->sql->prepare("SELECT ftype as ftype, count(id) as fcount from $table WHERE added > (unix_timestamp() - 86400) AND ftype != '-' GROUP BY ftype");
+        $stmt = $this->sql->prepare("SELECT ftype as ftype, count(id) as fcount from tbl_samples WHERE added > (unix_timestamp() - 86400) AND ftype != '-' GROUP BY ftype");
         if (!$stmt) {
             http_response_code(500);
             $output['ERROR'] = array();
@@ -1479,8 +1414,7 @@ class ServerObject
         header('Content-Type: application/json');
 
         $output = array();
-        $table = $this->vars_table_uploads;
-        $stmt = $this->sql->prepare("SELECT distinct name as name FROM $table WHERE ( ts > ( UNIX_TIMESTAMP()-86400) and ts is not NULL ) LIMIT 1000");
+        $stmt = $this->sql->prepare("SELECT distinct name as name FROM tbl_uploads WHERE ( ts > ( UNIX_TIMESTAMP()-86400) and ts is not NULL ) LIMIT 1000");
         if (!$stmt) {
             http_response_code(500);
             $output['ERROR'] = array();
@@ -1514,8 +1448,7 @@ class ServerObject
         header('Content-Type: application/json');
 
         $output = array();
-        $table = $this->vars_table_sources;
-        $stmt = $this->sql->prepare("SELECT distinct source as source FROM $table WHERE ( added > ( UNIX_TIMESTAMP()-86400) and added is not NULL ) LIMIT 1000");
+        $stmt = $this->sql->prepare("SELECT distinct source as source FROM tbl_sample_sources WHERE ( added > ( UNIX_TIMESTAMP()-86400) and added is not NULL ) LIMIT 1000");
         if (!$stmt) {
             http_response_code(500);
             $output['ERROR'] = array();
@@ -1546,8 +1479,7 @@ class ServerObject
 
     public function get_sources_raw()
     {
-        $table = $this->vars_table_sources;
-        $stmt = $this->sql->prepare("SELECT distinct source as source FROM $table WHERE ( added > ( UNIX_TIMESTAMP()-86400) and added is not NULL ) LIMIT 1000");
+        $stmt = $this->sql->prepare("SELECT distinct source as source FROM tbl_sample_sources WHERE ( added > ( UNIX_TIMESTAMP()-86400) and added is not NULL ) LIMIT 1000");
         if (!$stmt) {
             $this->error_die(
                 "Error 138024. (Problem pulling raw source list for the past day. Please report this issue)"
@@ -1728,11 +1660,10 @@ www.malshare.com
     {
         header('Content-Type: application/json');
 
-        $table = $this->vars_table_users;
         $api_key = $this->secure($this->uri_api_key);
 
 
-        if (!($stmt = $this->sql->prepare("UPDATE $table SET active = 0 WHERE api_key = ?"))) {
+        if (!($stmt = $this->sql->prepare("UPDATE tbl_users SET active = 0 WHERE api_key = ?"))) {
             $this->error_die("Error 432999 (Please report this issue)");
         }
         $stmt->bind_param('s', $api_key);
@@ -1749,8 +1680,7 @@ www.malshare.com
 
     public function get_user_quota($api_key)
     {
-        $table = $this->vars_table_users;
-        if (!($stmt = $this->sql->prepare("SELECT query_limit, query_base FROM $table WHERE api_key = ?"))) {
+        if (!($stmt = $this->sql->prepare("SELECT query_limit, query_base FROM tbl_users WHERE api_key = ?"))) {
             return null;
         }
         $stmt->bind_param('s', $api_key);
@@ -1784,9 +1714,8 @@ www.malshare.com
 
     public function update_query_limit()
     {
-        $table = $this->vars_table_users;
         $api_key = $this->uri_api_key;
-        if (!($stmt = $this->sql->prepare("SELECT query_limit, last_query FROM $table WHERE api_key = ?"))) {
+        if (!($stmt = $this->sql->prepare("SELECT query_limit, last_query FROM tbl_users WHERE api_key = ?"))) {
             $this->error_die("Error 432101 (Please report this issue)");
         }
         $stmt->bind_param('s', $api_key);
@@ -1800,7 +1729,7 @@ www.malshare.com
 
         if ($row->query_limit <= 0) {
             if (($row->last_query + 86400) < time()) {
-                if (!($u = $this->sql->prepare("UPDATE $table SET query_limit = query_base - 1 WHERE api_key = ?"))) {
+                if (!($u = $this->sql->prepare("UPDATE tbl_users SET query_limit = query_base - 1 WHERE api_key = ?"))) {
                     $this->error_die("Error 432103 (Please report this issue)");
                 }
                 $u->bind_param('s', $api_key);
@@ -1815,7 +1744,7 @@ www.malshare.com
                 die(self::error_message_html("Error 4290 (Over Request Limit)"));
             }
         } else {
-            if (!($u = $this->sql->prepare("UPDATE $table SET query_limit = query_limit - 1, last_query = UNIX_TIMESTAMP() WHERE api_key = ?"))) {
+            if (!($u = $this->sql->prepare("UPDATE tbl_users SET query_limit = query_limit - 1, last_query = UNIX_TIMESTAMP() WHERE api_key = ?"))) {
                 $this->error_die("Error 492104 (Please report this issue)");
             }
             $u->bind_param('s', $api_key);
@@ -1829,9 +1758,8 @@ www.malshare.com
 
     public function log_api_call($user_id, $endpoint)
     {
-        $table = $this->vars_table_api_calls;
         $ts = time();
-        if (!($stmt = $this->sql->prepare("INSERT INTO $table (user_id, endpoint, ts) VALUES (?, ?, ?)"))) {
+        if (!($stmt = $this->sql->prepare("INSERT INTO tbl_api_calls (user_id, endpoint, ts) VALUES (?, ?, ?)"))) {
             return;
         }
         $stmt->bind_param('isi', $user_id, $endpoint, $ts);
@@ -1841,16 +1769,14 @@ www.malshare.com
 
     public function get_api_calls_per_day($days = 30)
     {
-        $t = $this->vars_table_api_calls;
-        $td = $this->vars_table_api_calls_daily;
         $midnight = strtotime('today');
         $since = $midnight - ($days * 86400);
         $since_date = gmdate('Y-m-d', $since);
         $now = time();
         $sql = "SELECT day_label, SUM(cnt) AS total FROM ("
-             . "SELECT FLOOR(ts / 86400) AS day_label, COUNT(*) AS cnt FROM $t WHERE ts >= ? AND ts <= ? GROUP BY day_label "
+             . "SELECT FLOOR(ts / 86400) AS day_label, COUNT(*) AS cnt FROM tbl_api_calls WHERE ts >= ? AND ts <= ? GROUP BY day_label "
              . "UNION ALL "
-             . "SELECT TO_DAYS(day) AS day_label, call_count AS cnt FROM $td WHERE day >= ?"
+             . "SELECT TO_DAYS(day) AS day_label, call_count AS cnt FROM tbl_api_calls_daily WHERE day >= ?"
              . ") combined GROUP BY day_label ORDER BY day_label";
         if (!($stmt = $this->sql->prepare($sql))) {
             return [];
@@ -1868,14 +1794,12 @@ www.malshare.com
 
     public function get_api_calls_per_month($months = 12)
     {
-        $t = $this->vars_table_api_calls;
-        $td = $this->vars_table_api_calls_daily;
         $since = strtotime("-$months months midnight");
         $since_date = gmdate('Y-m-d', $since);
         $sql = "SELECT month_label, SUM(cnt) AS total FROM ("
-             . "SELECT DATE_FORMAT(FROM_UNIXTIME(ts), '%Y-%m') AS month_label, COUNT(*) AS cnt FROM $t WHERE ts >= ? GROUP BY month_label "
+             . "SELECT DATE_FORMAT(FROM_UNIXTIME(ts), '%Y-%m') AS month_label, COUNT(*) AS cnt FROM tbl_api_calls WHERE ts >= ? GROUP BY month_label "
              . "UNION ALL "
-             . "SELECT DATE_FORMAT(day, '%Y-%m') AS month_label, call_count AS cnt FROM $td WHERE day >= ?"
+             . "SELECT DATE_FORMAT(day, '%Y-%m') AS month_label, call_count AS cnt FROM tbl_api_calls_daily WHERE day >= ?"
              . ") combined GROUP BY month_label ORDER BY month_label";
         if (!($stmt = $this->sql->prepare($sql))) {
             return [];
@@ -1893,14 +1817,12 @@ www.malshare.com
 
     public function get_api_calls_by_endpoint($days = 30)
     {
-        $t = $this->vars_table_api_calls;
-        $td = $this->vars_table_api_calls_daily;
         $since = time() - ($days * 86400);
         $since_date = gmdate('Y-m-d', $since);
         $sql = "SELECT endpoint, SUM(cnt) AS total FROM ("
-             . "SELECT endpoint, COUNT(*) AS cnt FROM $t WHERE ts >= ? GROUP BY endpoint "
+             . "SELECT endpoint, COUNT(*) AS cnt FROM tbl_api_calls WHERE ts >= ? GROUP BY endpoint "
              . "UNION ALL "
-             . "SELECT endpoint, call_count AS cnt FROM $td WHERE day >= ?"
+             . "SELECT endpoint, call_count AS cnt FROM tbl_api_calls_daily WHERE day >= ?"
              . ") combined GROUP BY endpoint ORDER BY total DESC";
         if (!($stmt = $this->sql->prepare($sql))) {
             return [];
@@ -1918,16 +1840,13 @@ www.malshare.com
 
     public function get_api_top_users($days = 30, $limit = 20)
     {
-        $t = $this->vars_table_api_calls;
-        $td = $this->vars_table_api_calls_daily;
-        $users_table = $this->vars_table_users;
         $since = time() - ($days * 86400);
         $since_date = gmdate('Y-m-d', $since);
         $sql = "SELECT u.id, u.name, u.email, SUM(c.cnt) AS total FROM ("
-             . "SELECT user_id, COUNT(*) AS cnt FROM $t WHERE ts >= ? GROUP BY user_id "
+             . "SELECT user_id, COUNT(*) AS cnt FROM tbl_api_calls WHERE ts >= ? GROUP BY user_id "
              . "UNION ALL "
-             . "SELECT user_id, call_count AS cnt FROM $td WHERE day >= ? AND user_id IS NOT NULL GROUP BY user_id, call_count"
-             . ") c JOIN $users_table u ON c.user_id = u.id GROUP BY u.id, u.name, u.email ORDER BY total DESC LIMIT ?";
+             . "SELECT user_id, call_count AS cnt FROM tbl_api_calls_daily WHERE day >= ? AND user_id IS NOT NULL GROUP BY user_id, call_count"
+             . ") c JOIN tbl_users u ON c.user_id = u.id GROUP BY u.id, u.name, u.email ORDER BY total DESC LIMIT ?";
         if (!($stmt = $this->sql->prepare($sql))) {
             return [];
         }
@@ -1944,17 +1863,15 @@ www.malshare.com
 
     public function get_api_calls_total($days = null)
     {
-        $t = $this->vars_table_api_calls;
-        $td = $this->vars_table_api_calls_daily;
         if ($days === null) {
-            $sql = "SELECT (SELECT COUNT(*) FROM $t) + (SELECT COALESCE(SUM(call_count), 0) FROM $td)";
+            $sql = "SELECT (SELECT COUNT(*) FROM tbl_api_calls) + (SELECT COALESCE(SUM(call_count), 0) FROM tbl_api_calls_daily)";
             if (!($stmt = $this->sql->prepare($sql))) {
                 return 0;
             }
         } else {
             $since = time() - ($days * 86400);
             $since_date = gmdate('Y-m-d', $since);
-            $sql = "SELECT (SELECT COUNT(*) FROM $t WHERE ts >= ?) + (SELECT COALESCE(SUM(call_count), 0) FROM $td WHERE day >= ?)";
+            $sql = "SELECT (SELECT COUNT(*) FROM tbl_api_calls WHERE ts >= ?) + (SELECT COALESCE(SUM(call_count), 0) FROM tbl_api_calls_daily WHERE day >= ?)";
             if (!($stmt = $this->sql->prepare($sql))) {
                 return 0;
             }
@@ -1969,8 +1886,7 @@ www.malshare.com
 
     public function get_last_rollup_date()
     {
-        $td = $this->vars_table_api_calls_daily;
-        if (!($stmt = $this->sql->prepare("SELECT MAX(day) FROM $td"))) {
+        if (!($stmt = $this->sql->prepare("SELECT MAX(day) FROM tbl_api_calls_daily"))) {
             return null;
         }
         $stmt->execute();
@@ -1982,8 +1898,7 @@ www.malshare.com
 
     public function get_registered_user_count()
     {
-        $t = $this->vars_table_users;
-        if (!($stmt = $this->sql->prepare("SELECT COUNT(*) FROM $t WHERE active = 1"))) {
+        if (!($stmt = $this->sql->prepare("SELECT COUNT(*) FROM tbl_users WHERE active = 1"))) {
             return 0;
         }
         $stmt->execute();
@@ -2007,10 +1922,9 @@ www.malshare.com
 
     public function increment_query_limit()
     {
-        $table = $this->vars_table_users;
         $api_key = $this->uri_api_key;
 
-        if (!($stmt = $this->sql->prepare("UPDATE $table SET query_limit = query_limit + 1 WHERE api_key = ?"))) {
+        if (!($stmt = $this->sql->prepare("UPDATE tbl_users SET query_limit = query_limit + 1 WHERE api_key = ?"))) {
             $this->error_die("Error 432114 (Please report this issue)");
         }
         $stmt->bind_param('s', $api_key);
@@ -2024,8 +1938,7 @@ www.malshare.com
 
     public function update_sample_count($hash)
     {
-        $table = $this->vars_table_samples;
-        if (!($stmt = $this->sql->prepare("UPDATE $table SET counter = counter + 1 WHERE md5 = ?"))) {
+        if (!($stmt = $this->sql->prepare("UPDATE tbl_samples SET counter = counter + 1 WHERE md5 = ?"))) {
             $this->error_die("Error 432201 (Please report this issue)");
         }
         $stmt->bind_param('s', $hash);
@@ -2040,8 +1953,7 @@ www.malshare.com
     {
         $results = array();
 
-        $table = $this->vars_table_public_searches;
-        $stmt = $this->sql->prepare("SELECT query FROM $table ORDER BY ts DESC LIMIT 50");
+        $stmt = $this->sql->prepare("SELECT query FROM tbl_public_searches ORDER BY ts DESC LIMIT 50");
         if (!$stmt) {
             return $results;
         }
@@ -2067,7 +1979,7 @@ www.malshare.com
 
     public function sha256ExistsInDatabase($sha256): bool
     {
-        $sql = "SELECT sha256 FROM {$this->vars_table_samples} where sha256 = ? limit 1";
+        $sql = "SELECT sha256 FROM tbl_samples where sha256 = ? limit 1";
         if (!($stmt = $this->sql->prepare($sql))) {
             $this->error_die("Error 148993 (Please report this issue)");
         }
@@ -2093,7 +2005,7 @@ www.malshare.com
         $clientFileName = $this->secure($uploadedSample['name']);
 
         try {
-            $sql = "INSERT INTO {$this->vars_table_uploads} (name, md5, source, ts) VALUES (?, ?, ?, UNIX_TIMESTAMP())";
+            $sql = "INSERT INTO tbl_uploads (name, md5, source, ts) VALUES (?, ?, ?, UNIX_TIMESTAMP())";
             if (!($stmt = $this->sql->prepare($sql))) {
                 return ['type' => 'error', 'message' => 'Error 148992. Please report this issue'];
             }
@@ -2108,7 +2020,7 @@ www.malshare.com
 
             $this->s3Client->putObject(['Bucket' => WASABI_BUCKET, 'Key' => $s3Key, 'SourceFile' => $tmpPath]);
 
-            $sql = "INSERT INTO {$this->vars_table_samples} (md5, sha1, sha256, added, counter, pending,ftype) VALUES (?, ?, ?, UNIX_TIMESTAMP(), 0, 1, '-')";
+            $sql = "INSERT INTO tbl_samples (md5, sha1, sha256, added, counter, pending,ftype) VALUES (?, ?, ?, UNIX_TIMESTAMP(), 0, 1, '-')";
             if (!($stmt = $this->sql->prepare($sql))) {
                 return ['type' => 'error', 'message' => 'Error 139999. Please report this issue'];
             }
@@ -2125,8 +2037,6 @@ www.malshare.com
 
     public function task_url_download($user_id, $durl, $drecursive): string
     {
-        $table = $this->vars_table_url_download_tasks;
-
         $recursive = $this->secure($drecursive);
         $url = $this->secure($durl);
 
@@ -2139,7 +2049,7 @@ www.malshare.com
         if ($recursive != 1) {
             $recursive = 0;
         }
-        if (!($stmt = $this->sql->prepare("INSERT INTO $table (guid, user_id, url, fetchall) VALUES (?, ?, ?, ? )"))) {
+        if (!($stmt = $this->sql->prepare("INSERT INTO tbl_url_download_tasks (guid, user_id, url, fetchall) VALUES (?, ?, ?, ? )"))) {
             $this->error_die("Error 149991 (URL Tasking failed. Please report this issue)");
         }
         $stmt->bind_param('sisi', $guid, $user_id, $url, $recursive);
@@ -2163,8 +2073,7 @@ www.malshare.com
 
     public function get_download_status($userId, $guid): array
     {
-        $table = $this->vars_table_url_download_tasks;
-        $sql = 'SELECT id, url, started_at, finished_at FROM ' . $table . ' WHERE (guid = ?) AND (user_id = ?)';
+        $sql = 'SELECT id, url, started_at, finished_at FROM tbl_url_download_tasks WHERE (guid = ?) AND (user_id = ?)';
         if (!($stmt = $this->sql->prepare($sql))) {
             $this->error_die(
                 "Error 149992 (Problem fetching URL Download task status.  Please report this issue)"
@@ -2181,7 +2090,7 @@ www.malshare.com
         $result = array('url' => $url);
         if ($this->empty_date_str($startedAt)) {
             $result['status'] = 'pending';
-            $sql = 'SELECT COUNT(*) FROM ' . $table . ' WHERE id < ? AND started_at = \'1970-01-01 00:00:01\'';
+            $sql = 'SELECT COUNT(*) FROM tbl_url_download_tasks WHERE id < ? AND started_at = \'1970-01-01 00:00:01\'';
             if (($stmt = $this->sql->prepare($sql))) {
                 $stmt->bind_param('i', $taskId);
                 $stmt->execute();
@@ -2217,9 +2126,7 @@ www.malshare.com
         if ($startedTs === false) {
             return null;
         }
-        $sources = $this->vars_table_sources;
-        $samples = $this->vars_table_samples;
-        $sql = "SELECT s.sha256 FROM $sources ss JOIN $samples s ON s.id = ss.id"
+        $sql = "SELECT s.sha256 FROM tbl_sample_sources ss JOIN tbl_samples s ON s.id = ss.id"
             . " WHERE ss.source = ? AND ss.added >= ? LIMIT 2";
         if (!($stmt = $this->sql->prepare($sql))) {
             return null;

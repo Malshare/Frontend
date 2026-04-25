@@ -1920,6 +1920,21 @@ www.malshare.com
         return (int) $count;
     }
 
+    public function get_stats_cache()
+    {
+        if (!($stmt = $this->sql->prepare("SELECT name, value FROM tbl_stats_cache"))) {
+            return [];
+        }
+        $stmt->execute();
+        $stmt->bind_result($name, $value);
+        $cache = [];
+        while ($stmt->fetch()) {
+            $cache[$name] = $value;
+        }
+        $stmt->close();
+        return $cache;
+    }
+
     public function increment_query_limit()
     {
         $api_key = $this->uri_api_key;

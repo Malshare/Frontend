@@ -133,6 +133,18 @@ CREATE TABLE `tbl_samples` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `tbl_stats_cache`
+--
+
+DROP TABLE IF EXISTS `tbl_stats_cache`;
+CREATE TABLE `tbl_stats_cache` (
+  `name` varchar(50) NOT NULL,
+  `value` text NOT NULL,
+  `updated_at` int NOT NULL,
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
 -- Table structure for table `tbl_searches`
 --
 

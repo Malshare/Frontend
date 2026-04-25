@@ -21,12 +21,13 @@ html/                          # Web root (Apache document root is /var/www/html
   api.php                      # REST API endpoints
   account.php                  # Logged-in user account page (quota/usage)
   admin.php                    # Admin-only API analytics dashboard (D3.js charts, top users)
+  stats.php                    # Public statistics page (D3.js charts, sample/API metrics, no user data)
   sample.php                   # Sample detail view
   search.php                   # Search page
   upload.php                   # File upload (max 26MB)
   index.php                    # Homepage with recent samples
   include/i18n.php             # Translation system using t() and h() helpers
-  include/stats.php             # Stats class (not yet wired up — prep for stats page)
+  include/stats.php             # Stats class used by stats.php (sample counts, uploads by year/day, file type breakdown)
   include/disposable_email_domains.php  # Throwaway-email blocklist for register_user()
   i18n/en.php                  # English strings (canonical)
   i18n/de.php                  # German translations

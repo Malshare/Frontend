@@ -23,7 +23,7 @@ $registered_users = $share->get_registered_user_count();
 $yara_rules       = $share->get_yara_rule_count();
 $api_today        = $share->get_api_calls_total(1);
 $api_30d          = $share->get_api_calls_total(30);
-$api_all          = $share->get_api_calls_total();
+$api_all          = isset($cache['api_calls_all_time']) ? (int) $cache['api_calls_all_time'] : $share->get_api_calls_total();
 
 $file_type_total = 0;
 foreach ($file_types as $count) {

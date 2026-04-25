@@ -14,7 +14,7 @@ class Stats
      * @param DateTime|null $submittedUntil
      * @return int
      */
-    function countSamples(DateTime $submittedFrom = null, DateTime $submittedUntil = null)
+    function countSamples(?DateTime $submittedFrom = null, ?DateTime $submittedUntil = null)
     {
         if ($submittedFrom === null) {
             if ($submittedUntil === null) {
@@ -118,7 +118,7 @@ SQL;
         return $ret;
     }
 
-    function uploadsByDay(DateTime $submittedFrom = null, DateTime $submittedUntil = null)
+    function uploadsByDay(?DateTime $submittedFrom = null, ?DateTime $submittedUntil = null)
     {
         if (!($stmt = $this->db->prepare(
             'SELECT COUNT(*) FROM tbl_samples WHERE (added >= ?) AND (added < ?) '
@@ -170,7 +170,7 @@ SQL;
      * @param int $numberOfTypes
      * @return array
      */
-    function fileTypeBreakdown(DateTime $since = null, $numberOfTypes = 8)
+    function fileTypeBreakdown(?DateTime $since = null, $numberOfTypes = 8)
     {
         $numberOfTypes = $numberOfTypes + 0;
         if ($numberOfTypes <= 0) {

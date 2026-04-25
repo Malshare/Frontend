@@ -97,6 +97,15 @@ malshare_db.sql                # Database schema + stored procedures
 - Analytics query methods in `ServerObject`: `get_api_calls_per_day()`, `get_api_calls_per_month()`, `get_api_calls_by_endpoint()`, `get_api_top_users()`, `get_api_calls_total()`
 - Production MySQL uses `sql_mode=only_full_group_by` — all non-aggregated SELECT columns must appear in GROUP BY
 
+### Stats Cache (`tbl_stats_cache`)
+
+- Expensive queries on `tbl_samples` (11.6M+ rows) — `COUNT(*)`, `GROUP BY YEAR(...)`, `GROUP BY ftype` — are **never run on page load**
+- A background job (`pymalshare/refresh_stats.py`) precomputes these hourly and writes results to `tbl_stats_cache` (key-value table with `name`, `value`, `updated_at`)
+- PHP reads via `$share->get_stats_cache()` which returns an associative array keyed by name
+- Cached keys: `total_samples`, `earliest_upload`, `latest_upload`, `uploads_by_year` (JSON), `file_type_breakdown` (JSON), `api_calls_all_time`
+- Both `stats.php` and `admin.php` use the cache for all-time totals, with a fallback to the live query if the cache is empty
+- **Never add `COUNT(*)` or unfiltered `GROUP BY` queries on `tbl_samples` or `tbl_api_calls` to page loads** — add new keys to the cache table and `refresh_stats_cache()` in pymalshare instead
+
 ### Search
 
 - `sample_search()` in `server_includes.php` handles all search types: hash (exact match), `source:` prefix (FULLTEXT), `type:` prefix (file type), and default (source LIKE prefix match)

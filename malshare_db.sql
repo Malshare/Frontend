@@ -141,7 +141,7 @@ DROP TABLE IF EXISTS `tbl_searches`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbl_searches` (
   `query` text,
-  `source` varchar(30) DEFAULT NULL,
+  `source` varchar(45) DEFAULT NULL,
   `ts` int DEFAULT NULL,
   `private` int DEFAULT NULL,
   `id` int NOT NULL AUTO_INCREMENT,
@@ -208,7 +208,7 @@ DROP TABLE IF EXISTS `tbl_uploads`;
 CREATE TABLE `tbl_uploads` (
   `name` text,
   `md5` varchar(32) DEFAULT NULL,
-  `source` varchar(30) DEFAULT NULL,
+  `source` varchar(45) DEFAULT NULL,
   `ts` int DEFAULT NULL,
   `id` int NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id`),

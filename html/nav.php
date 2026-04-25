@@ -65,6 +65,11 @@ $current_locale = i18n_lang_value();
                     } ?>>
                         <a href="<?php echo htmlspecialchars(i18n_url_with_lang('about.php', $current_locale), ENT_QUOTES, 'UTF-8'); ?>"><?php echo h('nav.about'); ?></a>
                     </li>
+                    <li <?php if (stripos($_SERVER['REQUEST_URI'], 'stats.php') !== false) {
+                        echo 'class="active"';
+                    } ?>>
+                        <a href="<?php echo htmlspecialchars(i18n_url_with_lang('stats.php', $current_locale), ENT_QUOTES, 'UTF-8'); ?>"><?php echo h('nav.stats'); ?></a>
+                    </li>
 
 
                 </ul>

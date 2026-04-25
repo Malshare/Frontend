@@ -1980,6 +1980,31 @@ www.malshare.com
         return $maxDay;
     }
 
+    public function get_registered_user_count()
+    {
+        $t = $this->vars_table_users;
+        if (!($stmt = $this->sql->prepare("SELECT COUNT(*) FROM $t WHERE active = 1"))) {
+            return 0;
+        }
+        $stmt->execute();
+        $stmt->bind_result($count);
+        $stmt->fetch();
+        $stmt->close();
+        return (int) $count;
+    }
+
+    public function get_yara_rule_count()
+    {
+        if (!($stmt = $this->sql->prepare("SELECT COUNT(*) FROM tbl_yara"))) {
+            return 0;
+        }
+        $stmt->execute();
+        $stmt->bind_result($count);
+        $stmt->fetch();
+        $stmt->close();
+        return (int) $count;
+    }
+
     public function increment_query_limit()
     {
         $table = $this->vars_table_users;

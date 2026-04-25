@@ -20,7 +20,6 @@ $daily_uploads    = $stats->uploadsByDaySince(30);
 $monthly_api      = $share->get_api_calls_per_month(12);
 $by_endpoint      = $share->get_api_calls_by_endpoint(30);
 $registered_users = $share->get_registered_user_count();
-$yara_rules       = $share->get_yara_rule_count();
 $api_today        = $share->get_api_calls_total(1);
 $api_30d          = $share->get_api_calls_total(30);
 $api_all          = isset($cache['api_calls_all_time']) ? (int) $cache['api_calls_all_time'] : $share->get_api_calls_total();
@@ -63,10 +62,6 @@ foreach ($by_endpoint as $ep) {
             <tr>
                 <td><b><?php echo h('stats.registered_users'); ?></b></td>
                 <td><?php echo number_format($registered_users); ?></td>
-            </tr>
-            <tr>
-                <td><b><?php echo h('stats.yara_rules'); ?></b></td>
-                <td><?php echo number_format($yara_rules); ?></td>
             </tr>
             <tr>
                 <td><b><?php echo h('stats.collecting_since'); ?></b></td>

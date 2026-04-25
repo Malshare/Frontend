@@ -1908,22 +1908,6 @@ www.malshare.com
         return (int) $count;
     }
 
-    public function get_yara_rule_count()
-    {
-        try {
-            if (!($stmt = $this->sql->prepare("SELECT COUNT(*) FROM tbl_yara"))) {
-                return 0;
-            }
-            $stmt->execute();
-            $stmt->bind_result($count);
-            $stmt->fetch();
-            $stmt->close();
-            return (int) $count;
-        } catch (\mysqli_sql_exception $e) {
-            return 0;
-        }
-    }
-
     public function get_stats_cache()
     {
         try {

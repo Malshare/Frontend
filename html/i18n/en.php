@@ -189,7 +189,6 @@ return array(
         'summary' => 'At a Glance',
         'total_samples' => 'Total Samples',
         'registered_users' => 'Registered Users',
-        'yara_rules' => 'YARA Rules',
         'collecting_since' => 'Collecting Since',
         'latest_sample' => 'Latest Sample',
         'samples_by_year' => 'Samples by Year',

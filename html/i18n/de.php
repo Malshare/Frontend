@@ -179,7 +179,6 @@ return array(
         'summary' => 'Auf einen Blick',
         'total_samples' => 'Samples gesamt',
         'registered_users' => 'Registrierte Benutzer',
-        'yara_rules' => 'YARA-Regeln',
         'collecting_since' => 'Sammlung seit',
         'latest_sample' => 'Neuestes Sample',
         'samples_by_year' => 'Samples nach Jahr',

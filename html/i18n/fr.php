@@ -179,7 +179,6 @@ return array(
         'summary' => 'En un coup d\'oeil',
         'total_samples' => 'Total des échantillons',
         'registered_users' => 'Utilisateurs enregistrés',
-        'yara_rules' => 'Règles YARA',
         'collecting_since' => 'Collecte depuis',
         'latest_sample' => 'Dernier échantillon',
         'samples_by_year' => 'Échantillons par année',

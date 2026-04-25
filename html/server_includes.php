@@ -788,9 +788,7 @@ class ServerObject
 
         $id = $this->getSampleIdFromHash($hash);
         if ($id === null) {
-            http_response_code(404);
-            usleep(500000);
-            die("Sample not found with hash ( $hash )");
+            return '<br /> <center><p class="lead">Sample not found with hash ( ' . $this->escape_html($hash) . ' )</p></center>';
         }
 
         $row = (object)['hash' => $id];

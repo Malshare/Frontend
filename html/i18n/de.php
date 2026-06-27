@@ -178,6 +178,7 @@ return array(
         'title' => 'Plattform-Statistiken',
         'summary' => 'Auf einen Blick',
         'total_samples' => 'Samples gesamt',
+        'total_size' => 'Gesamtgröße',
         'registered_users' => 'Registrierte Benutzer',
         'collecting_since' => 'Sammlung seit',
         'latest_sample' => 'Neuestes Sample',

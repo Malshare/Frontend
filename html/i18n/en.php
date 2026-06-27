@@ -188,6 +188,7 @@ return array(
         'title' => 'Platform Statistics',
         'summary' => 'At a Glance',
         'total_samples' => 'Total Samples',
+        'total_size' => 'Total Size',
         'registered_users' => 'Registered Users',
         'collecting_since' => 'Collecting Since',
         'latest_sample' => 'Latest Sample',

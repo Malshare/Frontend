@@ -1,5 +1,6 @@
 <?php require_once __DIR__ . '/include/i18n.php'; ?>
 <?php require_once __DIR__ . '/server_includes.php'; ?>
+<?php require_once __DIR__ . '/include/format_bytes.php'; ?>
 <?php
 $share = new ServerObject();
 require_once __DIR__ . '/include/stats.php';
@@ -8,6 +9,7 @@ $stats = new Stats($share->sql);
 // Precomputed hourly by refresh_stats.py → tbl_stats_cache
 $cache = $share->get_stats_cache();
 $total_samples = isset($cache['total_samples']) ? (int) $cache['total_samples'] : 0;
+$total_bytes   = isset($cache['total_bytes']) ? (int) $cache['total_bytes'] : 0;
 $earliest      = isset($cache['earliest_upload']) && $cache['earliest_upload'] > 0
     ? (new DateTime('@' . $cache['earliest_upload'])) : null;
 $latest        = isset($cache['latest_upload']) && $cache['latest_upload'] > 0
@@ -59,6 +61,12 @@ foreach ($by_endpoint as $ep) {
                 <td><b><?php echo h('stats.total_samples'); ?></b></td>
                 <td><?php echo number_format($total_samples); ?></td>
             </tr>
+            <?php if ($total_bytes > 0): ?>
+            <tr>
+                <td><b><?php echo h('stats.total_size'); ?></b></td>
+                <td><?php echo htmlspecialchars(format_bytes($total_bytes), ENT_QUOTES, 'UTF-8'); ?></td>
+            </tr>
+            <?php endif; ?>
             <tr>
                 <td><b><?php echo h('stats.registered_users'); ?></b></td>
                 <td><?php echo number_format($registered_users); ?></td>

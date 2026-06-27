@@ -178,6 +178,7 @@ return array(
         'title' => 'Statistiques de la plateforme',
         'summary' => 'En un coup d\'oeil',
         'total_samples' => 'Total des échantillons',
+        'total_size' => 'Taille totale',
         'registered_users' => 'Utilisateurs enregistrés',
         'collecting_since' => 'Collecte depuis',
         'latest_sample' => 'Dernier échantillon',

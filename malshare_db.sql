@@ -102,6 +102,7 @@ CREATE TABLE `tbl_samples` (
   `subType` int DEFAULT NULL,
   `filenames` text,
   `parent_id` int DEFAULT NULL,
+  `size` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `added` (`added`),
   KEY `sample_id` (`md5`,`sha1`,`sha256`),

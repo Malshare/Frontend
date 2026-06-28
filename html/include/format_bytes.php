@@ -21,9 +21,10 @@ function format_bytes(int $bytes): string
 
 /**
  * Human-readable size with the exact byte count appended,
- * e.g. 1_433_600 => "1.4 MB (1,433,600 bytes)".
+ * e.g. 1_433_600 => "1.4 MB (1433600 bytes)". The exact byte count is left
+ * unformatted (no thousands separators) so it's cleanly copy-pasteable.
  */
 function format_size_full(int $bytes): string
 {
-    return format_bytes($bytes) . ' (' . number_format($bytes) . ' bytes)';
+    return format_bytes($bytes) . ' (' . $bytes . ' bytes)';
 }

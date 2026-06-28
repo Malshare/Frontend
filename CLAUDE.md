@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # MalShare Frontend
 
 PHP web application powering malshare.com — a community-driven public malware sample repository.
@@ -28,6 +32,7 @@ html/                          # Web root (Apache document root is /var/www/html
   index.php                    # Homepage with recent samples
   include/i18n.php             # Translation system using t() and h() helpers
   include/stats.php             # Stats class used by stats.php (sample counts, uploads by year/day, file type breakdown)
+  include/format_bytes.php     # format_bytes() / format_size_full() byte-size formatters (stats total + per-sample size)
   include/disposable_email_domains.php  # Throwaway-email blocklist for register_user()
   i18n/en.php                  # English strings (canonical)
   i18n/de.php                  # German translations
@@ -148,6 +153,16 @@ docker-compose up
 ```
 
 Limitations without API keys: no reCAPTCHA, no Mailgun emails, no sample files.
+
+## Testing & Verification
+
+There is no automated test suite. Verify changes with:
+
+- **PHP syntax check (lint):** `php -l html/<file>.php` — run on every changed file; expect `No syntax errors detected`.
+- **Pure helpers:** exercise standalone functions directly, e.g. `php -r 'require "html/include/format_bytes.php"; echo format_bytes(43700000000000);'`.
+- **i18n completeness:** new keys must lint in all three locales (`php -l html/i18n/{en,de,fr}.php`) and exist in each.
+
+Aggregate/DB-backed behavior is validated against production, since the expensive stats live in `tbl_stats_cache` (precomputed by pymalshare) rather than in page code.
 
 ## CI/CD
 

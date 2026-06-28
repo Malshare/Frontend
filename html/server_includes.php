@@ -1,6 +1,7 @@
 <?php
 require dirname(__FILE__) . '/../vendor/autoload.php';
 require_once __DIR__ . '/include/i18n.php';
+require_once __DIR__ . '/include/format_bytes.php';
 
 /* ****************************************** */
 /* Norman SampleShare Server Framework        */
@@ -740,7 +741,7 @@ class ServerObject
 
         $row = (object)['hash' => $id];
 
-        if (!($stmt = $this->sql->prepare("SELECT md5, sha1, sha256, ssdeep, added, ftype, pending, parent_id FROM tbl_samples WHERE id = ?"))) {
+        if (!($stmt = $this->sql->prepare("SELECT md5, sha1, sha256, ssdeep, added, ftype, pending, parent_id, size FROM tbl_samples WHERE id = ?"))) {
             $this->error_die("Error 23418 (Unable to find child samples  Please report this issue)");
         }
         $stmt->bind_param('i', $row->hash);
@@ -783,7 +784,11 @@ class ServerObject
               </tr>
               <tr>
                 <td class="hash_font"><b>File Type</b>:   ' . $this->escape_html($f_row->ftype) . '</td>
-              </tr>
+              </tr>' .
+            ($f_row->size !== null ? '
+              <tr>
+                <td class="hash_font"><b>File Size</b>:   ' . $this->escape_html(format_size_full((int) $f_row->size)) . '</td>
+              </tr>' : '') . '
               <tr>
                 <td class="hash_font"><b>Added</b>:   ' . gmdate("Y-m-d H:i:s", $f_row->added) . '</td>
               </tr>
@@ -952,7 +957,7 @@ class ServerObject
         }
         $row = (object)['hash' => $id];
 
-        if (!($stmt = $this->sql->prepare("SELECT md5, sha1, sha256, ssdeep, added, ftype FROM tbl_samples WHERE id = ?"))) {
+        if (!($stmt = $this->sql->prepare("SELECT md5, sha1, sha256, ssdeep, added, ftype, size FROM tbl_samples WHERE id = ?"))) {
             http_response_code(500);
             $output['ERROR'] = array();
             $output['ERROR']["CODE"] = 724341;
@@ -980,6 +985,9 @@ class ServerObject
         $output['SHA256'] = $f_row->sha256;
         $output['SSDEEP'] = $f_row->ssdeep;
         $output['F_TYPE'] = $f_row->ftype;
+        if ($f_row->size !== null) {
+            $output['SIZE'] = (int) $f_row->size;
+        }
 
         if (!($stmt = $this->sql->prepare("SELECT source FROM tbl_sample_sources WHERE id = ?"))) {
             http_response_code(500);
@@ -1261,7 +1269,7 @@ class ServerObject
         $row = (object)['hash' => $id];
 
 
-        if (!($stmt = $this->sql->prepare("SELECT md5, sha1, sha256, ssdeep, added, ftype FROM tbl_samples WHERE id = ?"))) {
+        if (!($stmt = $this->sql->prepare("SELECT md5, sha1, sha256, ssdeep, added, ftype, size FROM tbl_samples WHERE id = ?"))) {
             $this->error_die("Error 139432 (Problem getting sample details. Please report this issue)");
         }
         $stmt->bind_param('i', $row->hash);
@@ -1280,6 +1288,9 @@ class ServerObject
         $output['SHA256'] = $f_row->sha256;
         $output['SSDEEP'] = $f_row->ssdeep;
         $output['F_TYPE'] = $f_row->ftype;
+        if ($f_row->size !== null) {
+            $output['SIZE'] = (int) $f_row->size;
+        }
         $output['ADDED'] = $f_row->added;
 
         if (!($stmt = $this->sql->prepare("SELECT source FROM tbl_sample_sources WHERE id = ?"))) {

@@ -18,3 +18,12 @@ function format_bytes(int $bytes): string
     $decimals = ($i === 0) ? 0 : 1;
     return number_format($value, $decimals) . ' ' . $units[$i];
 }
+
+/**
+ * Human-readable size with the exact byte count appended,
+ * e.g. 1_433_600 => "1.4 MB (1,433,600 bytes)".
+ */
+function format_size_full(int $bytes): string
+{
+    return format_bytes($bytes) . ' (' . number_format($bytes) . ' bytes)';
+}

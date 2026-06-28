@@ -102,7 +102,8 @@ malshare_db.sql                # Database schema + stored procedures
 - Expensive queries on `tbl_samples` (11.6M+ rows) — `COUNT(*)`, `GROUP BY YEAR(...)`, `GROUP BY ftype` — are **never run on page load**
 - A background job (`pymalshare/refresh_stats.py`) precomputes these hourly and writes results to `tbl_stats_cache` (key-value table with `name`, `value`, `updated_at`)
 - PHP reads via `$share->get_stats_cache()` which returns an associative array keyed by name
-- Cached keys: `total_samples`, `earliest_upload`, `latest_upload`, `uploads_by_year` (JSON), `file_type_breakdown` (JSON), `api_calls_all_time`
+- Cached keys: `total_samples`, `earliest_upload`, `latest_upload`, `uploads_by_year` (JSON), `file_type_breakdown` (JSON), `api_calls_all_time`, `total_bytes`
+- `total_bytes` is `COALESCE(SUM(size), 0)` over `tbl_samples.size` (a nullable `BIGINT UNSIGNED` column). `size` is populated on processing by pymalshare's `process_upload()` and was backfilled for existing rows once via `pymalshare/backfill_sizes.py` (a one-time S3 bucket sweep). `stats.php` renders it via the `format_bytes()` helper (`html/include/format_bytes.php`), hiding the row when the key is absent/zero.
 - Both `stats.php` and `admin.php` use the cache for all-time totals, with a fallback to the live query if the cache is empty
 - **Never add `COUNT(*)` or unfiltered `GROUP BY` queries on `tbl_samples` or `tbl_api_calls` to page loads** — add new keys to the cache table and `refresh_stats_cache()` in pymalshare instead
 

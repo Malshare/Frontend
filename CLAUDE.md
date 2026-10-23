@@ -8,7 +8,7 @@ PHP web application powering malshare.com — a community-driven public malware 
 
 ## Tech Stack
 
-- PHP 8.4 on Apache
+- PHP 8.5 on Apache
 - MySQL 8
 - Wasabi S3-compatible object storage (malware sample binaries)
 - AWS SDK for PHP (`aws/aws-sdk-php`)

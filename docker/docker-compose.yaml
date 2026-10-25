@@ -25,7 +25,7 @@ services:
     restart: always
 
   web:
-    image: php:8.5-apache
+    image: php:8.5.2-apache
     links:
       - "mysql"
     container_name: malshare_web
